@@ -24,6 +24,11 @@
             <artifactId>jobs-adapters</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.jobsapply</groupId>
+            <artifactId>jobs-browser</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

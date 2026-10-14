@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ApplicationService {
 
+    private static final Pattern IDEMPOTENCY_KEY = Pattern.compile("^[A-Za-z0-9._:-]{8,100}$");
     private static final EnumSet<ApplicationStatus> CLOSED = EnumSet.of(
             ApplicationStatus.REJECTED_BY_USER, ApplicationStatus.WITHDRAWN, ApplicationStatus.EXPIRED);
 
@@ -144,6 +146,9 @@ public class ApplicationService {
     @Transactional
     public AttemptView startSubmission(UUID id, String idempotencyKey, SubmissionChannel channel) {
         UUID user = UserContext.requireUserId();
+        if (idempotencyKey == null || !IDEMPOTENCY_KEY.matcher(idempotencyKey).matches()) {
+            throw new DomainRuleViolationException("An Idempotency-Key of 8-100 characters [A-Za-z0-9._:-] is required");
+        }
         Optional<ApplicationAttempt> replay = attempts.findByIdempotencyKey(idempotencyKey);
         if (replay.isPresent()) {
             if (!replay.get().getApplicationId().equals(id)) {

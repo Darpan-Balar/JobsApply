@@ -21,6 +21,7 @@
     <modules>
         <module>jobs-spi</module>
         <module>jobs-adapters</module>
+        <module>jobs-browser</module>
         <module>jobs-app</module>
     </modules>
 
@@ -38,6 +39,8 @@
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
         <!-- Override openhtmltopdf's PDFBox 3.0.3 with the current 3.0.x for security fixes. -->
         <pdfbox.version>3.0.8</pdfbox.version>
+        <!-- Browser assistance (Phase 7). Apache-2.0. Downloads its browser build on first use unless a channel is set. -->
+        <playwright.version>1.63.0</playwright.version>
     </properties>
 
     <dependencyManagement>
@@ -58,6 +61,16 @@
                 <groupId>com.jobsapply</groupId>
                 <artifactId>jobs-adapters</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jobsapply</groupId>
+                <artifactId>jobs-browser</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.playwright</groupId>
+                <artifactId>playwright</artifactId>
+                <version>${playwright.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>

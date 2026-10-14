@@ -123,7 +123,9 @@ flowchart LR
   preparation --> application
   submission --> preparation
   submission --> application
-  automation --> submission
+  assist --> application
+  assist --> preparation
+  assist --> plugin
   tracking --> application
   scheduling --> discovery
   scheduling --> matching
@@ -852,3 +854,51 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - Another user gets 404 everywhere.
 - Over HTTP, a missing or invalid `Idempotency-Key` returns 400.
 - A local run applied V11, and the app is healthy on :8090.
+
+### Phase 7 outcome (2026-10-14)
+
+**Delivered (see ADR-0012)**
+- **New Maven module `jobs-browser`:**
+  - `PlaywrightApplicationAdapter` (Playwright 1.63.0, Apache-2.0), SPI-only and auto-configured
+  - headed by default, with an ephemeral context per window and one browser thread
+  - read-only form inspection across frames (`inspect-form.js`): labels, types, required flags, options, radio and checkbox groups
+  - fills HIGH mappings into empty fields only
+  - detects blockers: login, MFA, challenge page, HTTP 401/403/429, no form. A CAPTCHA widget inside the form becomes a human step.
+  - confirmation evidence: message, address and screenshot
+- **SPI:**
+  - `ApplicationAdapter.open/close`, still with no submit operation
+  - platform-owned `ApplicationSession` with `saveArtifact`
+  - `FormInspection.humanSteps/pageUrl`
+  - `FieldMapping.attachment/origin`
+- **New app module `assist`:**
+  - `AssistService`: start, refresh, confirm, close, view, screenshot
+  - `FieldMappingPlanner` (values only from the approved package; never self-identification or consent)
+  - `AssistSessions` (one window per user)
+  - `AssistWindowCloser` (closes the window when an attempt ends)
+  - REST under `/me/applications/{id}/assist`
+- **Application module:**
+  - `SubmissionEvidence.artifactRef`
+  - idempotency-key validation centralised in `ApplicationService.startSubmission`
+  - an `APPLICATION_ADAPTER` plugin registry
+- **Module direction:** assist → application, preparation, plugin.
+- There is no new migration: evidence is JSON, and the new field is optional.
+
+**Problems found and fixed**
+- **First-launch timeouts:** the first browser launch downloads Chromium and timed out the per-operation budget, and every queued call behind it. Launching now has its own budget (`jobs.browser.launch-timeout`, 5 min).
+- **Missing runtime classpath:** a test-scope Playwright declaration in `jobs-app` overrode the transitive runtime scope, so the app failed at startup while the tests passed. A local run caught it, and the declaration was removed.
+
+**Verification**
+- `./mvnw clean install`: 367 tests, 0 failures. New tests:
+  - `PlaywrightApplicationAdapterIT`: 10 tests against fixture forms in real headless Chromium
+  - `AssistIT`: 8 tests, end to end with the real adapter
+  - `FieldMappingPlannerTest`: 6 tests
+  - `AssistApiIT`
+- Only HIGH-confidence values are filled. MEDIUM values, the human's input, consent and self-identification stay untouched.
+- Nothing is POSTed until the "human" (the test) clicks Submit.
+- The confirmation after a submit becomes evidence with a PNG screenshot. A "thank you" banner next to an unsubmitted form does not.
+- Login, MFA and challenge pages, 403 and pages without a form pause assistance. A 404 is recorded as FAILED.
+- Only one window is open per user, and a second application keeps its approval.
+- Replaying the key reopens the window for the same attempt.
+- Reporting the outcome manually closes the window.
+- Other users get 404.
+- A local run started cleanly, the assist endpoints are in OpenAPI, and requests without a key are rejected with 400.

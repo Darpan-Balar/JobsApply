@@ -18,4 +18,4 @@
   - Hibernate's JSON mapper passes `String` through unchanged.
   - In Jackson 3, `FAIL_ON_NULL_FOR_PRIMITIVES` defaults to true, and record properties are sorted creator-first unless `SORT_CREATOR_PROPERTIES_FIRST` is disabled.
   - Testcontainers 2's PostgreSQL class is `org.testcontainers.postgresql.PostgreSQLContainer`.
-- Detailed design: `docs/architecture/README.md` and `docs/adr/0001-0011`. Map of the code: `.ai/codebase.md`.
+- Detailed design: `docs/architecture/README.md` and `docs/adr/0001-0012`. Map of the code: `.ai/codebase.md`.

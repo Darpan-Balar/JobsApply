@@ -70,6 +70,7 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `POST /me/applications/prepare`, `GET /me/applications[/{id}]`, `PUT /me/applications/{id}/answers/{q}`, `PUT /me/applications/{id}/resume`, `GET /me/applications/{id}/documents/{doc}`, `POST /me/applications/{id}/reject` | Prepare and review application packages (documents, answers, issues) |
 | `GET /me/applications/{id}/approval/blockers`, `POST /me/applications/{id}/approval {packageId}`, `DELETE .../approval`, `GET .../approvals` | Approve the exact package you reviewed, for one submission (refused while anything blocks), or revoke the approval |
 | `POST /me/applications/{id}/submission` (requires an `Idempotency-Key` header), `POST .../submission/{attempt}/outcome`, `POST .../verification`, `GET .../attempts`, `POST .../withdrawal` | Start the submission (you submit in your browser), report the outcome with evidence, resolve an unconfirmed outcome, withdraw |
+| `POST /me/applications/{id}/assist` (requires an `Idempotency-Key`), `GET/DELETE .../assist`, `POST .../assist/refresh`, `POST .../assist/confirmation?waitSeconds=`, `GET .../attempts/{attempt}/screenshot` | Browser assistance: open the approved form in a visible window, fill only what your approved package makes certain, pause on sign-in, challenges and codes, and record the confirmation after **you** press Submit |
 | `GET /me/audit?aggregateId=` | Your audit trail (ids and statuses only) |
 | `POST /me/candidate-profiles/{key}/master-resumes` (raw PDF, DOCX or text), `GET .../master-resumes/{id}/content` | Your master resume, kept exactly as uploaded |
 
@@ -89,6 +90,14 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 6. Report the outcome:
    - `CONFIRMED` needs evidence, such as the confirmation page text or the e-mail subject.
    - If you are not sure what happened, report `UNCONFIRMED` and resolve it later with `POST .../verification` (ADR-0011).
+
+**With browser assistance (instead of steps 4–6):**
+1. Approve as above.
+2. `POST .../assist` with an `Idempotency-Key` header. A browser window opens with the form partly filled from your approved package. The response lists what was filled and what is left to you (voluntary self-identification and consent are always left to you).
+3. Complete and check the form in the window, then press Submit yourself.
+4. `POST .../assist/confirmation`. The confirmation page becomes the evidence, including a screenshot.
+
+If the window shows a sign-in, a challenge or a code request, assistance pauses. Resolve it yourself, then call `POST .../assist/refresh`. The first window may take a while to open because Playwright downloads its Chromium (about 150 MB) once. Set `jobs.browser.channel: chrome` to use your installed Chrome instead (ADR-0012).
 
 **To discover jobs:** add a real employer with a verified board token (for example via `PUT /employers/{key}/bindings/greenhouse-public/{token}`, or YAML/CSV), make sure it is `enabled`, then `POST /sync`. A job is closed only on authoritative evidence: a failed request never closes anything (ADR-0008).
 
@@ -135,7 +144,7 @@ compose.yaml     Local PostgreSQL
 These are enforced in code and in the database, not just documented:
 - Personal data is private per user, and isolation is tested.
 - Generated claims must cite verified facts.
-- Every submission needs its own explicit approval. An uncertain submission is never retried automatically.
+- Every submission needs its own explicit approval, and you press Submit yourself, including with browser assistance. An uncertain submission is never retried automatically.
 - At most one live application per user per vacancy is allowed (a unique index in the database).
 - Configuration holds secret *references* only.
 - CAPTCHAs, MFA and access controls are never bypassed.

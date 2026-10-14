@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><title>Apply: Backend Engineer</title></head>
+<body>
+<h1>Backend Engineer</h1>
+<form method="post" action="/submit">
+  <label for="first_name">First Name *</label><input id="first_name" name="first_name" type="text" required>
+  <label for="last_name">Last Name *</label><input id="last_name" name="last_name" type="text" required>
+  <label for="email">Email *</label><input id="email" name="email" type="email" required>
+  <label for="phone">Phone</label><input id="phone" name="phone" type="tel">
+  <label for="preferred_name">Preferred name</label><input id="preferred_name" name="preferred_name" value="Typed by human">
+  <label for="resume">Resume/CV *</label><input id="resume" name="resume" type="file" style="display:none" required>
+  <label for="question_1">How did you hear about us?</label>
+  <select id="question_1" name="question_1"><option value="">Select...</option><option value="a">Job board</option><option value="b">Friend</option></select>
+  <fieldset><legend>Will you require visa sponsorship? *</legend>
+    <label><input type="radio" name="question_2" value="1" required> Yes</label>
+    <label><input type="radio" name="question_2" value="0"> No</label>
+  </fieldset>
+  <label for="question_3">Years of experience</label><input id="question_3" name="question_3" type="number">
+  <label for="cover_letter_text">Cover letter</label><textarea id="cover_letter_text" name="cover_letter_text"></textarea>
+  <label><input type="checkbox" id="consent" name="consent" required> I agree to the privacy policy *</label>
+  <label for="location">Location</label><input id="location" role="combobox" aria-autocomplete="list">
+  <input type="hidden" name="token" value="abc">
+  <button type="submit">Submit application</button>
+</form>
+</body></html>

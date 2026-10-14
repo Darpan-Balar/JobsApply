@@ -18,7 +18,6 @@ import com.jobsapply.spi.common.Availability;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +29,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SubmissionService {
-
-    private static final Pattern IDEMPOTENCY_KEY = Pattern.compile("^[A-Za-z0-9._:-]{8,100}$");
 
     private final ApplicationService applications;
     private final PreparationService preparation;
@@ -73,9 +70,6 @@ public class SubmissionService {
      * their own browser and reports the outcome. Replaying the same key returns the same attempt.
      */
     public StartedSubmission start(UUID applicationId, String idempotencyKey) {
-        if (idempotencyKey == null || !IDEMPOTENCY_KEY.matcher(idempotencyKey).matches()) {
-            throw new DomainRuleViolationException("An Idempotency-Key of 8-100 characters [A-Za-z0-9._:-] is required");
-        }
         AttemptView attempt = applications.startSubmission(applicationId, idempotencyKey, SubmissionChannel.MANUAL);
         PackageContent content = preparation.detail(applicationId).currentPackage().content();
         return new StartedSubmission(attempt, content.destination() == null ? null : content.destination().applicationUrl(),

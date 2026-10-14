@@ -59,3 +59,9 @@ jobs:
     directory: config
     import-on-startup: false
     validate-only: false
+  browser:
+    headless: false          # the human must see the window and press Submit
+    # channel: chrome        # use an installed Chrome instead of Playwright's own build (no download)
+  assist:
+    adapter: playwright-browser
+    max-observe: 120s

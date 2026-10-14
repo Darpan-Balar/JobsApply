@@ -49,6 +49,10 @@
     - `ApplicationService`: `openOrCreate`, `transition` (approval and submission states blocked), `recordPreparation`, `approve`, `revokeApproval`, `startSubmission`, `recordOutcome`, `verify`, `markInterrupted`, `withdraw`, views
     - `internal/SubmissionApproval` and `ApplicationAttempt` (evidence encrypted)
     - `ApplicationEvents`, `SubmissionEvidence` (`credible()`)
+  - `assist`:
+    - `AssistService`: start, refresh, confirm, close, view, screenshot
+    - `internal/FieldMappingPlanner` (policy), `AssistSessions` and `LiveSession` (in memory, one per user), `PlatformSession`, `AssistWindowCloser`
+    - `web/AssistController`
   - `submission`:
     - `SubmissionService`: gates, approve, revoke, start (returns the application link), outcome, verify, withdraw
     - `internal/SubmissionRecovery`: startup recovery and the only cross-user scan
@@ -70,3 +74,4 @@
   - `RealSourcesLiveIT` runs only with `-Plive`.
   - The architecture tests are `ModularityTest`, `PersistenceRulesTest` and `SpiDependencyRulesTest`.
 - `config/`: sample YAML (example role profiles, fictional disabled employers).
+- `jobs-browser`: `PlaywrightApplicationAdapter` (single browser thread; `actAsHuman` test hook), `BrowserSettings` (`jobs.browser.*`), `inspect-form.js`, `BrowserAssistAutoConfiguration`. Tests: `PlaywrightApplicationAdapterIT` with fixture forms in `src/test/resources/forms`.

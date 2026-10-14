@@ -13,3 +13,5 @@ jobs:
     key: dGVzdC1rZXktZm9yLXRlc3RzLW9ubHktMzItYnl0ZXM=
   storage:
     directory: target/test-data   # test files are removed by mvn clean
+  browser:
+    headless: true

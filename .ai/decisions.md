@@ -12,3 +12,4 @@ The authoritative records are the ADRs in `docs/adr/`. This is an index only.
 - 0009: matching via CandidateFacts, UNKNOWN when facts are missing, encrypted snapshots
 - 0010: preparation (traceable fact-backed content, immutable encrypted packages)
 - 0011: approval and submission workflow (approval gates over the reviewed package, idempotency keys, evidence rules, crash recovery, synchronous audit; Modulith outbox deferred to Phase 9)
+- 0012: browser-assisted filling (separate jobs-browser module, platform-planned HIGH-only fills from the approved package, pauses on login/MFA/challenges, human submits, confirmation plus form gone = evidence)

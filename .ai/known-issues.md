@@ -45,3 +45,10 @@
   - Crash recovery and its cross-user scan assume a single instance.
   - A replay that races the first request with the same `Idempotency-Key` may get 409 instead of the attempt. It never creates a second attempt.
   - Withdrawal is only possible from SUBMITTED. Before submission, use reject.
+- **Browser assistance (ADR-0012):**
+  - Confirmation detection uses message patterns. A site with unusual wording is never confirmed automatically; you report the outcome instead.
+  - Custom widgets (comboboxes, multi-selects, dates) and names with more than two parts are left to you.
+  - Playwright auto-dismisses JavaScript dialogs in the window.
+  - The first window downloads about 150 MB of Chromium unless `jobs.browser.channel` is set.
+  - `GET .../assist` can show a stale state if you close the browser window by hand. The next confirm or refresh notices.
+  - Sessions are kept in memory, assuming a single instance.
