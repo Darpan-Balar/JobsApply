@@ -10,4 +10,9 @@ public class TestPluginsConfiguration {
     TestJobSourceAdapter testJobSourceAdapter() {
         return new TestJobSourceAdapter();
     }
+
+    @Bean
+    ScriptedJobSourceAdapter scriptedJobSourceAdapter() {
+        return new ScriptedJobSourceAdapter();
+    }
 }

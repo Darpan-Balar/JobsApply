@@ -1,0 +1,13 @@
+{
+  "id": 4001001,
+  "title": "Senior Backend Engineer",
+  "updated_at": "2026-10-09T18:28:27-04:00",
+  "first_published": "2026-08-24T13:52:04-04:00",
+  "location": { "name": "Remote - United States" },
+  "absolute_url": "https://boards.greenhouse.io/examplefintech/jobs/4001001",
+  "content": "&lt;p&gt;Hi&lt;/p&gt;",
+  "pay_input_ranges": [
+    { "min_cents": 15000000, "max_cents": 19000000, "currency_type": "USD", "title": "NYC", "blurb": "" },
+    { "min_cents": 13500000, "max_cents": 17000000, "currency_type": "USD", "title": "Other US", "blurb": "" }
+  ]
+}

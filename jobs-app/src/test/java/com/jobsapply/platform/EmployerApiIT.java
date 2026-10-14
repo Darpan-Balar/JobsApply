@@ -144,9 +144,9 @@ class EmployerApiIT {
     @Test
     void enablingASourceRequiresAnInstalledAdapterAndValidSettings() {
         Response missingAdapter = api.putJson("/api/v1/sources/" + uniqueKey("src"),
-                Map.of("adapterId", "greenhouse-job-board", "displayName", "GH", "enabled", true));
+                Map.of("adapterId", "workday-job-board", "displayName", "WD", "enabled", true));
         assertThat(missingAdapter.status()).isEqualTo(409);
-        assertThat(missingAdapter.json().get("detail").asString()).contains("adapter 'greenhouse-job-board' is not installed");
+        assertThat(missingAdapter.json().get("detail").asString()).contains("adapter 'workday-job-board' is not installed");
 
         Response badSettings = api.putJson("/api/v1/sources/" + uniqueKey("src"),
                 Map.of("adapterId", TestJobSourceAdapter.ID, "displayName", "T", "enabled", true, "settings", Map.of("maxRetries", 50)));
@@ -154,7 +154,7 @@ class EmployerApiIT {
         assertThat(badSettings.json().get("detail").asString()).contains("settings.maxRetries", "settings.requestTimeout");
 
         JsonNode adapters = api.get("/api/v1/plugins/job-source-adapters").json();
-        assertThat(adapters.findValuesAsString("id")).contains(TestJobSourceAdapter.ID);
+        assertThat(adapters.findValuesAsString("id")).contains(TestJobSourceAdapter.ID, "greenhouse-job-board", "lever-postings", "ashby-job-board");
         assertThat(api.get("/api/v1/sources/" + source).json().get("adapterInstalled").asBoolean()).isTrue();
     }
 

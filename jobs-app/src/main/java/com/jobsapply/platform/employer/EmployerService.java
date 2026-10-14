@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -184,6 +185,69 @@ public class EmployerService {
             owners.put(sourceKeys.get(binding.getJobSourceId()) + "/" + binding.getExternalRef(), employerKeys.get(binding.getEmployerId()));
         }
         return owners;
+    }
+
+    /**
+     * Active sync targets: enabled, non-archived employers × enabled bindings × enabled sources, optionally narrowed to
+     * one source and/or one employer.
+     */
+    @Transactional(readOnly = true)
+    public List<SyncTarget> syncTargets(String sourceKey, String employerKey) {
+        Map<UUID, JobSourceView> sourceViews = sources.viewsById();
+        Map<UUID, Employer> active = (employerKey == null ? employers.findAll() : employers.findByKey(employerKey).stream().toList())
+                .stream().filter(e -> e.isEnabled() && !e.isArchived())
+                .collect(Collectors.toMap(Employer::getId, e -> e));
+        if (active.isEmpty()) {
+            return List.of();
+        }
+        return bindings.findByEmployerIdIn(active.keySet()).stream()
+                .filter(EmployerSource::isEnabled)
+                .filter(b -> {
+                    JobSourceView source = sourceViews.get(b.getJobSourceId());
+                    return source.enabled() && (sourceKey == null || source.key().equals(sourceKey));
+                })
+                .sorted(Comparator.comparing((EmployerSource b) -> -active.get(b.getEmployerId()).getDiscoveryPriority())
+                        .thenComparing(b -> -b.getPriority())
+                        .thenComparing(EmployerSource::getExternalRef))
+                .map(b -> toTarget(b, active.get(b.getEmployerId()), sourceViews.get(b.getJobSourceId())))
+                .toList();
+    }
+
+    /** The target for one binding regardless of enabled flags (used for on-demand availability rechecks). */
+    @Transactional(readOnly = true)
+    public Optional<SyncTarget> syncTarget(UUID employerSourceId) {
+        return bindings.findById(employerSourceId).map(b -> toTarget(b,
+                employers.findById(b.getEmployerId()).orElseThrow(), sources.viewsById().get(b.getJobSourceId())));
+    }
+
+    /** Records the outcome of a sync on the binding (health shown in the registry). */
+    @Transactional
+    public void recordSyncOutcome(UUID employerSourceId, boolean success, Instant at, String error) {
+        bindings.findById(employerSourceId).ifPresent(b -> b.recordSync(success, at, error));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, EmployerRef> refs(Collection<UUID> employerIds) {
+        return employers.findAllById(employerIds).stream().collect(Collectors.toMap(Employer::getId,
+                e -> new EmployerRef(e.getId(), e.getKey(), e.getDisplayName())));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, BindingRef> bindingRefs(Collection<UUID> employerSourceIds) {
+        Map<UUID, JobSourceView> sourceViews = sources.viewsById();
+        List<EmployerSource> found = bindings.findAllById(employerSourceIds);
+        Map<UUID, String> employerKeys = employers.findAllById(found.stream().map(EmployerSource::getEmployerId).toList())
+                .stream().collect(Collectors.toMap(Employer::getId, Employer::getKey));
+        return found.stream().collect(Collectors.toMap(EmployerSource::getId, b -> new BindingRef(
+                b.getId(), employerKeys.get(b.getEmployerId()), sourceViews.get(b.getJobSourceId()).key(), b.getExternalRef())));
+    }
+
+    @SuppressWarnings("unchecked")
+    private SyncTarget toTarget(EmployerSource binding, Employer employer, JobSourceView source) {
+        Map<String, Object> settings = new LinkedHashMap<>(source.settings());
+        settings.putAll(json.read(binding.getSettingsJson(), Map.class));
+        return new SyncTarget(binding.getId(), binding.getJobSourceId(), employer.getId(), employer.getKey(), source.key(), source.adapterId(),
+                binding.getExternalRef(), settings);
     }
 
     private boolean putBinding(Employer employer, BindingSpec spec, Map<String, UUID> sourceIds) {

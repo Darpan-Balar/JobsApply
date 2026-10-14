@@ -1,0 +1,51 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "title": "Senior Data Engineer",
+      "department": "Engineering",
+      "team": "Data Platform",
+      "employmentType": "FullTime",
+      "location": "Berlin",
+      "secondaryLocations": [
+        { "location": "Remote - Europe", "address": { "addressLocality": null, "addressRegion": null, "addressCountry": null } }
+      ],
+      "publishedAt": "2024-03-04T14:29:08.532+00:00",
+      "isListed": true,
+      "isRemote": false,
+      "workplaceType": "Hybrid",
+      "address": { "postalAddress": { "postalCode": "10115", "addressRegion": "Berlin", "addressCountry": "Germany", "addressLocality": "Berlin" } },
+      "jobUrl": "https://jobs.ashbyhq.com/exampleco/7458d4e9-da2e-47bd-98cb-adfda43d42b2",
+      "applyUrl": "https://jobs.ashbyhq.com/exampleco/7458d4e9-da2e-47bd-98cb-adfda43d42b2/application",
+      "descriptionHtml": "<p>Spark and Airflow.</p>",
+      "descriptionPlain": "Spark and Airflow.",
+      "compensation": {
+        "compensationTierSummary": "€110K – €185K • Offers Equity",
+        "scrapeableCompensationSalarySummary": "€110K - €185K",
+        "compensationTiers": [],
+        "summaryComponents": [
+          { "compensationType": "EquityPercentage", "interval": "NONE", "currencyCode": null, "minValue": null, "maxValue": null },
+          { "compensationType": "Salary", "interval": "1 YEAR", "currencyCode": "EUR", "minValue": 110000, "maxValue": 185000 }
+        ]
+      }
+    },
+    {
+      "title": "Backend Engineer (no id field)",
+      "employmentType": "Contract",
+      "location": "Remote",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "jobUrl": "https://jobs.ashbyhq.com/exampleco/9f2c1a7e-0000-4000-8000-000000000002",
+      "applyUrl": "https://jobs.ashbyhq.com/exampleco/9f2c1a7e-0000-4000-8000-000000000002/application",
+      "descriptionHtml": "<p>Go.</p>"
+    },
+    {
+      "id": "unlisted-1",
+      "title": "Unlisted role",
+      "isListed": false,
+      "jobUrl": "https://jobs.ashbyhq.com/exampleco/unlisted-1"
+    }
+  ]
+}

@@ -14,8 +14,10 @@ The files are matched by `kind`, not by which directory they're in.
 
 **Job sources.**
 - An *enabled* source must name an installed adapter plugin, and its `settings` must be valid for that plugin.
-- A *disabled* source may name an adapter that isn't installed yet. The shipped Greenhouse, Lever and Ashby sources are disabled until their adapters arrive in Phase 3.
+- A *disabled* source may name an adapter that isn't installed yet. The shipped Greenhouse, Lever and Ashby sources are enabled, because their adapters are installed.
 - `GET /api/v1/plugins/job-source-adapters` lists the installed adapters.
+
+**Finding board tokens.** Use the employer's own careers page: `boards.greenhouse.io/<token>`, `jobs.lever.co/<site>` or `jobs.ashbyhq.com/<name>`. Verify a token before relying on it. A wrong token returns 404, which marks the sync as failed but never closes jobs.
 
 **Employers.**
 - Import is a declarative upsert keyed by `key`. Bindings the file no longer lists are *disabled*, never deleted.

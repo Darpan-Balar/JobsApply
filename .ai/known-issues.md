@@ -2,12 +2,20 @@
 
 ## Not implemented (by design, later phases)
 - **Authentication:** none yet. In LOCAL identity mode every `/api/*` request acts as the local user, which is safe only because the server binds to 127.0.0.1 (Phase 8). Catalog writes (employers, sources, config import) have no role checks yet; admin roles arrive with login.
-- **No job-source adapters** are installed, so the shipped sources are disabled (Phase 3).
+- **No scheduling:** sync runs on demand (`POST /sync`, which is synchronous) until Phase 9.
+- **No real employers configured:** the shipped ones are fictional and disabled. The user needs to add employers with verified board tokens.
 - **Matching vocabulary** is declared, not implemented (Phase 4). Configs referencing it validate, but nothing evaluates them.
 - **No discovery, matching, preparation, approval, attempts or crash recovery services** (Phases 3–6).
 - **Audit:** no listener writes `audit_event` yet (Phase 6). Pseudonymization is allowed by the DB trigger but has no service.
 
 ## Risks and technical debt
+- **Discovery** (also in ADR-0008):
+  - Multi-page Lever boards close jobs only through bounded per-run rechecks.
+  - Fingerprint dedup can miss duplicates with different wording, or merge identical openings across different sources.
+  - A rare race between concurrent syncs of different sources for one employer can create duplicate postings.
+  - Startup recovery assumes a single instance.
+- **Greenhouse pay ranges** have no stated interval, so the period is stored as unknown. They are only fetched through the details endpoint, not during listing syncs.
+- **Description HTML** is stored raw (`job_listing.description_html`) and must be sanitized when rendered (dashboard, Phase 8).
 - **CSV:** `metadata` and per-binding `enabled=false` can't be expressed. CSV imports leave metadata unchanged and list only enabled bindings (undeclared ones get disabled). Use YAML for full fidelity.
 - **Formula neutralization:** CSV export prefixes cells starting with `= + - @` with `'`. If such a CSV is re-imported, the apostrophe becomes part of the value.
 - **Validation messages:** errors for key/slug patterns show the raw regex (`must match "^[a-z0-9]..."`). This is functional but could be friendlier.

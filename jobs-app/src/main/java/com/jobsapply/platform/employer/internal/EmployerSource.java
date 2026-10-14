@@ -60,6 +60,19 @@ public class EmployerSource extends BaseEntity {
     @Column(name = "last_error", columnDefinition = "text")
     private String lastError;
 
+    /** Health bookkeeping; the error text is truncated and must not contain secrets (adapters never echo them). */
+    public void recordSync(boolean success, Instant at, String error) {
+        if (success) {
+            this.lastSuccessAt = at;
+            this.consecutiveFailures = 0;
+            this.lastError = null;
+        } else {
+            this.lastFailureAt = at;
+            this.consecutiveFailures++;
+            this.lastError = error == null ? null : error.length() > 2000 ? error.substring(0, 2000) : error;
+        }
+    }
+
     /** @return whether anything changed */
     public boolean configure(boolean enabled, int priority) {
         if (this.enabled == enabled && this.priority == priority) {

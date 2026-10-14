@@ -34,10 +34,7 @@ class ConfigImportIT {
         ConfigImportReport report = importService.validate(REPO_CONFIG);
 
         assertThat(report.issues()).isEmpty();
-        assertThat(report.notices()).containsExactlyInAnyOrder(
-                "source 'greenhouse-public' stays disabled: adapter 'greenhouse-job-board' is not installed",
-                "source 'lever-public' stays disabled: adapter 'lever-postings' is not installed",
-                "source 'ashby-public' stays disabled: adapter 'ashby-job-board' is not installed");
+        assertThat(report.notices()).as("all shipped sources have their adapters installed").isEmpty();
     }
 
     @Test
@@ -47,7 +44,7 @@ class ConfigImportIT {
         assertThat(keys(report, ConfigKind.JOB_SOURCE)).containsExactlyInAnyOrder("greenhouse-public", "lever-public", "ashby-public");
         assertThat(keys(report, ConfigKind.EMPLOYER_SET)).containsExactlyInAnyOrder("example-fintech", "example-trading");
         assertThat(jdbc.queryForObject("select count(*) from job_source where key in ('greenhouse-public','lever-public','ashby-public') "
-                + "and not enabled", Integer.class)).isEqualTo(3);
+                + "and enabled", Integer.class)).isEqualTo(3);
         assertThat(jdbc.queryForList("select s.key || '/' || b.external_ref from employer_source b join employer e on e.id = b.employer_id "
                 + "join job_source s on s.id = b.job_source_id where e.key = 'example-fintech' order by 1", String.class))
                 .containsExactly("greenhouse-public/examplefintech", "lever-public/examplefintech");

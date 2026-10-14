@@ -22,15 +22,26 @@
     - `EmployerSource` (bindings, moved here from `source`)
     - `UserEmployerPreference`
     - `web/*Controller`
-  - `posting`, `discovery`: entities and repositories only (Phase 3 adds logic).
+  - `posting`: `ListingIngestService` (wrapping `internal/ListingIngestor`), `internal/JobNormalizer`, `PostingQueryService` with `internal/PostingSpecifications`, `web/PostingController`.
+  - `discovery`:
+    - `SyncService`, `internal/SyncEngine` (the algorithm), `internal/SyncRunRecorder` (REQUIRES_NEW history), `internal/SyncRunRecovery`
+    - `AvailabilityService`, `SyncRunQueryService`
+    - `web/DiscoveryController`
   - `roleprofile`: `RoleProfileService` (idempotent versioned import; visibility is "own profiles plus templates").
   - `candidate`: `CandidateProfileService` (immutable snapshot versions) and `CandidateSnapshotValidator`.
   - `matching`: `MatchingVocabulary` (declared names only), `JobMatch` entity.
   - `application`: the `ApplicationStatus` transition table, the `Application` aggregate (`discover`, `transitionTo`) and its history.
   - `audit`: `AuditEvent` entity.
   - `configimport`: `ConfigImportService` (directory, single YAML document, CSV content), `EmployerExchangeService` (CSV import; CSV/YAML export), `internal/EmployerCsv`, `web/ConfigController`, `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
-- Migrations: `jobs-app/src/main/resources/db/migration/V1..V6`.
+- `jobs-adapters/` (`com.jobsapply.adapters`):
+  - `http/` holds `HttpFetcher`, `HostRateLimiter`, `HttpTransport`/`JdkHttpTransport`, `AbstractHttpJobSourceAdapter` and `Json`.
+  - `source/{greenhouse,lever,ashby}` hold the adapters.
+  - `BuiltInAdaptersAutoConfiguration` is registered via `META-INF/spring/...AutoConfiguration.imports`.
+  - Tests use `FakeTransport` and `src/test/resources/fixtures`. `live/PublicBoardsLiveIT` runs with `-Plive`.
+- Migrations: `jobs-app/src/main/resources/db/migration/V1..V8`.
 - Tests:
-  - Unit tests are `*Test`. Integration tests are `*IT` (`support/IntegrationTest`, `TestData`, `DbAssertions`).
+  - Unit tests are `*Test`. Integration tests are `*IT` (`support/IntegrationTest`, `ApiTest`, `TestData`, `DbAssertions`, `HttpApi`).
+  - Discovery tests use `support/ScriptedJobSourceAdapter` and `DiscoveryFixture`.
+  - `RealSourcesLiveIT` runs only with `-Plive`.
   - The architecture tests are `ModularityTest`, `PersistenceRulesTest` and `SpiDependencyRulesTest`.
 - `config/`: sample YAML (example role profiles, fictional disabled employers).

@@ -1,6 +1,7 @@
 package com.jobsapply.spi.source;
 
 import com.jobsapply.spi.common.Lists;
+import com.jobsapply.spi.common.WorkplaceType;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -18,6 +19,8 @@ public record SourceJob(
         List<RawLocation> locations,
         String department,
         String employmentTypeRaw,
+        /* Only when the provider states it explicitly; otherwise null (the core may infer from locations). */
+        WorkplaceType workplaceType,
         String descriptionHtml,
         URI listingUrl,
         URI applicationUrl,

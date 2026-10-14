@@ -1,18 +1,21 @@
-# Latest Session: 2026-10-14 (continued)
+# Latest Session: 2026-10-14 (Phase 3)
 
-1. **GitHub.** The user created Darpan-Balar/JobsApply (public, default branch `master`, with an MIT LICENSE). Phase 1 was committed on top of it and pushed as a fast-forward.
-2. **Phase 2** was implemented on the `phase-2-employer-registry` branch:
-   - plugin registry
-   - source checks
-   - employer registry with search, bindings and preferences
-   - YAML/CSV exchange
-   - REST API
-   - local-user filter
-   - V7 migration
-3. **Bugs found and fixed:**
-   - jsonb text comparison made every re-import report UPDATED
-   - `text[]` vs `varchar[]` in tag predicates
-   - a stale migration in `target/` after a rename (fixed with a clean build)
-   - an oversized-upload IT was unreliable over HTTP, so it moved to a unit test
-4. **Verified:** 178 tests green; local run shows idempotent re-import, the 409 adapter guard, and CSV round-trip.
-5. **Next:** wait for the user's review of Phase 2 before merging or pushing.
+1. Phase 2 was merged with a fast-forward and pushed. Phase 3 started on `phase-3-discovery`.
+2. **Research.** Read the official docs for the Greenhouse Job Board API, the Lever Postings API and the Ashby posting API, and made read-only checks of live responses. Found several doc gaps (see ADR-0008 and architecture §11, Phase 3).
+3. **Built:**
+   - `jobs-adapters` (HTTP base and three adapters)
+   - SPI additions
+   - posting ingestion, normalization, dedup and search
+   - discovery engine, run history, recovery, availability recheck and metrics
+   - REST endpoints
+   - V8
+   - `-Plive` profiles
+4. **Bugs fixed:**
+   - non-atomic rate-limiter reservation
+   - URI-building exceptions escaping adapters
+   - several over-narrow test expectations
+5. **Verified:**
+   - 247 default tests green
+   - live adapters and the live end-to-end pipeline idempotent against real boards
+   - local startup on V8
+6. **Next:** wait for review.

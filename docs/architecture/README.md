@@ -1,6 +1,6 @@
 # Job Discovery & Application Platform — Architecture Proposal
 
-> **Status: ACCEPTED (2026-10-14). Phases 1 (Foundation) and 2 (Employer & source registry) are implemented; Phases 3–9 are not.**
+> **Status: ACCEPTED (2026-10-14). Phases 1–3 (Foundation, Employer & source registry, Discovery) are implemented; Phases 4–9 are not.**
 > Where Phase 1 deviated from the original proposal, this document was updated. See "Phase 1 outcome" in §11.
 
 ## 0. Environment (verified 2026-10-14)
@@ -697,3 +697,35 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
   - re-import reports UNCHANGED for every item
   - enabling a source without its adapter returns 409
   - CSV export and import work, including a dry run with row-level errors
+
+### Phase 3 outcome (2026-10-14)
+
+**Delivered (see ADR-0008)**
+- **`jobs-adapters`** (depends on the SPI only; registered by Boot auto-configuration):
+  - `AbstractHttpJobSourceAdapter` (Template Method) with `HttpFetcher`. It provides per-host rate limiting, bounded retries with exponential backoff and jitter, `Retry-After` support (capped), a 25 MB response cap, HTTPS-only transport, and the status→`FailureKind` mapping.
+  - **Greenhouse** (`greenhouse-job-board`): list, details with pay ranges, availability.
+  - **Lever** (`lever-postings`): paged; global or EU host.
+  - **Ashby** (`ashby-job-board`): complete listing; no single-job endpoint.
+- **`posting`:**
+  - `ListingIngestService`: idempotent upsert with a content hash and cross-source dedup. Availability changes on authoritative evidence only.
+  - `JobNormalizer`: never guesses.
+  - Posting search and detail through a JPA Specification, with a stale flag.
+- **`discovery`:**
+  - `SyncEngine`: database single-flight, fetch outside transactions, bounded rechecks, PARTIAL and FAILED outcomes, dry run, binding health, Micrometer `jobs.discovery.*`.
+  - `SyncRunRecovery`, `AvailabilityService` (the pre-preparation recheck) and run history.
+- **REST:** `POST /sync`, `GET /sync-runs[/{id}]`, `GET /postings[/{id}]`, `POST /postings/{id}/availability-check`.
+- **V8:** `job_listing.description_html` (raw, sanitized on render) and an availability index.
+- **SPI additions:** `SourceJob.workplaceType` and `DiscoveryPage.problems`. These were needed because real APIs state the workplace explicitly and individual items can be malformed.
+
+**API docs vs reality (checked against live responses)**
+- Greenhouse's list already returns `first_published` and `company_name`.
+- Lever returns `workplaceType: onsite` (the docs say `on-site`) and an undocumented `createdAt`, which is kept only as metadata.
+- Ashby returns a job `id` that the docs omit, and per-job compensation.
+- All three return 404 for a missing board. That is never treated as a closure.
+
+**Verification**
+- `./mvnw clean install`: 247 tests, 0 failures (SPI 15, adapters 25, app unit tests 119, integration tests 88).
+- Opt-in `-Plive`:
+  - Adapters parse today's real public boards with zero problems (Greenhouse 17, Lever 10, Ashby 63 jobs).
+  - The full pipeline syncs each board twice. The second run reports every job unchanged, with 0 inserted and 0 closed.
+- A local run against Compose PostgreSQL applied V8 and registered all three adapters, and the shipped sources are enabled.

@@ -8,6 +8,7 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - Integration tests only: `./mvnw -pl jobs-app verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false`
 - Run the app (port 8090): `docker compose up -d --wait && ./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.profiles=local`
 - Validate config: `./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.arguments="--jobs.config.validate-only=true"`
+- Live tests (real public job-board APIs, opt-in): `./mvnw -pl jobs-adapters verify -Plive`. For the full pipeline, add `-pl jobs-app ... -Plive -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false`. Never part of the default build.
 
 ## Architecture rules (see docs/adr)
 - **Modular monolith.** Each feature module lives under `com.jobsapply.platform.<module>`. The module's base package is its public API, and `internal/` is private. Modules reference each other **by ID only**. `ModularityTest` enforces this, so don't weaken it.
@@ -42,10 +43,17 @@ Project guide for Claude sessions. The repository is the source of truth. For th
   - Database constraints are tested with plain SQL through `TestData`.
 - **Never commit** secrets or personal data. `.env`, `local/` and `data/` are git-ignored, and config holds only `env:` secret references.
 
+## Discovery rules (ADR-0008), do not weaken
+- Only authoritative evidence changes availability: presence in a listing (OPEN), absence from a *complete* listing (CLOSED), or a job-level 404 while the board answers 200 (CLOSED).
+- Failures, partial pages and unidentified bad items must never close anything.
+- Adapters return failures as values and never throw. Parsers never fabricate: missing means `null`.
+- Network I/O never happens inside a DB transaction.
+
 ## Gotchas learned
 - **jsonb is returned re-formatted** by PostgreSQL. Never compare stored JSON text with our canonical JSON; use `JsonCodec.canonicalize`.
 - **Hibernate binds array parameters as `varchar[]`.** Array columns queried with array predicates must be `varchar(n)[]`, not `text[]`.
 - **Run `clean` after renaming or removing a migration.** Otherwise `target/classes` keeps the old file and Flyway sees duplicate versions.
+- **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
 - **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select max(version) from flyway_schema_history`).
 
 ## Environment notes

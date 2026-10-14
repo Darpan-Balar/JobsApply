@@ -2,11 +2,13 @@ package com.jobsapply.platform.posting.internal;
 
 import com.jobsapply.platform.shared.persistence.BaseEntity;
 import com.jobsapply.spi.common.Availability;
+import com.jobsapply.spi.source.SourceJob;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.net.URI;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -89,4 +91,65 @@ public class JobListing extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "source_metadata", nullable = false)
     private String sourceMetadataJson = "{}";
+
+    /** As received from the source; sanitize before rendering. */
+    @Column(name = "description_html", columnDefinition = "text")
+    private String descriptionHtml;
+
+    /** Seen in a source listing: authoritative evidence that the vacancy is open. @return whether it was reopened */
+    public boolean markSeen(Instant now) {
+        boolean reopened = availability != Availability.OPEN;
+        this.lastSeenAt = now;
+        this.lastCheckedAt = now;
+        this.availability = Availability.OPEN;
+        this.availabilityEvidence = "present in the source listing";
+        return reopened;
+    }
+
+    /** Replaces the source content (raw values as received). */
+    public void replaceContent(SourceJob job, String locationRawJson, String sourceMetadataJson, String contentHash) {
+        this.titleRaw = truncate(job.title(), 500);
+        this.locationRawJson = locationRawJson;
+        this.department = truncate(job.department(), 300);
+        this.employmentTypeRaw = truncate(job.employmentTypeRaw(), 100);
+        this.listingUrl = url(job.listingUrl());
+        this.applicationUrl = url(job.applicationUrl());
+        this.publishedAt = job.publishedAt();
+        this.sourceUpdatedAt = job.updatedAt();
+        this.descriptionHtml = job.descriptionHtml();
+        this.sourceMetadataJson = sourceMetadataJson;
+        this.contentHash = contentHash;
+    }
+
+    /**
+     * Records an availability observation. Only authoritative observations change OPEN/CLOSED; anything else is
+     * evidence only. @return whether the availability changed
+     */
+    public boolean observe(Availability observed, boolean authoritative, String evidence, Instant now) {
+        this.lastCheckedAt = now;
+        if (!authoritative || observed == Availability.UNKNOWN || observed == availability) {
+            if (authoritative) {
+                this.availabilityEvidence = truncate(evidence, 2000);
+            }
+            return false;
+        }
+        this.availability = observed;
+        this.availabilityEvidence = truncate(evidence, 2000);
+        if (observed == Availability.OPEN) {
+            this.lastSeenAt = now;
+        }
+        return true;
+    }
+
+    public void movePosting(UUID postingId) {
+        this.jobPostingId = postingId;
+    }
+
+    static String url(URI uri) {
+        return uri == null ? null : truncate(uri.toString(), 2048);
+    }
+
+    static String truncate(String value, int max) {
+        return value == null || value.length() <= max ? value : value.substring(0, max);
+    }
 }

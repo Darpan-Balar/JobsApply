@@ -1,0 +1,28 @@
+[
+  {
+    "id": "0a1b2c3d-1111-4a4a-8b8b-000000000001",
+    "text": "Quantitative Developer",
+    "categories": { "commitment": "Regular Full Time (Salary)", "department": "Trading", "location": "London", "team": "Execution", "allLocations": ["London", "Remote - UK"] },
+    "country": "GB",
+    "workplaceType": "onsite",
+    "opening": "<div>Opening</div>",
+    "description": "<div>Low-latency <b>C++</b> systems.</div>",
+    "descriptionPlain": "Low-latency C++ systems.",
+    "lists": [ { "text": "Requirements", "content": "<li>C++</li><li>Probability</li>" } ],
+    "additional": "<div>Benefits</div>",
+    "hostedUrl": "https://jobs.lever.co/exampletrading/0a1b2c3d-1111-4a4a-8b8b-000000000001",
+    "applyUrl": "https://jobs.lever.co/exampletrading/0a1b2c3d-1111-4a4a-8b8b-000000000001/apply",
+    "createdAt": 1788199939703,
+    "salaryRange": { "min": 120000, "max": 160000, "currency": "GBP", "interval": "per-year-salary" },
+    "salaryDescriptionPlain": "Plus bonus"
+  },
+  {
+    "id": "0a1b2c3d-1111-4a4a-8b8b-000000000002",
+    "text": "Platform Engineer",
+    "categories": { "commitment": "Contract", "location": "Remote", "team": "Infra" },
+    "workplaceType": "unspecified",
+    "description": "<p>Kubernetes.</p>",
+    "hostedUrl": "https://jobs.lever.co/exampletrading/0a1b2c3d-1111-4a4a-8b8b-000000000002",
+    "applyUrl": "https://jobs.lever.co/exampletrading/0a1b2c3d-1111-4a4a-8b8b-000000000002/apply"
+  }
+]

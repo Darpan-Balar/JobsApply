@@ -2,11 +2,12 @@
 
 A local-first platform for discovering, matching, preparing and tracking job applications. It's extensible to any role family, employer, job source and user, through configuration and plugins rather than core code changes.
 
-> **Status: Phases 1 (Foundation) and 2 (Employer & source registry) complete.**
-> - Phase 1: domain model, schema, configuration validation and import, multi-user isolation and plugin contracts.
-> - Phase 2: employer registry with search, source bindings and private per-user preferences; the plugin registry; YAML/CSV import and export; the REST API.
+> **Status: Phases 1–3 complete.**
+> - Phase 1 (Foundation): domain model, schema, configuration, multi-user isolation and plugin contracts.
+> - Phase 2 (Employer & source registry): employer registry, plugin registry, YAML/CSV exchange and the REST API.
+> - Phase 3 (Discovery): Greenhouse, Lever and Ashby adapters, plus syncing, normalization, cross-source dedup and availability tracking.
 >
-> **Not implemented yet:** job discovery (no source adapters exist yet, so the shipped sources are disabled), matching, resume and answer generation, browser-assisted applying, the dashboard and login. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
+> **Not implemented yet:** matching, resume and answer generation, browser-assisted applying, the dashboard, login and scheduling. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
 
 ## Stack
 
@@ -56,6 +57,12 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `GET /sources`, `PUT /sources/{key}`, `GET /plugins/job-source-adapters` | Job sources and installed adapters |
 | `GET/POST /exchange/employers` | Employer CSV/YAML export, and CSV import (`?dryRun=true`) |
 | `POST /config/documents`, `POST /config/import`, `GET /config/validation` | YAML document import, configuration directory import, and validation |
+| `POST /sync?source=&employer=&dryRun=` | Synchronize the active bindings now (synchronous) |
+| `GET /sync-runs`, `GET /sync-runs/{id}` | Sync history, with per-run errors |
+| `GET /postings`, `GET /postings/{id}` | Search discovered jobs (employer, availability, workplace, employmentType, seniority, country, q, stale), and job detail with its source listings |
+| `POST /postings/{id}/availability-check` | Recheck at the source whether a posting is still open |
+
+**To discover jobs:** add a real employer with a verified board token (for example via `PUT /employers/{key}/bindings/greenhouse-public/{token}`, or YAML/CSV), make sure it is `enabled`, then `POST /sync`. A job is closed only on authoritative evidence: a failed request never closes anything (ADR-0008).
 
 In the current *local identity mode*, every API call acts as the configured local user. The server is reachable only from this machine. Real login arrives with the dashboard (Phase 8).
 
@@ -70,12 +77,19 @@ In the current *local identity mode*, every API call acts as the configured loca
 
 Add `--jobs.config.directory=/path/to/other/config` to validate a different directory.
 
+### Live checks against the real job boards (opt-in)
+
+```bash
+./mvnw -pl jobs-adapters verify -Plive                                     # adapters vs real public boards
+./mvnw -pl jobs-app verify -Plive -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false   # full sync pipeline, twice
+```
+
 ## Repository layout
 
 ```
 jobs-spi/        Plugin contracts (records, interfaces, sealed results). No Spring/JPA. Third-party plugins compile against this.
 jobs-app/        Spring Boot modular monolith (package-by-feature; boundaries verified by Spring Modulith)
-jobs-adapters/   Built-in plugins (Greenhouse/Lever/Ashby/Playwright/…). Empty in Phase 1.
+jobs-adapters/   Built-in plugins: Greenhouse, Lever and Ashby job sources (Playwright etc. later). Depend on the SPI only.
 config/          Versioned YAML: job families, skills, role profiles, sources, employers
 docs/            Architecture proposal and ADRs
 compose.yaml     Local PostgreSQL

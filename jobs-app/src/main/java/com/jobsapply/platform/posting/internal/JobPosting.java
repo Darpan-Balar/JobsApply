@@ -105,4 +105,49 @@ public class JobPosting extends BaseEntity {
         locations.add(location);
         return location;
     }
+
+    static JobPosting from(UUID employerId, NormalizedJob job, Instant now) {
+        JobPosting posting = JobPosting.builder()
+                .employerId(employerId)
+                .firstSeenAt(now)
+                .lastSeenAt(now)
+                .availability(Availability.OPEN)
+                .build();
+        posting.refresh(job);
+        return posting;
+    }
+
+    /** Rebuilds the canonical content from the authoritative listing. */
+    void refresh(NormalizedJob job) {
+        this.title = JobListing.truncate(job.title(), 500);
+        this.titleNormalized = JobListing.truncate(job.titleNormalized(), 500);
+        this.seniority = job.seniority();
+        this.employmentType = job.employmentType();
+        this.workplaceType = job.workplaceType();
+        this.salaryMin = job.salaryMin();
+        this.salaryMax = job.salaryMax();
+        this.salaryCurrency = job.salaryCurrency();
+        this.salaryPeriod = job.salaryPeriod();
+        this.descriptionText = job.descriptionText();
+        this.dedupFingerprint = job.fingerprint();
+        this.locations.clear();
+        job.locations().forEach(l -> addLocation(l.rawText(), l.city(), l.region(), l.countryCode(), l.remote()));
+    }
+
+    void markSeen(Instant now) {
+        if (lastSeenAt == null || now.isAfter(lastSeenAt)) {
+            this.lastSeenAt = now;
+        }
+    }
+
+    /** OPEN if any listing is open; CLOSED only if every listing is closed; otherwise UNKNOWN. */
+    void deriveAvailability(List<Availability> listingAvailabilities) {
+        if (listingAvailabilities.contains(Availability.OPEN)) {
+            this.availability = Availability.OPEN;
+        } else if (!listingAvailabilities.isEmpty() && listingAvailabilities.stream().allMatch(Availability.CLOSED::equals)) {
+            this.availability = Availability.CLOSED;
+        } else {
+            this.availability = Availability.UNKNOWN;
+        }
+    }
 }

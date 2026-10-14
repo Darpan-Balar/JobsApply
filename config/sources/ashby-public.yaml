@@ -3,8 +3,9 @@ kind: JobSource
 key: ashby-public
 adapter: ashby-job-board
 displayName: Ashby Job Board API (public)
-enabled: false   # the adapter plugin arrives in Phase 3; a source can only be enabled once its adapter is installed
+enabled: true
 settings:
   requestTimeout: PT10S
   maxRetries: 3
   rateLimit: { permits: 5, per: PT1S }
+  includeCompensation: true

@@ -3,8 +3,10 @@ kind: JobSource
 key: lever-public
 adapter: lever-postings
 displayName: Lever Postings API (public)
-enabled: false   # the adapter plugin arrives in Phase 3; a source can only be enabled once its adapter is installed
+enabled: true
 settings:
   requestTimeout: PT10S
   maxRetries: 3
   rateLimit: { permits: 5, per: PT1S }
+  region: GLOBAL     # GLOBAL (api.lever.co) or EU (api.eu.lever.co)
+  pageSize: 250      # a board that fits in one page counts as a complete listing

@@ -5,7 +5,7 @@ kind: JobSource
 key: greenhouse-public
 adapter: greenhouse-job-board
 displayName: Greenhouse Job Board API (public)
-enabled: false   # the adapter plugin arrives in Phase 3; a source can only be enabled once its adapter is installed
+enabled: true
 settings:
   requestTimeout: PT10S
   maxRetries: 3

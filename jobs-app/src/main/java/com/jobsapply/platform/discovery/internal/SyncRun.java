@@ -1,5 +1,6 @@
 package com.jobsapply.platform.discovery.internal;
 
+import com.jobsapply.platform.discovery.SyncCounts;
 import com.jobsapply.platform.discovery.SyncRunStatus;
 import com.jobsapply.platform.discovery.SyncTrigger;
 import com.jobsapply.platform.shared.persistence.BaseEntity;
@@ -84,7 +85,7 @@ public class SyncRun extends BaseEntity {
                 .build();
     }
 
-    public void finish(SyncRunStatus outcome, Instant now, String errorSummary) {
+    public void finish(SyncRunStatus outcome, Instant now, SyncCounts counts, String errorSummary) {
         if (status.isFinished()) {
             throw new IllegalStateException("Sync run already finished: " + status);
         }
@@ -93,6 +94,16 @@ public class SyncRun extends BaseEntity {
         }
         this.status = outcome;
         this.finishedAt = now;
+        this.discoveredCount = counts.discovered();
+        this.insertedCount = counts.inserted();
+        this.updatedCount = counts.updated();
+        this.unchangedCount = counts.unchanged();
+        this.closedCount = counts.closed();
+        this.failedCount = counts.failed();
         this.errorSummary = errorSummary;
+    }
+
+    public SyncCounts counts() {
+        return new SyncCounts(discoveredCount, insertedCount, updatedCount, unchangedCount, closedCount, failedCount);
     }
 }
