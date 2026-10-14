@@ -1,0 +1,21 @@
+# Project Memory (long-lived facts)
+
+- **User requirements:**
+  - Extensible to any role family, employer, source and user.
+  - Configuration-driven.
+  - Use Lombok builders and design patterns where they earn their place.
+  - Human approval for every submission.
+  - Never fabricate qualifications.
+- **Users:** the platform owner is the only user today. Other users must be quick to onboard and fully isolated, with login.
+- **Machine:**
+  - JDK 25.0.4, Maven 3.9.10, Node 22.17.1.
+  - Homebrew PostgreSQL 18 on :5432.
+  - An unrelated Docker app on :8080.
+  - Docker Desktop has to be started for tests.
+- **Verified library facts:**
+  - Boot 4.1.1 supports Java 17–26.
+  - Hibernate 7.4's `@TenantId` filter applies to find-by-id.
+  - Hibernate's JSON mapper passes `String` through unchanged.
+  - In Jackson 3, `FAIL_ON_NULL_FOR_PRIMITIVES` defaults to true, and record properties are sorted creator-first unless `SORT_CREATOR_PROPERTIES_FIRST` is disabled.
+  - Testcontainers 2's PostgreSQL class is `org.testcontainers.postgresql.PostgreSQLContainer`.
+- Detailed design: `docs/architecture/README.md` and `docs/adr/0001-0007`. Map of the code: `.ai/codebase.md`.

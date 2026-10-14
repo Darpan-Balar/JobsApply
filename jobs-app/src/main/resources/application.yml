@@ -1,0 +1,54 @@
+# Shared defaults. Secrets come from the environment or a git-ignored .env file in the working directory.
+spring:
+  application:
+    name: jobs-platform
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${JOBS_DB_URL:jdbc:postgresql://localhost:5433/jobs}
+    username: ${JOBS_DB_USER:jobs}
+    password: ${JOBS_DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate          # Flyway owns the schema; Hibernate only verifies the mapping
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  address: 127.0.0.1              # local-first: not reachable from the network by default
+  port: ${JOBS_PORT:8090}         # override with JOBS_PORT
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  structured:
+    format:
+      console: ecs
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+jobs:
+  identity:
+    local-user:
+      username: local
+      display-name: Local User
+  config:
+    directory: config
+    import-on-startup: false
+    validate-only: false

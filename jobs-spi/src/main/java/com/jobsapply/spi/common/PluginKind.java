@@ -1,0 +1,13 @@
+package com.jobsapply.spi.common;
+
+public enum PluginKind {
+    JOB_SOURCE,
+    ELIGIBILITY_RULE,
+    SCORE_COMPONENT,
+    MATCHING_STRATEGY,
+    CONTENT_GENERATOR,
+    DOCUMENT_RENDERER,
+    ANSWER_DRAFTER,
+    APPLICATION_ADAPTER,
+    LLM_PROVIDER
+}

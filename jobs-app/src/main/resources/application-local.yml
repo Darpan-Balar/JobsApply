@@ -1,0 +1,4 @@
+# Local development: import shipped configuration (system templates) at startup.
+jobs:
+  config:
+    import-on-startup: true

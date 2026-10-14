@@ -1,0 +1,10 @@
+schemaVersion: 1
+kind: JobSource
+key: ashby-public
+adapter: ashby-job-board
+displayName: Ashby Job Board API (public)
+enabled: true
+settings:
+  requestTimeout: PT10S
+  maxRetries: 3
+  rateLimit: { permits: 5, per: PT1S }

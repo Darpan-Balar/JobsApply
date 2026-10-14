@@ -1,0 +1,44 @@
+schemaVersion: 1
+kind: SkillSet
+skills:
+  # Languages
+  - { key: java, displayName: Java, category: language }
+  - { key: kotlin, displayName: Kotlin, category: language }
+  - { key: go, displayName: Go, category: language, aliases: [golang] }
+  - { key: python, displayName: Python, category: language }
+  - { key: scala, displayName: Scala, category: language }
+  - { key: cpp, displayName: C++, category: language, aliases: [c++, cplusplus, modern c++] }
+  - { key: c, displayName: C, category: language }
+  - { key: rust, displayName: Rust, category: language }
+  - { key: typescript, displayName: TypeScript, category: language, aliases: [ts] }
+  - { key: sql, displayName: SQL, category: language }
+  # Frameworks and platforms
+  - { key: spring-boot, displayName: Spring Boot, category: framework, aliases: [spring boot, springboot] }
+  - { key: react, displayName: React, category: framework, aliases: [react.js, reactjs] }
+  - { key: postgresql, displayName: PostgreSQL, category: datastore, aliases: [postgres, psql] }
+  - { key: mysql, displayName: MySQL, category: datastore }
+  - { key: redis, displayName: Redis, category: datastore }
+  - { key: kafka, displayName: Apache Kafka, category: messaging, aliases: [apache kafka] }
+  - { key: kubernetes, displayName: Kubernetes, category: infrastructure, aliases: [k8s] }
+  - { key: docker, displayName: Docker, category: infrastructure }
+  - { key: aws, displayName: Amazon Web Services, category: cloud, aliases: [amazon web services] }
+  - { key: gcp, displayName: Google Cloud Platform, category: cloud, aliases: [google cloud] }
+  - { key: azure, displayName: Microsoft Azure, category: cloud }
+  - { key: linux, displayName: Linux, category: infrastructure }
+  - { key: grpc, displayName: gRPC, category: protocol }
+  # Practices
+  - { key: distributed-systems, displayName: Distributed Systems, category: practice, aliases: [distributed systems] }
+  - { key: microservices, displayName: Microservices, category: practice }
+  - { key: rest-apis, displayName: REST APIs, category: practice, aliases: [rest, rest api, restful apis] }
+  - { key: algorithms, displayName: Algorithms & Data Structures, category: practice, aliases: [data structures and algorithms, dsa] }
+  - { key: low-latency, displayName: Low-Latency Systems, category: practice, aliases: [low latency] }
+  # Quantitative
+  - { key: probability, displayName: Probability, category: quantitative }
+  - { key: statistics, displayName: Statistics, category: quantitative }
+  # Data
+  - { key: spark, displayName: Apache Spark, category: data, aliases: [apache spark, pyspark] }
+  - { key: airflow, displayName: Apache Airflow, category: data, aliases: [apache airflow] }
+  - { key: dbt, displayName: dbt, category: data }
+  - { key: snowflake, displayName: Snowflake, category: data }
+  - { key: bigquery, displayName: BigQuery, category: data }
+  - { key: data-modeling, displayName: Data Modeling, category: data, aliases: [data modeling, data modelling] }

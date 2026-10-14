@@ -1,0 +1,26 @@
+# FICTIONAL examples showing the format; disabled so they are never synced.
+# Replace them with real employers and *verified* board tokens / site names.
+schemaVersion: 1
+kind: EmployerSet
+employers:
+  - key: example-fintech
+    displayName: Example Fintech Inc.
+    website: https://fintech.example
+    careersUrl: https://fintech.example/careers
+    industry: fintech
+    tags: [fintech, payments]
+    discoveryPriority: 80
+    enabled: false
+    sources:
+      - { source: greenhouse-public, externalRef: examplefintech }
+      - { source: lever-public, externalRef: examplefintech }
+  - key: example-trading
+    displayName: Example Trading LLC
+    website: https://trading.example
+    careersUrl: https://trading.example/jobs
+    industry: trading
+    tags: [quant, trading]
+    discoveryPriority: 60
+    enabled: false
+    sources:
+      - { source: ashby-public, externalRef: exampletrading }

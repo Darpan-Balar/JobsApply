@@ -1,0 +1,43 @@
+# ILLUSTRATIVE EXAMPLE — not anyone's verified qualifications. Copy and tune per user.
+schemaVersion: 1
+kind: RoleProfile
+key: data-engineer
+displayName: Data Engineer
+jobFamily: data-engineering
+example: true
+titles:
+  include: [data engineer, data platform engineer, analytics engineer, big data engineer]
+  exclude: [intern, data analyst, data scientist]
+  seniority: [ENTRY, MID, SENIOR]
+searchTerms: [data engineer, spark, airflow, data pipelines]
+skills:
+  required: [sql]
+  requiredAnyOf:
+    - [python, scala, java]
+  preferred:
+    - { skill: spark, weight: 2 }
+    - { skill: airflow, weight: 2 }
+    - { skill: kafka }
+    - { skill: dbt }
+    - { skill: snowflake }
+    - { skill: data-modeling }
+experience: { minYears: 1, maxYears: 8 }
+locations:
+  workplaceTypes: [REMOTE, HYBRID, ONSITE]
+employmentTypes: [FULL_TIME]
+eligibility:
+  - type: title-match
+  - type: employment-type-in
+  - type: work-authorization
+    params: { source: job-location }
+scoring:
+  strategy: weighted
+  strategyVersion: 1
+  weights: { title: 0.20, required-skills: 0.30, preferred-skills: 0.25, experience: 0.10, location: 0.15 }
+  thresholds: { minimum: 50, shortlist: 70 }
+documents:
+  resumeTemplate: one-page-technical
+  coverNote: { strategy: none }
+screeningQuestions:
+  - { match: "(?i)sponsor|visa|work authori[sz]ation", policy: ALWAYS_ASK_USER }
+  - { match: "(?i)salary|compensation", policy: ALWAYS_ASK_USER }

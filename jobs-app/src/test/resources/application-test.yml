@@ -1,0 +1,10 @@
+logging:
+  structured:
+    format:
+      console: ""      # plain text in tests
+  level:
+    org.testcontainers: WARN
+    com.github.dockerjava: WARN
+jobs:
+  config:
+    import-on-startup: false

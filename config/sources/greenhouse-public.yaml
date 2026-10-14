@@ -1,0 +1,12 @@
+# One JobSource per file. Each names the adapter plugin that implements it (adapters arrive in Phase 3).
+# Endpoints will be re-verified against official documentation before each adapter is implemented.
+schemaVersion: 1
+kind: JobSource
+key: greenhouse-public
+adapter: greenhouse-job-board
+displayName: Greenhouse Job Board API (public)
+enabled: true
+settings:
+  requestTimeout: PT10S
+  maxRetries: 3
+  rateLimit: { permits: 5, per: PT1S }

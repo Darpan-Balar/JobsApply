@@ -1,0 +1,29 @@
+# Build
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Local, personal and secret data — never commit
+local/
+data/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+
+# Node (dashboard, later)
+node_modules/
+dist/
+
+# Tooling caches
+.code-review-graph/
+
+# Claude Code local settings
+.claude/settings.local.json

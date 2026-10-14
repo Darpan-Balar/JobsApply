@@ -1,0 +1,27 @@
+# Codebase Map
+
+- `jobs-spi/`: `com.jobsapply.spi.{common,profile,source,matching,render,application,llm}`.
+  - Plugin contracts, plus the shared vocabulary enums (`EmploymentType`, `Availability`, `Eligibility`, ...).
+  - `RoleProfileDefinition` (the YAML schema of role profiles) and `CandidateSnapshot` (versioned candidate facts) live here.
+- `jobs-app/` (`com.jobsapply.platform`), one module per package:
+  - `shared` (an OPEN module)
+    - `id/Ids` (UUIDv7)
+    - `persistence/BaseEntity`, `OwnedEntity` (@TenantId and the post-load guard)
+    - `tenancy/UserContext` (ScopedValue) and the tenant resolver
+    - `json/JsonCodec`
+    - `error/*` and `web/GlobalExceptionHandler`
+    - `model/Actor`, `UpsertOutcome`
+  - `identity`: `UserService` and `AppUser`. `LocalUserBootstrap` creates the configured local user.
+  - `catalog`: `CatalogService` (job families, skills and aliases), `CatalogSnapshot`.
+  - `employer`, `source`, `posting`, `discovery`: entities and repositories only (Phase 1).
+  - `roleprofile`: `RoleProfileService` (idempotent versioned import; visibility is "own profiles plus templates").
+  - `candidate`: `CandidateProfileService` (immutable snapshot versions) and `CandidateSnapshotValidator`.
+  - `matching`: `MatchingVocabulary` (declared names only), `JobMatch` entity.
+  - `application`: the `ApplicationStatus` transition table, the `Application` aggregate (`discover`, `transitionTo`) and its history.
+  - `audit`: `AuditEvent` entity.
+  - `configimport`: `ConfigImportService` (validate/import/dry run), `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
+- Migrations: `jobs-app/src/main/resources/db/migration/V1..V6`.
+- Tests:
+  - Unit tests are `*Test`. Integration tests are `*IT` (`support/IntegrationTest`, `TestData`, `DbAssertions`).
+  - The architecture tests are `ModularityTest`, `PersistenceRulesTest` and `SpiDependencyRulesTest`.
+- `config/`: sample YAML (example role profiles, fictional disabled employers).

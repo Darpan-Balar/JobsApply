@@ -1,0 +1,46 @@
+# ILLUSTRATIVE EXAMPLE — not anyone's verified qualifications. Copy and tune per user.
+schemaVersion: 1
+kind: RoleProfile
+key: backend-engineer
+displayName: Backend Engineer / SDE
+jobFamily: backend
+example: true
+titles:
+  include: [backend engineer, software engineer, sde, software development engineer, platform engineer]
+  exclude: [frontend, ios, android, engineering manager, intern]
+  seniority: [ENTRY, MID, SENIOR]
+searchTerms: [backend, java, distributed systems, microservices]
+skills:
+  required: [java]
+  requiredAnyOf:
+    - [sql, postgresql, mysql]
+  preferred:
+    - { skill: spring-boot, weight: 2 }
+    - { skill: distributed-systems, weight: 2 }
+    - { skill: kafka }
+    - { skill: kubernetes }
+    - { skill: aws }
+experience: { minYears: 1, maxYears: 8 }
+locations:
+  workplaceTypes: [REMOTE, HYBRID, ONSITE]
+  preferred: []   # e.g. [{ country: XX, city: Example City }]
+employmentTypes: [FULL_TIME]
+eligibility:      # HARD rules — any FAIL => NOT_ELIGIBLE, any UNKNOWN => UNKNOWN
+  - type: title-match
+  - type: employment-type-in
+  - type: max-required-experience
+    params: { years: 8 }
+  - type: work-authorization    # evaluated against candidate facts; UNKNOWN when not supplied
+    params: { source: job-location }
+scoring:          # SOFT preferences
+  strategy: weighted
+  strategyVersion: 1
+  weights: { title: 0.20, required-skills: 0.30, preferred-skills: 0.20, experience: 0.15, location: 0.15 }
+  thresholds: { minimum: 50, shortlist: 70 }
+documents:
+  resumeTemplate: one-page-technical
+  coverNote: { strategy: none }
+screeningQuestions:
+  - { match: "(?i)sponsor|visa|work authori[sz]ation", policy: ALWAYS_ASK_USER }
+  - { match: "(?i)salary|compensation expectation", policy: ALWAYS_ASK_USER }
+  - { match: "(?i)years of (professional )?experience", policy: FROM_FACT, fact: experience.total-years }

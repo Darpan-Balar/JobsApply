@@ -1,0 +1,10 @@
+schemaVersion: 1
+kind: JobSource
+key: lever-public
+adapter: lever-postings
+displayName: Lever Postings API (public)
+enabled: true
+settings:
+  requestTimeout: PT10S
+  maxRetries: 3
+  rateLimit: { permits: 5, per: PT1S }

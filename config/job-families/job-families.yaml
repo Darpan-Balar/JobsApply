@@ -1,0 +1,18 @@
+schemaVersion: 1
+kind: JobFamilySet
+families:
+  - key: backend
+    displayName: Backend / Software Engineering
+    description: Server-side software engineering, APIs, data stores and distributed systems.
+  - key: quant-developer
+    displayName: Quantitative Development
+    description: Engineering for trading, pricing and research platforms.
+  - key: data-engineering
+    displayName: Data Engineering
+    description: Data pipelines, warehousing and data platform engineering.
+  - key: machine-learning
+    displayName: Machine Learning Engineering
+    description: Building, deploying and operating ML systems.
+  - key: product-management
+    displayName: Product Management
+    description: Product discovery, strategy and delivery.
