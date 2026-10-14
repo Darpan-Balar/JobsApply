@@ -1,6 +1,6 @@
 # Job Discovery & Application Platform — Architecture Proposal
 
-> **Status: ACCEPTED (2026-10-14). Phases 1–3 (Foundation, Employer & source registry, Discovery) are implemented; Phases 4–9 are not.**
+> **Status: ACCEPTED (2026-10-14). Phases 1–4 (Foundation, Registry, Discovery, Candidates & Matching) are implemented; Phases 5–9 are not.**
 > Where Phase 1 deviated from the original proposal, this document was updated. See "Phase 1 outcome" in §11.
 
 ## 0. Environment (verified 2026-10-14)
@@ -729,3 +729,35 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
   - Adapters parse today's real public boards with zero problems (Greenhouse 17, Lever 10, Ashby 63 jobs).
   - The full pipeline syncs each board twice. The second run reports every job unchanged, with 0 inserted and 0 closed.
 - A local run against Compose PostgreSQL applied V8 and registered all three adapters, and the shipped sources are enabled.
+
+### Phase 4 outcome (2026-10-14)
+
+**Delivered (see ADR-0009)**
+- **Matching plugins** in `jobs-adapters`:
+  - 11 eligibility rules: `title-match`, `seniority-in`, `employment-type-in`, `workplace-type-in`, `location-in`, `min-experience-years`, `max-required-experience`, `education-level-min`, `education-field-in`, `work-authorization`, `compensation-min`.
+  - 7 score components: `title`, `required-skills`, `preferred-skills`, `experience`, `location`, `seniority`, `compensation`.
+  - The `weighted` v1 strategy, which works without any LLM.
+  - Registries for each kind, and a registry-backed `MatchingVocabulary`.
+- **Candidates:**
+  - YAML import (`kind: CandidateProfile`) through the API only. Facts arrive UNVERIFIED unless trusted, and a confirm step creates a new version.
+  - API edits create versions.
+  - Skills are validated against the catalog.
+- **Personal data:** AES-256-GCM encryption of snapshots, a keyed HMAC fingerprint, a startup key check, and redacting structured logs.
+- **Catalog:** `SkillExtractor` (whole-term, alias-only flag; V9 `skill.extract_aliases_only`).
+- **Matching service:** idempotent `JobMatch` rows with full explanations; batch runs skip employers you IGNORE; listing and detail. Role templates can be forked into private profiles, and users can import their own validated role profiles.
+- **REST:** `/me/candidate-profiles[/{key}[/versions|/verification]]`, `/me/candidate-profiles/import`, `/role-profiles[/{key}]`, `/me/role-profiles/{key}/fork`, `/me/role-profiles/import`, `/me/matches[/evaluate|/run|/{id}]`.
+- **SPI additions:** `JobSnapshot.skills`, `MatchContext.evaluatedAt`, `CandidateFacts`, `ComponentScore.value` may be `null` (no evidence).
+
+**Problems found and fixed**
+- **Decimal scale:** `JsonCodec.canonicalize` read numbers as `double`, turning `1.0000` into `1.0`, so unchanged matches looked UPDATED. Decimals now keep their scale.
+- **Phone redaction:** the first pattern would also have masked dates and ids in logs; it was narrowed to clearly phone-shaped values.
+
+**Verification**
+- `./mvnw clean install`: 298 tests, 0 failures (SPI 15, adapters 45, app unit tests 135, integration tests 103).
+- Every rule is tested for PASS, FAIL and UNKNOWN.
+- The shipped backend and quant templates judge the same jobs differently.
+- Unverified facts never make a candidate eligible.
+- Re-matching is idempotent.
+- Ciphertext copied to another row fails to decrypt.
+- Matches are private to their owner.
+- A local run applied V9 with the key from `.env`.

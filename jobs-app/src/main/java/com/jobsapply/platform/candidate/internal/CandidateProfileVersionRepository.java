@@ -1,5 +1,6 @@
 package com.jobsapply.platform.candidate.internal;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,6 @@ public interface CandidateProfileVersionRepository extends JpaRepository<Candida
 
     @Query("select max(v.versionNo) from CandidateProfileVersion v where v.candidateProfileId = :profileId")
     Optional<Integer> findMaxVersionNo(UUID profileId);
+
+    List<CandidateProfileVersion> findByCandidateProfileIdOrderByVersionNoDesc(UUID profileId);
 }

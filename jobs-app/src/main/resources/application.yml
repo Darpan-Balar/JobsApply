@@ -38,12 +38,17 @@ logging:
   structured:
     format:
       console: ecs
+    json:
+      customizer: com.jobsapply.platform.shared.web.RedactingLogCustomizer
 
 springdoc:
   api-docs:
     path: /v3/api-docs
 
 jobs:
+  crypto:
+    key: ${JOBS_ENCRYPTION_KEY:}
+    key-id: k1
   identity:
     local-user:
       username: local

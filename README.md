@@ -2,12 +2,13 @@
 
 A local-first platform for discovering, matching, preparing and tracking job applications. It's extensible to any role family, employer, job source and user, through configuration and plugins rather than core code changes.
 
-> **Status: Phases 1–3 complete.**
+> **Status: Phases 1–4 complete.**
 > - Phase 1 (Foundation): domain model, schema, configuration, multi-user isolation and plugin contracts.
 > - Phase 2 (Employer & source registry): employer registry, plugin registry, YAML/CSV exchange and the REST API.
 > - Phase 3 (Discovery): Greenhouse, Lever and Ashby adapters, plus syncing, normalization, cross-source dedup and availability tracking.
+> - Phase 4 (Candidates & Matching): encrypted, versioned candidate profiles with fact verification, 11 eligibility rules, 7 score components, and explainable, idempotent matches.
 >
-> **Not implemented yet:** matching, resume and answer generation, browser-assisted applying, the dashboard, login and scheduling. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
+> **Not implemented yet:** resume and answer generation, browser-assisted applying, the dashboard, login and scheduling. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
 
 ## Stack
 
@@ -30,7 +31,8 @@ React + TypeScript (dashboard) and Playwright (browser assistance) arrive in lat
 ## Quick start
 
 ```bash
-cp .env.example .env              # then set JOBS_DB_PASSWORD (the file is git-ignored)
+cp .env.example .env              # then set JOBS_DB_PASSWORD and JOBS_ENCRYPTION_KEY (openssl rand -base64 32); the file is git-ignored
+                                  # back up JOBS_ENCRYPTION_KEY: without it your candidate data cannot be decrypted
 docker compose up -d --wait       # PostgreSQL 18 on 127.0.0.1:5433
 ./mvnw clean install              # build + all tests (needs Docker)
 ./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.profiles=local
@@ -61,6 +63,16 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `GET /sync-runs`, `GET /sync-runs/{id}` | Sync history, with per-run errors |
 | `GET /postings`, `GET /postings/{id}` | Search discovered jobs (employer, availability, workplace, employmentType, seniority, country, q, stale), and job detail with its source listings |
 | `POST /postings/{id}/availability-check` | Recheck at the source whether a posting is still open |
+| `POST /me/candidate-profiles/import` (YAML), `GET/PUT /me/candidate-profiles/{key}`, `POST /me/candidate-profiles/{key}/verification` | Your encrypted, versioned facts. Imports are UNVERIFIED until you confirm them (see `docs/examples/candidate-profile.example.yaml`) |
+| `GET /role-profiles`, `POST /me/role-profiles/{key}/fork`, `POST /me/role-profiles/import` | Shared templates, and your private copies or your own profiles |
+| `POST /me/matches/run`, `POST /me/matches/evaluate`, `GET /me/matches`, `GET /me/matches/{id}` | Explainable matches (eligibility kept separate from score, with every rule outcome and the evidence used) |
+
+**To match:**
+1. Import your profile and confirm its facts.
+2. Fork or tune a role profile.
+3. Sync your employers.
+4. `POST /me/matches/run {"candidateProfile":"main","roleProfile":"backend-engineer"}`
+5. Read `GET /me/matches?candidateProfile=main&roleProfile=backend-engineer&eligibility=ELIGIBLE`.
 
 **To discover jobs:** add a real employer with a verified board token (for example via `PUT /employers/{key}/bindings/greenhouse-public/{token}`, or YAML/CSV), make sure it is `enabled`, then `POST /sync`. A job is closed only on authoritative evidence: a failed request never closes anything (ADR-0008).
 

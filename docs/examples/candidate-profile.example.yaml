@@ -1,0 +1,42 @@
+# FICTIONAL example of a candidate profile. Copy it OUTSIDE this repository (e.g. ~/jobs/me.yaml), fill in your own
+# facts, and import it:
+#   curl -X POST -H 'Content-Type: application/yaml' --data-binary @~/jobs/me.yaml \
+#        http://127.0.0.1:8090/api/v1/me/candidate-profiles/import
+# Imported facts are UNVERIFIED until you confirm them (POST .../{key}/verification). Only confirmed facts count in
+# matching and in generated documents. Never invent facts: the platform will only ever restate what is here.
+schemaVersion: 1
+kind: CandidateProfile
+key: main
+displayName: Main profile
+contact:                       # encrypted at rest; used only to fill your own application forms
+  fullName: Jane Example
+  email: jane@example.com
+  countryCode: DE
+experiences:                   # one entry per position; end omitted = current
+  - id: exp-example-gmbh       # stable id: generated claims cite it
+    verification: VERIFIED
+    employer: Example GmbH
+    title: Software Engineer
+    start: 2019-01
+    end: 2022-12
+    skills: [java, postgresql] # canonical catalog keys (see config/skills)
+education:
+  - id: edu-bsc
+    verification: VERIFIED
+    institution: Example University
+    level: BACHELOR            # HIGH_SCHOOL, ASSOCIATE, BACHELOR, MASTER, DOCTORATE
+    field: Computer Science
+    completed: true
+skills:
+  - { id: sk-java, verification: VERIFIED, skill: java, years: 5, proficiency: PROFICIENT }
+achievements:
+  - id: ach-latency
+    verification: VERIFIED
+    text: Cut p99 API latency from 800 ms to 120 ms by redesigning the caching layer.
+    experienceId: exp-example-gmbh
+    skills: [java]
+attributes:                    # scalar facts and preferences
+  # work-authorization.<country code>: citizen | permanent-resident | authorized | requires-sponsorship | not-authorized
+  - { id: auth-de, verification: VERIFIED, key: work-authorization.de, value: citizen }
+  - { id: notice, verification: VERIFIED, key: notice-period-days, value: "30" }
+  - { id: pref-city, verification: USER_PREFERENCE, key: preferred-city, value: Berlin }

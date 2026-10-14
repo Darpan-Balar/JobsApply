@@ -25,7 +25,9 @@ The files are matched by `kind`, not by which directory they're in.
 - Omitting `metadata` leaves stored metadata unchanged; `metadata: {}` clears it.
 - Employers can also be exchanged as CSV via `/api/v1/exchange/employers`. The columns are `key,displayName,website,careersUrl,industry,tags,headquarters,discoveryPriority,enabled,sources`, where `tags` and `sources` are `;`-separated and each source is `sourceKey:externalRef[:priority]`.
 
-**Never put personal data or secrets here.** This folder is tracked by git.
+**Never put personal data or secrets here.** This folder is tracked by git, and the importer rejects `kind: CandidateProfile` documents here.
+- Import candidate profiles through `POST /api/v1/me/candidate-profiles/import`. See `docs/examples/candidate-profile.example.yaml`.
+- Skills flagged `extractAliasesOnly: true` (for example `go` and `c`, which are ordinary words) are recognized in job text only through their aliases.
 - Candidate profiles are imported from files outside the repository.
 - Source settings may only hold secret *references*, such as `env:SOME_VAR`. The validator rejects literal values for keys that look like secrets.
 

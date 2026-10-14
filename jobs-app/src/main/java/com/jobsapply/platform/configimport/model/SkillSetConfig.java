@@ -21,9 +21,12 @@ public record SkillSetConfig(@NotEmpty List<@NotNull @Valid SkillConfig> skills)
             @NotBlank @Pattern(regexp = Keys.KEY_REGEX) String key,
             @NotBlank @Size(max = 200) String displayName,
             @Pattern(regexp = Keys.KEY_REGEX) String category,
-            List<@NotBlank @Size(max = 100) String> aliases) {
+            List<@NotBlank @Size(max = 100) String> aliases,
+            /* Find this skill in job text only by its aliases (key/name is an ordinary word, e.g. "go"). */
+            Boolean extractAliasesOnly) {
         public SkillConfig {
             aliases = Lists.immutable(aliases);
+            extractAliasesOnly = Boolean.TRUE.equals(extractAliasesOnly);
         }
     }
 }

@@ -34,6 +34,10 @@ public class Skill extends BaseEntity {
     @Column(name = "category", length = 63)
     private String category;
 
+    /** Extract from job text only via aliases (the key/name is an ordinary word, e.g. "go"). */
+    @Column(name = "extract_aliases_only", nullable = false)
+    private boolean extractAliasesOnly;
+
     @Builder.Default
     @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -43,12 +47,14 @@ public class Skill extends BaseEntity {
         return aliases.stream().map(SkillAlias::getAliasNormalized).collect(Collectors.toUnmodifiableSet());
     }
 
-    public boolean update(String displayName, String category) {
-        if (Objects.equals(this.displayName, displayName) && Objects.equals(this.category, category)) {
+    public boolean update(String displayName, String category, boolean extractAliasesOnly) {
+        if (Objects.equals(this.displayName, displayName) && Objects.equals(this.category, category)
+                && this.extractAliasesOnly == extractAliasesOnly) {
             return false;
         }
         this.displayName = displayName;
         this.category = category;
+        this.extractAliasesOnly = extractAliasesOnly;
         return true;
     }
 

@@ -49,7 +49,14 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - Adapters return failures as values and never throw. Parsers never fabricate: missing means `null`.
 - Network I/O never happens inside a DB transaction.
 
+## Matching and personal-data rules (ADR-0009), do not weaken
+- Plugins read candidate facts only through `CandidateFacts`, which exposes only claimable facts. Rules return UNKNOWN when facts are missing.
+- Components return `value = null` for "no evidence", never a guessed number.
+- Candidate snapshots are encrypted at rest (`PersonalDataCipher`, row-bound AAD). Never log snapshots or contact details. Candidate YAML must never go into `config/`.
+- Tests use a fixed test key (application-test.yml). Real keys live only in `.env`.
+
 ## Gotchas learned
+- **`JsonCodec.canonicalize` must keep decimal scale.** It does, by reading decimals as `BigDecimal`. Comparing with values read as `double` breaks idempotency.
 - **jsonb is returned re-formatted** by PostgreSQL. Never compare stored JSON text with our canonical JSON; use `JsonCodec.canonicalize`.
 - **Hibernate binds array parameters as `varchar[]`.** Array columns queried with array predicates must be `varchar(n)[]`, not `text[]`.
 - **Run `clean` after renaming or removing a migration.** Otherwise `target/classes` keeps the old file and Flyway sees duplicate versions.

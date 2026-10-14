@@ -69,12 +69,13 @@ public class CatalogService {
                         .key(spec.key())
                         .displayName(spec.displayName())
                         .category(spec.category())
+                        .extractAliasesOnly(spec.extractAliasesOnly())
                         .build();
                 created.addAliases(normalizedAliases.get(spec.key()));
                 skills.save(created);
                 outcomes.put(spec.key(), UpsertOutcome.CREATED);
             } else {
-                boolean detailsChanged = skill.update(spec.displayName(), spec.category());
+                boolean detailsChanged = skill.update(spec.displayName(), spec.category(), spec.extractAliasesOnly());
                 boolean aliasesAdded = skill.addAliases(normalizedAliases.get(spec.key()));
                 boolean anyChange = detailsChanged || aliasesAdded || changed.get(spec.key());
                 outcomes.put(spec.key(), anyChange ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED);
@@ -86,6 +87,21 @@ public class CatalogService {
     @Transactional(readOnly = true)
     public Optional<UUID> findJobFamilyId(String key) {
         return jobFamilies.findByKey(key).map(JobFamily::getId);
+    }
+
+    /** A matcher over every skill's extraction terms, built from the current catalog. */
+    @Transactional(readOnly = true)
+    public SkillExtractor skillExtractor() {
+        Map<String, Set<String>> terms = new HashMap<>();
+        for (Skill skill : skills.findAllWithAliases()) {
+            Set<String> skillTerms = new HashSet<>(skill.aliasNames());
+            if (!skill.isExtractAliasesOnly()) {
+                skillTerms.add(skill.getKey().replace('-', ' '));
+                skillTerms.add(skill.getDisplayName());
+            }
+            terms.put(skill.getKey(), skillTerms);
+        }
+        return new SkillExtractor(terms);
     }
 
     @Transactional(readOnly = true)

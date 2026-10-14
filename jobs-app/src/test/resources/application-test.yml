@@ -8,3 +8,6 @@ logging:
 jobs:
   config:
     import-on-startup: false
+  crypto:
+    # Fixed key for tests only (base64 of 32 bytes); never used outside tests.
+    key: dGVzdC1rZXktZm9yLXRlc3RzLW9ubHktMzItYnl0ZXM=

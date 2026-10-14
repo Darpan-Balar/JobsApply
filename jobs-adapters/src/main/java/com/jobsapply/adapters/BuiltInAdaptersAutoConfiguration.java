@@ -7,7 +7,15 @@ import com.jobsapply.adapters.http.Sleeper;
 import com.jobsapply.adapters.source.ashby.AshbyJobBoardAdapter;
 import com.jobsapply.adapters.source.greenhouse.GreenhouseJobBoardAdapter;
 import com.jobsapply.adapters.source.lever.LeverPostingsAdapter;
+import com.jobsapply.adapters.matching.EligibilityRules;
+import com.jobsapply.adapters.matching.ScoreComponents;
+import com.jobsapply.adapters.matching.WeightedMatchingStrategy;
+import com.jobsapply.spi.matching.EligibilityRule;
+import com.jobsapply.spi.matching.ScoreComponent;
 import java.time.Clock;
+import java.util.List;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -40,5 +48,25 @@ public class BuiltInAdaptersAutoConfiguration {
     @Bean
     AshbyJobBoardAdapter ashbyJobBoardAdapter(HttpFetcher fetcher, ObjectProvider<Clock> clock) {
         return new AshbyJobBoardAdapter(fetcher, clock.getIfAvailable(Clock::systemUTC));
+    }
+
+    /** Built-in eligibility rules, score components and the weighted strategy, as individual plugins. */
+    @Bean
+    static BeanDefinitionRegistryPostProcessor builtInMatchingPlugins() {
+        return registry -> {
+            for (EligibilityRule rule : EligibilityRules.all()) {
+                registry.registerBeanDefinition("eligibilityRule." + rule.ruleType(),
+                        BeanDefinitionBuilder.genericBeanDefinition(EligibilityRule.class, () -> rule).getBeanDefinition());
+            }
+            for (ScoreComponent component : ScoreComponents.all()) {
+                registry.registerBeanDefinition("scoreComponent." + component.componentKey(),
+                        BeanDefinitionBuilder.genericBeanDefinition(ScoreComponent.class, () -> component).getBeanDefinition());
+            }
+        };
+    }
+
+    @Bean
+    WeightedMatchingStrategy weightedMatchingStrategy(List<EligibilityRule> rules, List<ScoreComponent> components) {
+        return new WeightedMatchingStrategy(rules, components);
     }
 }

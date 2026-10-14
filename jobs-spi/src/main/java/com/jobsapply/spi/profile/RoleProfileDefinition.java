@@ -57,7 +57,7 @@ public record RoleProfileDefinition(
     }
 
     /** Title inclusion/exclusion phrases, matched case-insensitively against normalized job titles. */
-    @Builder
+    @Builder(toBuilder = true)
     public record TitleRules(
             @NotEmpty List<@NotBlank String> include,
             List<@NotBlank String> exclude,
@@ -76,7 +76,7 @@ public record RoleProfileDefinition(
      * @param requiredAnyOf each inner group requires at least one of its skills
      * @param preferred soft, weighted skills
      */
-    @Builder
+    @Builder(toBuilder = true)
     public record SkillRequirements(
             List<@NotBlank String> required,
             List<@NotEmpty List<@NotBlank String>> requiredAnyOf,
@@ -145,7 +145,7 @@ public record RoleProfileDefinition(
      *
      * @param weights score-component key → weight in [0, 1]; must sum to 1
      */
-    @Builder
+    @Builder(toBuilder = true)
     public record ScoringConfig(
             @NotBlank @Pattern(regexp = Keys.KEY_REGEX) String strategy,
             @NotNull @Positive Integer strategyVersion,

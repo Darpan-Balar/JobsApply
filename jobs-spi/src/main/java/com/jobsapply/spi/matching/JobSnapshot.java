@@ -8,6 +8,7 @@ import com.jobsapply.spi.source.Compensation;
 import com.jobsapply.spi.source.RawLocation;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -24,9 +25,12 @@ public record JobSnapshot(
         List<RawLocation> locations,
         Compensation compensation,
         String descriptionText,
-        Instant publishedAt) {
+        Instant publishedAt,
+        /* Canonical skill keys the platform found in the title and description (catalog-based). */
+        Set<String> skills) {
 
     public JobSnapshot {
         locations = Lists.immutable(locations);
+        skills = skills == null ? Set.of() : Set.copyOf(skills);
     }
 }

@@ -2,6 +2,7 @@ package com.jobsapply.platform.shared.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,12 @@ class JsonCodecTest {
     void roundTrips() {
         Sample sample = new Sample("x", "y", Map.of("k", 1), null);
         assertThat(codec.read(codec.write(sample), Sample.class)).isEqualTo(sample);
+    }
+
+    @Test
+    void canonicalizeKeepsDecimalScale() {
+        String ours = codec.write(Map.of("score", new BigDecimal("1.0000"), "n", 3));
+        assertThat(codec.canonicalize("{\"score\": 1.0000, \"n\": 3}")).isEqualTo(ours);
     }
 
     @Test

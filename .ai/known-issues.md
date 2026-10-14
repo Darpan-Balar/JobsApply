@@ -20,8 +20,13 @@
 - **Formula neutralization:** CSV export prefixes cells starting with `= + - @` with `'`. If such a CSV is re-imported, the apostrophe becomes part of the value.
 - **Validation messages:** errors for key/slug patterns show the raw regex (`must match "^[a-z0-9]..."`). This is functional but could be friendlier.
 - **Employer search scale:** `bindingOwners()` and `viewsById()` load every row. That's fine for thousands of employers but should be revisited if the catalog grows very large.
-- **PII at rest:** candidate snapshots are plain jsonb. Column encryption is planned for Phase 4.
-- **Log redaction:** there is no global redacting log customizer yet. Mitigations: PII records override `toString`, entities have no `toString` beyond their ID, exception messages carry no PII, and a scan of the integration-test output found no PII. Planned for Phase 4.
+- **Encryption key:** losing `JOBS_ENCRYPTION_KEY` makes candidate data unreadable, so it must be backed up outside the repository. There is no automated key-rotation re-encryption: old versions stay readable through `jobs.crypto.previous-keys`.
+- **Log redaction** masks e-mails and phone-shaped numbers in structured logs only. Plain-text logs (tests) are not redacted. Code must still never log personal data.
+- **Matching heuristics** (ADR-0009):
+  - Required years of experience are extracted from job text.
+  - Job skills come from text mentions.
+  - There is no currency conversion.
+  - The matched-role lookup in `GET /me/matches/{id}` shows no role when the role profile's active version has since changed.
 - **Posting dedup:** `fk_application_listing (job_listing_id, job_posting_id)` will block re-pointing a listing that an application uses to another posting during a dedup merge. This must be designed in Phase 3.
 - **Tenant context timing:** `UserContext` must be bound before a transaction starts. A transaction opened without it sees nothing and can't insert owned rows (fails closed).
 - **Classpath:** Jackson 2 is present via springdoc. Our code must use only Jackson 3 (`tools.jackson.*`).

@@ -1,5 +1,6 @@
 package com.jobsapply.platform.configimport.web;
 
+import com.jobsapply.platform.configimport.CandidateImportService;
 import com.jobsapply.platform.configimport.ConfigImportReport;
 import com.jobsapply.platform.configimport.ConfigImportService;
 import com.jobsapply.platform.configimport.ConfigProperties;
@@ -31,6 +32,7 @@ class ConfigController {
     private static final MediaType YAML = MediaType.parseMediaType("application/yaml");
 
     private final ConfigImportService imports;
+    private final CandidateImportService candidateImports;
     private final EmployerExchangeService exchange;
     private final ConfigProperties properties;
 
@@ -78,6 +80,26 @@ class ConfigController {
                 .contentType(csv ? CSV : YAML)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employers." + (csv ? "csv" : "yaml"))
                 .body(csv ? exchange.exportCsv(includeArchived) : exchange.exportYaml(includeArchived));
+    }
+
+    @Operation(summary = "Import one of your candidate profiles (YAML, kind CandidateProfile)",
+            description = "Facts are marked UNVERIFIED unless trust=true; confirm them via /verification. Max 5 MB.")
+    @PostMapping(path = "/me/candidate-profiles/import", consumes = {"application/yaml", "application/x-yaml", "text/yaml", "text/plain"})
+    ResponseEntity<ConfigImportReport> importCandidate(
+            @RequestParam(defaultValue = "candidate.yaml") String fileName,
+            @RequestParam(defaultValue = "false") boolean trust,
+            @RequestParam(defaultValue = "false") boolean dryRun,
+            HttpServletRequest request) throws IOException {
+        return respond(candidateImports.importProfile(fileName, RequestBodies.readText(request), trust, dryRun));
+    }
+
+    @Operation(summary = "Import one of your own role profiles (YAML, kind RoleProfile)", description = "Private to you. Max 5 MB.")
+    @PostMapping(path = "/me/role-profiles/import", consumes = {"application/yaml", "application/x-yaml", "text/yaml", "text/plain"})
+    ResponseEntity<ConfigImportReport> importRoleProfile(
+            @RequestParam(defaultValue = "role-profile.yaml") String fileName,
+            @RequestParam(defaultValue = "false") boolean dryRun,
+            HttpServletRequest request) throws IOException {
+        return respond(imports.importUserRoleProfile(fileName, RequestBodies.readText(request), dryRun));
     }
 
     private static ResponseEntity<ConfigImportReport> respond(ConfigImportReport report) {

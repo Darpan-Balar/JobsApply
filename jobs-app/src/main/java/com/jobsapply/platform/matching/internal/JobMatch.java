@@ -56,4 +56,12 @@ public class JobMatch extends OwnedEntity {
 
     @Column(name = "evaluated_at", nullable = false)
     private Instant evaluatedAt;
+
+    /** Replaces the result of a re-evaluation (same inputs, possibly changed posting content). */
+    public void replaceResult(BigDecimal score, Eligibility eligibility, String resultJson, Instant evaluatedAt) {
+        this.score = score;
+        this.eligibility = eligibility;
+        this.resultJson = resultJson;
+        this.evaluatedAt = evaluatedAt;
+    }
 }

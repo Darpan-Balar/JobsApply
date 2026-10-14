@@ -4,11 +4,11 @@ skills:
   # Languages
   - { key: java, displayName: Java, category: language }
   - { key: kotlin, displayName: Kotlin, category: language }
-  - { key: go, displayName: Go, category: language, aliases: [golang] }
+  - { key: go, displayName: Go, category: language, aliases: [golang, go lang], extractAliasesOnly: true }   # 'go' is an English word
   - { key: python, displayName: Python, category: language }
   - { key: scala, displayName: Scala, category: language }
   - { key: cpp, displayName: C++, category: language, aliases: [c++, cplusplus, modern c++] }
-  - { key: c, displayName: C, category: language }
+  - { key: c, displayName: C, category: language, aliases: [c language, ansi c, c99, c11], extractAliasesOnly: true }
   - { key: rust, displayName: Rust, category: language }
   - { key: typescript, displayName: TypeScript, category: language, aliases: [ts] }
   - { key: sql, displayName: SQL, category: language }
@@ -30,7 +30,7 @@ skills:
   - { key: distributed-systems, displayName: Distributed Systems, category: practice, aliases: [distributed systems] }
   - { key: microservices, displayName: Microservices, category: practice }
   - { key: rest-apis, displayName: REST APIs, category: practice, aliases: [rest, rest api, restful apis] }
-  - { key: algorithms, displayName: Algorithms & Data Structures, category: practice, aliases: [data structures and algorithms, dsa] }
+  - { key: algorithms, displayName: Algorithms & Data Structures, category: practice, aliases: [data structures, data structures and algorithms, dsa] }
   - { key: low-latency, displayName: Low-Latency Systems, category: practice, aliases: [low latency] }
   # Quantitative
   - { key: probability, displayName: Probability, category: quantitative }

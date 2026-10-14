@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,10 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/** Immutable snapshot of a candidate profile (also enforced by a database trigger). Contains PII. */
+/**
+ * Immutable snapshot of a candidate profile (also enforced by a database trigger). The snapshot is personal data and is
+ * stored encrypted (AES-256-GCM, bound to this row and owner); {@code contentHash} is a keyed HMAC fingerprint.
+ */
 @Entity
 @Immutable
 @Table(name = "candidate_profile_version")
@@ -39,14 +43,18 @@ public class CandidateProfileVersion extends OwnedEntity {
     @Column(name = "note", length = 1000, updatable = false)
     private String note;
 
-    public static CandidateProfileVersion of(
-            UUID candidateProfileId, int versionNo, int schemaVersion, String snapshotJson, String contentHash, String note) {
+    /**
+     * @param encryptor turns the plaintext snapshot into stored text given this version's id (so the ciphertext can be
+     *     bound to its row)
+     */
+    public static CandidateProfileVersion create(UUID candidateProfileId, int versionNo, int schemaVersion,
+            Function<UUID, String> encryptor, String contentFingerprint, String note) {
         CandidateProfileVersion version = new CandidateProfileVersion();
         version.candidateProfileId = candidateProfileId;
         version.versionNo = versionNo;
         version.schemaVersion = schemaVersion;
-        version.snapshotJson = snapshotJson;
-        version.contentHash = contentHash;
+        version.snapshotJson = encryptor.apply(version.getId());
+        version.contentHash = contentFingerprint;
         version.note = note;
         return version;
     }

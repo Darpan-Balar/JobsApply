@@ -28,6 +28,10 @@ public class JsonCodec {
             .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
             .build();
 
+    private final JsonMapper decimalReader = mapper.rebuild()
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            .build();
+
     public String write(Object value) {
         return mapper.writeValueAsString(value);
     }
@@ -46,7 +50,9 @@ public class JsonCodec {
      * jsonb re-formatted (whitespace, its own key order), so equal content does not compare equal as text.
      */
     public String canonicalize(String jsonText) {
-        return write(mapper.readValue(jsonText, Object.class));
+        // Decimals must keep their scale ("1.0000" stays "1.0000"): reading them as double would turn equal content
+        // into a different text. PostgreSQL's numeric preserves scale in jsonb too.
+        return write(decimalReader.readValue(jsonText, Object.class));
     }
 
     /** SHA-256 of the canonical JSON form, as 64 lower-case hex characters. */

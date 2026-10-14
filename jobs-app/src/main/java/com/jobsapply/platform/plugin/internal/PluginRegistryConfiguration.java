@@ -2,14 +2,20 @@ package com.jobsapply.platform.plugin.internal;
 
 import com.jobsapply.platform.plugin.PluginProperties;
 import com.jobsapply.platform.plugin.PluginRegistry;
+import com.jobsapply.spi.common.Plugin;
 import com.jobsapply.spi.common.PluginKind;
+import com.jobsapply.spi.matching.EligibilityRule;
+import com.jobsapply.spi.matching.MatchingStrategy;
+import com.jobsapply.spi.matching.ScoreComponent;
 import com.jobsapply.spi.source.JobSourceAdapter;
 import jakarta.validation.Validator;
+import java.util.List;
+import java.util.function.Function;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** One registry per plugin kind in use. Further kinds are added in the phase that first uses them. */
+/** One registry per plugin kind in use. */
 @Configuration(proxyBeanMethods = false)
 class PluginRegistryConfiguration {
 
@@ -17,5 +23,36 @@ class PluginRegistryConfiguration {
     PluginRegistry<JobSourceAdapter> jobSourceAdapters(
             ObjectProvider<JobSourceAdapter> adapters, PluginProperties properties, Validator validator) {
         return new PluginRegistry<>(PluginKind.JOB_SOURCE, adapters.orderedStream().toList(), properties.disabled(), validator);
+    }
+
+    @Bean
+    PluginRegistry<EligibilityRule> eligibilityRules(
+            ObjectProvider<EligibilityRule> rules, PluginProperties properties, Validator validator) {
+        return named(PluginKind.ELIGIBILITY_RULE, rules.orderedStream().toList(), EligibilityRule::ruleType, properties, validator);
+    }
+
+    @Bean
+    PluginRegistry<ScoreComponent> scoreComponents(
+            ObjectProvider<ScoreComponent> components, PluginProperties properties, Validator validator) {
+        return named(PluginKind.SCORE_COMPONENT, components.orderedStream().toList(), ScoreComponent::componentKey, properties, validator);
+    }
+
+    @Bean
+    PluginRegistry<MatchingStrategy> matchingStrategies(
+            ObjectProvider<MatchingStrategy> strategies, PluginProperties properties, Validator validator) {
+        return named(PluginKind.MATCHING_STRATEGY, strategies.orderedStream().toList(), MatchingStrategy::strategyKey, properties, validator);
+    }
+
+    /** Role profiles reference these plugins by name, so the plugin id must equal that name (checked at startup). */
+    private static <T extends Plugin> PluginRegistry<T> named(
+            PluginKind kind, List<T> plugins, Function<T, String> name, PluginProperties properties, Validator validator) {
+        for (T plugin : plugins) {
+            String id = plugin.descriptor() == null ? null : plugin.descriptor().id();
+            if (id != null && !id.equals(name.apply(plugin))) {
+                throw new IllegalStateException(kind + " plugin " + plugin.getClass().getName() + " has id '" + id
+                        + "' but is referenced as '" + name.apply(plugin) + "'; they must be equal");
+            }
+        }
+        return new PluginRegistry<>(kind, plugins, properties.disabled(), validator);
     }
 }

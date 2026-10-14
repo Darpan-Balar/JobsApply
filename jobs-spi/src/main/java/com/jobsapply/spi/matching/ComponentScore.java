@@ -4,7 +4,7 @@ import com.jobsapply.spi.common.Lists;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** @param value normalized score in [0, 1] */
+/** @param value normalized score in [0, 1], or {@code null} when there is no evidence to score (never guessed) */
 public record ComponentScore(
         String component, BigDecimal value, List<String> matched, List<String> missing, List<String> reasons) {
 

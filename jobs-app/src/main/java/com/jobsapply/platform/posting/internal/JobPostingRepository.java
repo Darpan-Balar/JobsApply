@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface JobPostingRepository extends JpaRepository<JobPosting, UUID>, JpaSpecificationExecutor<JobPosting> {
 
+    List<JobPosting> findByAvailability(Availability availability);
+
     /**
      * Cross-source dedup candidates: same employer and fingerprint, not closed, and not already listed through this
      * binding (two identical openings on the same board stay separate postings).

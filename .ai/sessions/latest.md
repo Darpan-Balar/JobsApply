@@ -1,21 +1,20 @@
-# Latest Session: 2026-10-14 (Phase 3)
+# Latest Session: 2026-10-14 (Phase 4)
 
-1. Phase 2 was merged with a fast-forward and pushed. Phase 3 started on `phase-3-discovery`.
-2. **Research.** Read the official docs for the Greenhouse Job Board API, the Lever Postings API and the Ashby posting API, and made read-only checks of live responses. Found several doc gaps (see ADR-0008 and architecture §11, Phase 3).
+1. Phase 3 was merged with a fast-forward and pushed. Phase 4 started on `phase-4-matching`.
+2. **Verified first:** Boot 4.1's structured-log customizer API (`logging.structured.json.customizer`, `JsonWriter.ValueProcessor`).
 3. **Built:**
-   - `jobs-adapters` (HTTP base and three adapters)
-   - SPI additions
-   - posting ingestion, normalization, dedup and search
-   - discovery engine, run history, recovery, availability recheck and metrics
-   - REST endpoints
-   - V8
-   - `-Plive` profiles
+   - matching plugins (11 rules, 7 components, the weighted strategy) with registries
+   - candidate import, verification and versioning, with AES-GCM encryption and HMAC fingerprints
+   - log redaction
+   - skill extraction
+   - matching service and API
+   - role-profile fork and user import
+   - V9
 4. **Bugs fixed:**
-   - non-atomic rate-limiter reservation
-   - URI-building exceptions escaping adapters
-   - several over-narrow test expectations
+   - decimal scale lost in `canonicalize`, which broke match idempotency
+   - an over-broad phone redaction pattern
+   - test count errors in my own tests
 5. **Verified:**
-   - 247 default tests green
-   - live adapters and the live end-to-end pipeline idempotent against real boards
-   - local startup on V8
+   - 298 tests green
+   - local startup on V9 with the encryption key from `.env`
 6. **Next:** wait for review.

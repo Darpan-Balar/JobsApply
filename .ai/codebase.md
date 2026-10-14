@@ -11,8 +11,9 @@
     - `json/JsonCodec`
     - `error/*` and `web/GlobalExceptionHandler`
     - `model/Actor`, `UpsertOutcome`
+    - `crypto/PersonalDataCipher` (AES-256-GCM plus HMAC) and `web/RedactingLogCustomizer`
   - `identity`: `UserService` and `AppUser`. `LocalUserBootstrap` creates the configured local user, and `LocalUserContextFilter` binds that user for `/api/*` in LOCAL mode.
-  - `catalog`: `CatalogService` (job families, skills and aliases), `CatalogSnapshot`.
+  - `catalog`: `CatalogService` (job families, skills and aliases), `CatalogSnapshot`, `SkillExtractor` (whole-term matching in job text).
   - `plugin`: `PluginRegistry<T>` (fail-fast; deny-list `jobs.plugins.disabled`), `PluginSettingsBinder`. Registries are created in `internal/PluginRegistryConfiguration`.
   - `source`: `SourceService` (check against the installed adapters, upsert, list, IDs by key or adapter); `web/SourceController` (sources, plugins).
   - `employer`:
@@ -28,8 +29,15 @@
     - `AvailabilityService`, `SyncRunQueryService`
     - `web/DiscoveryController`
   - `roleprofile`: `RoleProfileService` (idempotent versioned import; visibility is "own profiles plus templates").
-  - `candidate`: `CandidateProfileService` (immutable snapshot versions) and `CandidateSnapshotValidator`.
-  - `matching`: `MatchingVocabulary` (declared names only), `JobMatch` entity.
+  - `candidate`:
+    - `CandidateProfileService`: encrypted immutable versions, import, `verifyFacts`, detail and versions views
+    - `CandidateSnapshots`, `CandidateSnapshotValidator`
+    - `web/CandidateProfileController`
+  - `matching`:
+    - `MatchingService` (evaluate, run, list, get; idempotent `JobMatch` rows)
+    - `internal/RegistryMatchingVocabulary`
+    - `web/MatchController`
+    - Rules, components and strategies are plugins in `jobs-adapters/.../matching`.
   - `application`: the `ApplicationStatus` transition table, the `Application` aggregate (`discover`, `transitionTo`) and its history.
   - `audit`: `AuditEvent` entity.
   - `configimport`: `ConfigImportService` (directory, single YAML document, CSV content), `EmployerExchangeService` (CSV import; CSV/YAML export), `internal/EmployerCsv`, `web/ConfigController`, `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -59,6 +60,16 @@ public class EmployerPreferenceService {
         Map<UUID, Employer> byId = employers.findAllById(all.stream().map(UserEmployerPreference::getEmployerId).toList())
                 .stream().collect(Collectors.toMap(Employer::getId, Function.identity()));
         return all.stream().map(p -> view(p, byId.get(p.getEmployerId()))).toList();
+    }
+
+    /** Employers the current user chose to IGNORE (excluded from their matching). */
+    @Transactional(readOnly = true)
+    public Set<UUID> ignoredEmployerIds() {
+        UserContext.requireUserId();
+        return preferences.findAllByOrderByPriorityDesc().stream()
+                .filter(p -> p.getMode() == PreferenceMode.IGNORE)
+                .map(UserEmployerPreference::getEmployerId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private static EmployerPreferenceView view(UserEmployerPreference p, Employer employer) {

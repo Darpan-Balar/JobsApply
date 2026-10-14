@@ -1,5 +1,6 @@
 package com.jobsapply.platform.configimport;
 
+import com.jobsapply.platform.configimport.model.CandidateProfileDocument;
 import com.jobsapply.platform.configimport.model.EmployerSetConfig;
 import com.jobsapply.platform.configimport.model.JobFamilySetConfig;
 import com.jobsapply.platform.configimport.model.JobSourceConfig;
@@ -14,7 +15,9 @@ public enum ConfigKind {
     SKILL_SET("SkillSet", SkillSetConfig.class, 1),
     ROLE_PROFILE("RoleProfile", RoleProfileDefinition.class, 1),
     JOB_SOURCE("JobSource", JobSourceConfig.class, 1),
-    EMPLOYER_SET("EmployerSet", EmployerSetConfig.class, 1);
+    EMPLOYER_SET("EmployerSet", EmployerSetConfig.class, 1),
+    /** Personal data: only via the candidate import API, never from the configuration directory. */
+    CANDIDATE_PROFILE("CandidateProfile", CandidateProfileDocument.class, 1);
 
     private final String yamlName;
     private final Class<?> contentType;

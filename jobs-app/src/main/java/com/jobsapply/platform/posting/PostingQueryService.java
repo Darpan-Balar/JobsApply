@@ -11,6 +11,13 @@ import com.jobsapply.platform.posting.internal.PostingSpecifications;
 import com.jobsapply.platform.shared.error.NotFoundException;
 import com.jobsapply.platform.shared.model.PageResult;
 import com.jobsapply.spi.common.Availability;
+import com.jobsapply.spi.matching.JobSnapshot;
+import com.jobsapply.spi.source.Compensation;
+import com.jobsapply.spi.source.RawLocation;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -56,6 +63,48 @@ public class PostingQueryService {
                 postingListings.stream().map(l -> new PostingViews.Listing(l.getId(), bindings.get(l.getEmployerSourceId()).sourceKey(),
                         l.getExternalId(), l.getListingUrl(), l.getApplicationUrl(), l.getPublishedAt(), l.getSourceUpdatedAt(),
                         l.getAvailability(), l.getAvailabilityEvidence(), l.getFirstSeenAt(), l.getLastSeenAt(), l.getLastCheckedAt())).toList());
+    }
+
+    /** Read-only snapshot handed to matching plugins (skills are added by the matching module). */
+    @Transactional(readOnly = true)
+    public JobSnapshot jobSnapshot(UUID postingId) {
+        JobPosting p = postings.findById(postingId).orElseThrow(() -> new NotFoundException("Posting", postingId));
+        EmployerRef employer = employers.refs(List.of(p.getEmployerId())).get(p.getEmployerId());
+        Instant published = listings.findByJobPostingIdOrderByFirstSeenAtAsc(postingId).stream()
+                .map(JobListing::getPublishedAt).filter(Objects::nonNull).min(Instant::compareTo).orElse(null);
+        return JobSnapshot.builder()
+                .postingId(p.getId())
+                .employerKey(employer.key())
+                .title(p.getTitle())
+                .titleNormalized(p.getTitleNormalized())
+                .seniority(p.getSeniority())
+                .employmentType(p.getEmploymentType())
+                .workplaceType(p.getWorkplaceType())
+                .locations(p.getLocations().stream()
+                        .map(l -> new RawLocation(l.getRawText(), l.getCity(), l.getRegion(), l.getCountryCode(), l.isRemote())).toList())
+                .compensation(p.getSalaryCurrency() == null ? null
+                        : new Compensation(p.getSalaryMin(), p.getSalaryMax(), p.getSalaryCurrency(), p.getSalaryPeriod(), null))
+                .descriptionText(p.getDescriptionText())
+                .publishedAt(published)
+                .build();
+    }
+
+    /** Ids of postings with the given availability, excluding the given employers. */
+    @Transactional(readOnly = true)
+    public List<UUID> postingIds(Availability availability, Set<UUID> excludedEmployers) {
+        return postings.findByAvailability(availability).stream()
+                .filter(p -> !excludedEmployers.contains(p.getEmployerId()))
+                .map(JobPosting::getId)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, PostingViews.Summary> summaries(Collection<UUID> postingIds) {
+        List<JobPosting> found = postings.findAllById(postingIds);
+        Map<UUID, EmployerRef> refs = employers.refs(found.stream().map(JobPosting::getEmployerId).distinct().toList());
+        Instant staleBefore = staleBefore();
+        return found.stream().collect(Collectors.toMap(JobPosting::getId,
+                p -> summary(p, refs.get(p.getEmployerId()), staleBefore)));
     }
 
     private Instant staleBefore() {

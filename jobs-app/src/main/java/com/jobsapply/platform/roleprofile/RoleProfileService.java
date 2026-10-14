@@ -6,6 +6,7 @@ import com.jobsapply.platform.roleprofile.internal.RoleProfileRepository;
 import com.jobsapply.platform.roleprofile.internal.RoleProfileVersion;
 import com.jobsapply.platform.roleprofile.internal.RoleProfileVersionRepository;
 import com.jobsapply.platform.shared.error.DomainRuleViolationException;
+import com.jobsapply.platform.shared.error.NotFoundException;
 import com.jobsapply.platform.shared.json.JsonCodec;
 import com.jobsapply.platform.shared.tenancy.UserContext;
 import com.jobsapply.spi.profile.RoleProfileDefinition;
@@ -72,6 +73,19 @@ public class RoleProfileService {
                 RoleProfileVersion.of(profile.getId(), nextVersionNo, schemaVersion, definitionJson, contentHash));
         profile.activate(version.getId());
         return result(definition.key(), RoleProfileImportOutcome.NEW_VERSION, version);
+    }
+
+    /** Copies a system template into the current user's private profiles (same key), to tune it. */
+    @Transactional
+    public RoleProfileImportResult forkTemplate(String key) {
+        UUID owner = UserContext.requireUserId();
+        if (profiles.findOwned(owner, key).isPresent()) {
+            throw new DomainRuleViolationException("You already have a role profile '" + key + "'");
+        }
+        RoleProfile template = profiles.findTemplate(key).orElseThrow(() -> new NotFoundException("Role profile template", key));
+        RoleProfileVersion version = versions.findById(template.getActiveVersionId()).orElseThrow();
+        return importDefinition(json.read(version.getDefinitionJson(), RoleProfileDefinition.class), version.getSchemaVersion(),
+                RoleProfileScope.CURRENT_USER);
     }
 
     /**

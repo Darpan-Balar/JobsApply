@@ -63,12 +63,50 @@ public class ConfigImportService {
         return run(loader.loadText(fileName, yaml), dryRun, false);
     }
 
+    /**
+     * Imports one {@code RoleProfile} document as a private profile of the current user, with the same validation as
+     * system configuration. Other kinds are rejected.
+     */
+    public ConfigImportReport importUserRoleProfile(String fileName, String yaml, boolean dryRun) {
+        LoadedConfig config = loader.loadText(fileName, yaml);
+        if (config.issues().isEmpty() && config.documents().stream().anyMatch(d -> d.kind() != ConfigKind.ROLE_PROFILE)) {
+            return new ConfigImportReport(dryRun, false, List.of(new ConfigIssue(fileName, "kind", "expected kind RoleProfile")),
+                    List.of(), List.of());
+        }
+        if (!config.issues().isEmpty()) {
+            return new ConfigImportReport(dryRun, false, config.issues(), List.of(), List.of());
+        }
+        ValidationResult validation = semanticValidator.validate(config, context());
+        if (!validation.issues().isEmpty()) {
+            return new ConfigImportReport(dryRun, false, validation.issues(), List.of(), validation.notices());
+        }
+        List<ConfigItemOutcome> outcomes = transactions.execute(status -> {
+            List<ConfigItemOutcome> applied = config.documents().stream().map(doc -> {
+                RoleProfileImportResult result = roleProfiles.importDefinition(doc.contentAs(RoleProfileDefinition.class),
+                        ConfigKind.ROLE_PROFILE.latestSchemaVersion(), RoleProfileScope.CURRENT_USER);
+                return new ConfigItemOutcome(ConfigKind.ROLE_PROFILE, result.key(), result.outcome() + " (v" + result.version().versionNo() + ")");
+            }).toList();
+            if (dryRun) {
+                status.setRollbackOnly();
+            }
+            return applied;
+        });
+        return new ConfigImportReport(dryRun, !dryRun, List.of(), outcomes, validation.notices());
+    }
+
     /** Imports already-parsed content (used by the CSV importer). */
     public ConfigImportReport importContent(String fileName, ConfigKind kind, Object content, boolean dryRun) {
         return run(loader.fromContent(fileName, kind, content), dryRun, false);
     }
 
     private ConfigImportReport run(LoadedConfig config, boolean dryRun, boolean validateOnly) {
+        List<ConfigIssue> personal = config.ofKind(ConfigKind.CANDIDATE_PROFILE).stream()
+                .map(d -> new ConfigIssue(d.file(), "kind", "candidate profiles are personal data and must not be stored with the "
+                        + "platform configuration (it is tracked by git); import them through /api/v1/me/candidate-profiles/import"))
+                .toList();
+        if (!personal.isEmpty()) {
+            return new ConfigImportReport(dryRun, false, personal, List.of(), List.of());
+        }
         if (!config.issues().isEmpty()) {
             // Semantic validation only runs on a structurally valid set, to avoid cascades of follow-on errors.
             return new ConfigImportReport(dryRun, false, config.issues(), List.of(), List.of());
@@ -103,7 +141,7 @@ public class ConfigImportService {
         List<SkillSpec> skills = new ArrayList<>();
         for (ConfigDocument doc : config.ofKind(ConfigKind.SKILL_SET)) {
             doc.contentAs(SkillSetConfig.class).skills().forEach(skill -> skills.add(
-                    new SkillSpec(skill.key(), skill.displayName(), skill.category(), new HashSet<>(skill.aliases()))));
+                    new SkillSpec(skill.key(), skill.displayName(), skill.category(), new HashSet<>(skill.aliases()), skill.extractAliasesOnly())));
         }
         for (Map.Entry<String, ?> outcome : catalog.upsertSkills(skills).entrySet()) {
             outcomes.add(new ConfigItemOutcome(ConfigKind.SKILL_SET, outcome.getKey(), String.valueOf(outcome.getValue())));
