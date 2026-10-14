@@ -89,6 +89,12 @@ public class CatalogService {
         return jobFamilies.findByKey(key).map(JobFamily::getId);
     }
 
+    /** Canonical skill key → display name. */
+    @Transactional(readOnly = true)
+    public Map<String, String> skillDisplayNames() {
+        return skills.findAll().stream().collect(Collectors.toUnmodifiableMap(Skill::getKey, Skill::getDisplayName));
+    }
+
     /** A matcher over every skill's extraction terms, built from the current catalog. */
     @Transactional(readOnly = true)
     public SkillExtractor skillExtractor() {

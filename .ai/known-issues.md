@@ -9,6 +9,13 @@
 - **Audit:** no listener writes `audit_event` yet (Phase 6). Pseudonymization is allowed by the DB trigger but has no service.
 
 ## Risks and technical debt
+- **Preparation** (ADR-0010):
+  - Resumes contain only fact restatements (no generated summary).
+  - The PDF uses standard fonts, so non-Latin-1 text may not render (a warning is shown).
+  - Encrypted files of deleted users and superseded packages are not garbage-collected.
+  - Answer drafting uses only the built-in `rule-based-answers` plugin (not yet configurable per role).
+  - Only Greenhouse publishes form questions. For Lever and Ashby you add questions yourself.
+- **openhtmltopdf** is pinned to 1.1.37 because of a suspicious release burst upstream. Review upstream before upgrading.
 - **Discovery** (also in ADR-0008):
   - Multi-page Lever boards close jobs only through bounded per-run rechecks.
   - Fingerprint dedup can miss duplicates with different wording, or merge identical openings across different sources.

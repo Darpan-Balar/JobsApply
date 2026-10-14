@@ -9,9 +9,12 @@ import static com.jobsapply.adapters.http.Json.text;
 import com.jobsapply.adapters.http.AbstractHttpJobSourceAdapter;
 import com.jobsapply.adapters.http.HttpFetcher;
 import com.jobsapply.spi.common.Capability;
+import com.jobsapply.spi.common.FailureKind;
 import com.jobsapply.spi.common.ComplianceNote;
 import com.jobsapply.spi.common.PluginDescriptor;
 import com.jobsapply.spi.common.PluginKind;
+import com.jobsapply.spi.common.PluginResult;
+import com.jobsapply.spi.render.ApplicationQuestion;
 import com.jobsapply.spi.source.Compensation;
 import com.jobsapply.spi.source.DiscoveryPage;
 import com.jobsapply.spi.source.DiscoveryRequest;
@@ -28,6 +31,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.jsoup.parser.Parser;
 import tools.jackson.databind.JsonNode;
@@ -60,7 +64,7 @@ public final class GreenhouseJobBoardAdapter extends AbstractHttpJobSourceAdapte
                 .version("1.0.0")
                 .kind(PluginKind.JOB_SOURCE)
                 .capabilities(EnumSet.of(Capability.LIST_JOBS, Capability.JOB_DETAILS, Capability.AVAILABILITY_CHECK,
-                        Capability.COMPENSATION))
+                        Capability.COMPENSATION, Capability.APPLICATION_QUESTIONS))
                 .settingsType(GreenhouseSettings.class)
                 .settingsSchemaVersion(1)
                 .compliance(new ComplianceNote(URI.create("https://developers.greenhouse.io/job-board.html"), false,
@@ -110,6 +114,86 @@ public final class GreenhouseJobBoardAdapter extends AbstractHttpJobSourceAdapte
     @Override
     protected SourceJob parseJob(JsonNode body, SourceJobRef ref, GreenhouseSettings settings) {
         return toSourceJob(body);
+    }
+
+    /** Standard form fields: filled from contact details and generated documents, not drafted as answers. */
+    private static final Set<String> STANDARD_FIELDS = Set.of("first_name", "last_name", "preferred_name", "email", "phone",
+            "resume", "resume_text", "cover_letter", "cover_letter_text", "location", "latitude", "longitude");
+
+    @Override
+    public PluginResult<List<ApplicationQuestion>> fetchApplicationQuestions(SourceJobRef ref) {
+        GreenhouseSettings settings;
+        try {
+            settings = settings(ref.binding());
+            if (!JOB_ID.matcher(ref.externalId()).matches()) {
+                return PluginResult.failed(FailureKind.PERMANENT, "Greenhouse job ids are numeric");
+            }
+        } catch (IllegalArgumentException e) {
+            return PluginResult.failed(FailureKind.PERMANENT, "invalid binding settings");
+        }
+        URI uri = URI.create(BASE + ref.binding().externalRef() + "/jobs/" + ref.externalId() + "?questions=true");
+        return switch (fetcher.getJson(uri, settings)) {
+            case PluginResult.Ok<JsonNode> ok -> PluginResult.ok(questions(ok.value()));
+            case PluginResult.Failed<JsonNode> f -> new PluginResult.Failed<>(f.kind(), f.message(), f.retryAfter());
+            case PluginResult.Unsupported<JsonNode> u -> PluginResult.unsupported(u.capability());
+        };
+    }
+
+    static List<ApplicationQuestion> questions(JsonNode job) {
+        List<ApplicationQuestion> result = new ArrayList<>();
+        for (String group : List.of("questions", "location_questions")) {
+            for (JsonNode q : array(job, group)) {
+                JsonNode field = null;
+                for (JsonNode f : array(q, "fields")) {
+                    if (!"input_hidden".equals(text(f, "type"))) {
+                        field = f;
+                        break;
+                    }
+                }
+                if (field == null || text(field, "name") == null || text(q, "label") == null) {
+                    continue;
+                }
+                String name = text(field, "name");
+                List<String> options = new ArrayList<>();
+                for (JsonNode v : array(field, "values")) {
+                    if (text(v, "label") != null) {
+                        options.add(text(v, "label"));
+                    }
+                }
+                boolean required = q.get("required") != null && q.get("required").asBoolean(false);
+                ApplicationQuestion.Kind kind = STANDARD_FIELDS.contains(name) || "location_questions".equals(group)
+                        ? ApplicationQuestion.Kind.STANDARD : ApplicationQuestion.Kind.SCREENING;
+                result.add(new ApplicationQuestion(name, text(q, "label"), type(text(field, "type")), required, options, kind));
+            }
+        }
+        JsonNode demographic = object(job, "demographic_questions");
+        for (JsonNode q : array(demographic, "questions")) {
+            List<String> options = new ArrayList<>();
+            for (JsonNode o : array(q, "answer_options")) {
+                if (text(o, "label") != null) {
+                    options.add(text(o, "label"));
+                }
+            }
+            if (text(q, "id") != null && text(q, "label") != null) {
+                result.add(new ApplicationQuestion("demographic_" + text(q, "id"), text(q, "label"),
+                        options.isEmpty() ? ApplicationQuestion.QuestionType.TEXT : ApplicationQuestion.QuestionType.SINGLE_SELECT,
+                        false, options, ApplicationQuestion.Kind.SELF_IDENTIFICATION));
+            }
+        }
+        return result;
+    }
+
+    static ApplicationQuestion.QuestionType type(String raw) {
+        if (raw == null) {
+            return ApplicationQuestion.QuestionType.TEXT;
+        }
+        return switch (raw) {
+            case "textarea" -> ApplicationQuestion.QuestionType.TEXTAREA;
+            case "input_file" -> ApplicationQuestion.QuestionType.FILE;
+            case "multi_value_single_select" -> ApplicationQuestion.QuestionType.SINGLE_SELECT;
+            case "multi_value_multi_select" -> ApplicationQuestion.QuestionType.MULTI_SELECT;
+            default -> ApplicationQuestion.QuestionType.TEXT;
+        };
     }
 
     static SourceJob toSourceJob(JsonNode job) {

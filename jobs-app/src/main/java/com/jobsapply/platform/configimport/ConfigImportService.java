@@ -16,6 +16,8 @@ import com.jobsapply.platform.configimport.model.SkillSetConfig;
 import com.jobsapply.platform.employer.BindingSpec;
 import com.jobsapply.platform.employer.EmployerService;
 import com.jobsapply.platform.employer.EmployerSpec;
+import com.jobsapply.platform.preparation.ResumeTemplateService;
+import com.jobsapply.platform.preparation.ResumeTemplateSpec;
 import com.jobsapply.platform.roleprofile.RoleProfileImportResult;
 import com.jobsapply.platform.roleprofile.RoleProfileScope;
 import com.jobsapply.platform.roleprofile.RoleProfileService;
@@ -48,6 +50,7 @@ public class ConfigImportService {
     private final SourceService sources;
     private final EmployerService employers;
     private final RoleProfileService roleProfiles;
+    private final ResumeTemplateService resumeTemplates;
     private final TransactionTemplate transactions;
 
     public ConfigImportReport validate(Path directory) {
@@ -126,7 +129,7 @@ public class ConfigImportService {
     }
 
     private ValidationContext context() {
-        return new ValidationContext(catalog.snapshot(), sources.idsByKey().keySet(), employers.bindingOwners());
+        return new ValidationContext(catalog.snapshot(), sources.idsByKey().keySet(), employers.bindingOwners(), resumeTemplates.keys());
     }
 
     private List<ConfigItemOutcome> apply(LoadedConfig config) {
@@ -159,6 +162,11 @@ public class ConfigImportService {
                 var outcome = employers.upsert(toSpec(employer), toBindings(employer));
                 outcomes.add(new ConfigItemOutcome(ConfigKind.EMPLOYER_SET, employer.key(), outcome.name()));
             }
+        }
+
+        for (ConfigDocument doc : config.ofKind(ConfigKind.RESUME_TEMPLATE)) {
+            ResumeTemplateSpec template = doc.contentAs(ResumeTemplateSpec.class);
+            outcomes.add(new ConfigItemOutcome(ConfigKind.RESUME_TEMPLATE, template.key(), resumeTemplates.upsertSystem(template).name()));
         }
 
         for (ConfigDocument doc : config.ofKind(ConfigKind.ROLE_PROFILE)) {

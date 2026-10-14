@@ -5,6 +5,7 @@ import com.jobsapply.platform.configimport.model.EmployerSetConfig;
 import com.jobsapply.platform.configimport.model.JobFamilySetConfig;
 import com.jobsapply.platform.configimport.model.JobSourceConfig;
 import com.jobsapply.platform.configimport.model.SkillSetConfig;
+import com.jobsapply.platform.preparation.ResumeTemplateSpec;
 import com.jobsapply.spi.profile.RoleProfileDefinition;
 import java.util.Arrays;
 import java.util.Optional;
@@ -16,6 +17,7 @@ public enum ConfigKind {
     ROLE_PROFILE("RoleProfile", RoleProfileDefinition.class, 1),
     JOB_SOURCE("JobSource", JobSourceConfig.class, 1),
     EMPLOYER_SET("EmployerSet", EmployerSetConfig.class, 1),
+    RESUME_TEMPLATE("ResumeTemplate", ResumeTemplateSpec.class, 1),
     /** Personal data: only via the candidate import API, never from the configuration directory. */
     CANDIDATE_PROFILE("CandidateProfile", CandidateProfileDocument.class, 1);
 

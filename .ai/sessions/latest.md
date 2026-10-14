@@ -1,20 +1,23 @@
-# Latest Session: 2026-10-14 (Phase 4)
+# Latest Session: 2026-10-14 (Phase 5)
 
-1. Phase 3 was merged with a fast-forward and pushed. Phase 4 started on `phase-4-matching`.
-2. **Verified first:** Boot 4.1's structured-log customizer API (`logging.structured.json.customizer`, `JsonWriter.ValueProcessor`).
+1. Phase 4 was merged with a fast-forward and pushed. Phase 5 started on `phase-5-preparation`.
+2. **Research:**
+   - Verified Greenhouse's `questions=true` shape live.
+   - Found a burst of about 60 releases of openhtmltopdf starting July 2026, so pinned 1.1.37 with PDFBox 3.0.8 (ADR-0010).
 3. **Built:**
-   - matching plugins (11 rules, 7 components, the weighted strategy) with registries
-   - candidate import, verification and versioning, with AES-GCM encryption and HMAC fingerprints
-   - log redaction
-   - skill extraction
-   - matching service and API
-   - role-profile fork and user import
-   - V9
+   - preparation plugins: resume, cover note, answers, HTML and PDF renderers
+   - Greenhouse questions
+   - `TraceabilityValidator`
+   - the encrypted document store and master resume
+   - immutable encrypted packages and `PreparationService` with edits
+   - application service, templates config kind, REST
+   - V10
 4. **Bugs fixed:**
-   - decimal scale lost in `canonicalize`, which broke match idempotency
-   - an over-broad phone redaction pattern
-   - test count errors in my own tests
+   - availability "confirmed" from stale state
+   - binary uploads corrupted by text decoding
+   - cover-note sort order
+   - the migration-order test now derives its expectations from the shipped files
 5. **Verified:**
-   - 298 tests green
-   - local startup on V9 with the encryption key from `.env`
+   - 327 tests green
+   - local V10 with the template imported
 6. **Next:** wait for review.

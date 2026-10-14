@@ -61,6 +61,9 @@ public class Application extends OwnedEntity {
     @Column(name = "status_changed_at", nullable = false)
     private Instant statusChangedAt;
 
+    @Column(name = "current_package_id")
+    private UUID currentPackageId;
+
     @Builder.Default
     @Getter(AccessLevel.NONE)
     @OrderBy("occurredAt asc")
@@ -103,6 +106,21 @@ public class Application extends OwnedEntity {
         history.add(new ApplicationStatusHistory(this, status, target, actor, reason, now));
         this.status = target;
         this.statusChangedAt = now;
+    }
+
+    /** Records the inputs a (re-)preparation used. */
+    public void useInputs(UUID candidateProfileVersionId, UUID roleProfileVersionId, UUID jobMatchId) {
+        this.candidateProfileVersionId = Objects.requireNonNull(candidateProfileVersionId);
+        this.roleProfileVersionId = Objects.requireNonNull(roleProfileVersionId);
+        this.jobMatchId = jobMatchId;
+    }
+
+    public void useDestination(UUID jobListingId) {
+        this.jobListingId = jobListingId;
+    }
+
+    public void attachPackage(UUID packageId) {
+        this.currentPackageId = Objects.requireNonNull(packageId);
     }
 
     public List<ApplicationStatusHistory> getHistory() {

@@ -1,6 +1,6 @@
 # Job Discovery & Application Platform — Architecture Proposal
 
-> **Status: ACCEPTED (2026-10-14). Phases 1–4 (Foundation, Registry, Discovery, Candidates & Matching) are implemented; Phases 5–9 are not.**
+> **Status: ACCEPTED (2026-10-14). Phases 1–5 (Foundation, Registry, Discovery, Candidates & Matching, Preparation) are implemented; Phases 6–9 are not.**
 > Where Phase 1 deviated from the original proposal, this document was updated. See "Phase 1 outcome" in §11.
 
 ## 0. Environment (verified 2026-10-14)
@@ -761,3 +761,46 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - Ciphertext copied to another row fails to decrypt.
 - Matches are private to their owner.
 - A local run applied V9 with the key from `.env`.
+
+### Phase 5 outcome (2026-10-14)
+
+**Delivered (see ADR-0010)**
+- **Plugins** (`jobs-adapters`):
+  - `fact-based-resume` (selection and verbatim restatement)
+  - `fact-based` cover note
+  - `rule-based-answers`
+  - `html-resume` (all text escaped) and `pdf-resume` (openhtmltopdf 1.1.37 with PDFBox 3.0.8)
+  - Greenhouse `fetchApplicationQuestions`, which classifies questions as STANDARD, SCREENING or SELF_IDENTIFICATION
+- **Core:**
+  - `TraceabilityValidator` (structural checks and lexical grounding)
+  - `PreparationService`: prepare, answer, edit resume, reject, list, detail, versions, document download
+  - Immutable encrypted packages and documents, `DocumentStore` (encrypted, write-once, generated names)
+  - Master resume upload (type and magic-byte check, byte-exact)
+  - `ResumeTemplate` config kind, with role profiles validated against templates and installed plugins
+  - `ApplicationService` (open or reuse, transitions)
+  - V10
+- **REST:** `/me/applications[/prepare|/{id}[/packages|/documents/{doc}|/answers/{q}|/resume|/reject]]`, `/me/candidate-profiles/{key}/master-resumes[/{id}/content]`.
+- **SPI changes:**
+  - `ResumeDocument.header`, `Claim.userApproved`
+  - `ResumeContentGenerator` takes skill names
+  - new `CoverNoteGenerator`
+  - `AnswerDraft.origin`
+  - `ApplicationQuestion.kind`
+  - `JobSourceAdapter.fetchApplicationQuestions` (a default method)
+- **Module direction:** preparation → application, matching, discovery, candidate, posting, catalog, plugin. The application module has no outward dependencies.
+
+**Problems found and fixed**
+- **Availability confirmation:** a stored OPEN was being treated as confirmed although every live check failed. Preparation now requires a check that sees the posting open now.
+- **Binary uploads:** uploads would have been corrupted by decoding them as text. A raw byte reader was added, and a byte-exact round-trip test guards it.
+- **Cover note ordering:** skills were sorted inconsistently with the resume.
+
+**Verification**
+- `./mvnw clean install`: 327 tests, 0 failures (SPI 15, adapters 52, app unit tests 144, integration tests 116).
+- A fabricated claim citing a real fact is rejected.
+- The master resume is unchanged byte for byte, including over HTTP.
+- Unanswered questions are listed.
+- Re-preparation is idempotent.
+- NOT_ELIGIBLE and CLOSED stop before any document is generated.
+- An unconfirmed availability blocks READY_FOR_REVIEW.
+- Packages are immutable and encrypted at rest, and private to their owner.
+- A local run applied V10 and imported the resume template.

@@ -61,9 +61,12 @@ public class JsonCodec {
     }
 
     public static String sha256Hex(String text) {
+        return sha256Hex(text.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String sha256Hex(byte[] bytes) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return HexFormat.of().formatHex(digest.digest(text.getBytes(StandardCharsets.UTF_8)));
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 not available", e);
         }

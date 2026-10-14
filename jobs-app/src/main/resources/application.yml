@@ -49,6 +49,8 @@ jobs:
   crypto:
     key: ${JOBS_ENCRYPTION_KEY:}
     key-id: k1
+  storage:
+    directory: data          # encrypted personal files; git-ignored
   identity:
     local-user:
       username: local

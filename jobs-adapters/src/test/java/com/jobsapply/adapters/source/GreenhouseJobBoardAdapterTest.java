@@ -9,6 +9,7 @@ import com.jobsapply.adapters.source.greenhouse.GreenhouseJobBoardAdapter;
 import com.jobsapply.spi.common.Availability;
 import com.jobsapply.spi.common.FailureKind;
 import com.jobsapply.spi.common.PluginResult;
+import com.jobsapply.spi.render.ApplicationQuestion;
 import com.jobsapply.spi.source.AvailabilityObservation;
 import com.jobsapply.spi.source.DiscoveryPage;
 import com.jobsapply.spi.source.SourceBinding;
@@ -112,6 +113,24 @@ class GreenhouseJobBoardAdapterTest {
         assertThat(adapter.fetchJobDetails(new SourceJobRef(binding, "not-numeric")))
                 .isInstanceOfSatisfying(PluginResult.Failed.class, f -> assertThat(f.kind()).isEqualTo(FailureKind.PERMANENT));
         assertThat(transport.requests).isEmpty();
+    }
+
+    @Test
+    void applicationQuestionsAreClassified() {
+        transport.fixture("https://boards-api.greenhouse.io/v1/boards/examplefintech/jobs/4001001?questions=true", "greenhouse/job-questions.json");
+
+        var questions = ((PluginResult.Ok<java.util.List<ApplicationQuestion>>) adapter.fetchApplicationQuestions(
+                new SourceJobRef(binding, "4001001"))).value();
+
+        assertThat(questions).extracting(ApplicationQuestion::id, ApplicationQuestion::kind).containsExactly(
+                org.assertj.core.groups.Tuple.tuple("first_name", ApplicationQuestion.Kind.STANDARD),
+                org.assertj.core.groups.Tuple.tuple("resume", ApplicationQuestion.Kind.STANDARD),
+                org.assertj.core.groups.Tuple.tuple("question_101", ApplicationQuestion.Kind.SCREENING),
+                org.assertj.core.groups.Tuple.tuple("question_102", ApplicationQuestion.Kind.SCREENING),
+                org.assertj.core.groups.Tuple.tuple("demographic_7", ApplicationQuestion.Kind.SELF_IDENTIFICATION));
+        assertThat(questions.get(3).options()).containsExactly("Yes", "No");
+        assertThat(questions.get(3).type()).isEqualTo(ApplicationQuestion.QuestionType.SINGLE_SELECT);
+        assertThat(questions.get(1).type()).isEqualTo(ApplicationQuestion.QuestionType.FILE);
     }
 
     private AvailabilityObservation observe() {

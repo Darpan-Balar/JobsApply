@@ -55,13 +55,19 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - Candidate snapshots are encrypted at rest (`PersonalDataCipher`, row-bound AAD). Never log snapshots or contact details. Candidate YAML must never go into `config/`.
 - Tests use a fixed test key (application-test.yml). Real keys live only in `.env`.
 
+## Preparation rules (ADR-0010), do not weaken
+- Content plugins select and restate facts. `TraceabilityValidator` (structural checks and lexical grounding) runs on the platform side for every package and edit.
+- Never draft answers for sensitive or self-identification questions, and never write free-text answers for the candidate.
+- READY_FOR_REVIEW requires zero BLOCKING issues, including availability *confirmed by a check made now*.
+- Master resumes and packages are immutable. Read uploads as raw bytes (`RequestBodies.readBytes`), never as text.
+
 ## Gotchas learned
 - **`JsonCodec.canonicalize` must keep decimal scale.** It does, by reading decimals as `BigDecimal`. Comparing with values read as `double` breaks idempotency.
 - **jsonb is returned re-formatted** by PostgreSQL. Never compare stored JSON text with our canonical JSON; use `JsonCodec.canonicalize`.
 - **Hibernate binds array parameters as `varchar[]`.** Array columns queried with array predicates must be `varchar(n)[]`, not `text[]`.
 - **Run `clean` after renaming or removing a migration.** Otherwise `target/classes` keeps the old file and Flyway sees duplicate versions.
 - **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
-- **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select max(version) from flyway_schema_history`).
+- **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select version from flyway_schema_history order by installed_rank desc limit 1`). Do NOT use `max(version)`: the column is text, so "9" sorts after "10".
 
 ## Environment notes
 - JDK 25 doesn't run annotation processors implicitly, so Lombok is declared in `annotationProcessorPaths`.

@@ -9,6 +9,7 @@ Each file is versioned YAML with a `schemaVersion` and a `kind`. The importer va
 | `role-profiles/` | `RoleProfile` (imported as **system templates**, visible to every user) | Phase 1 |
 | `sources/` | `JobSource` | Phase 2 |
 | `employers/` | `EmployerSet` (employers and their source bindings) | Phase 2 |
+| `resume-templates/` | `ResumeTemplate` (content generator, renderers, selection limits) | Phase 5 |
 
 The files are matched by `kind`, not by which directory they're in.
 

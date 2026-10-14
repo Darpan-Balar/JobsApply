@@ -15,6 +15,11 @@ public final class RequestBodies {
     private RequestBodies() {}
 
     public static String readText(HttpServletRequest request) throws IOException {
+        return new String(readBytes(request), StandardCharsets.UTF_8);
+    }
+
+    /** The raw body, unmodified (binary uploads such as PDFs). */
+    public static byte[] readBytes(HttpServletRequest request) throws IOException {
         if (request.getContentLengthLong() > MAX_UPLOAD_BYTES) {
             throw tooLarge();
         }
@@ -23,7 +28,7 @@ public final class RequestBodies {
             if (bytes.length > MAX_UPLOAD_BYTES) {
                 throw tooLarge();
             }
-            return new String(bytes, StandardCharsets.UTF_8);
+            return bytes;
         }
     }
 

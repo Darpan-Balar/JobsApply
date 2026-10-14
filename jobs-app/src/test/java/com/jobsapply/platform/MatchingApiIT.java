@@ -41,7 +41,7 @@ class MatchingApiIT {
 
         HttpApi.Response detail = api.get("/api/v1/me/candidate-profiles/" + key);
         assertThat(detail.headers().firstValue("Cache-Control")).hasValueSatisfying(v -> assertThat(v).contains("no-store"));
-        assertThat(detail.json().get("factsByVerification").get("UNVERIFIED").asInt()).isEqualTo(5);
+        assertThat(detail.json().get("factsByVerification").get("UNVERIFIED").asInt()).isEqualTo(6);
 
         assertThat(api.postJson("/api/v1/me/candidate-profiles/" + key + "/verification", Map.of("all", true)).json()
                 .get("versionNo").asInt()).isEqualTo(2);

@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import com.jobsapply.platform.support.IntegrationTest;
 import com.jobsapply.platform.support.TestData;
 import com.jobsapply.platform.support.TestData.CandidateRefs;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,9 +26,18 @@ class SchemaConstraintsIT {
     TestData data;
 
     @Test
-    void migrationsAppliedInOrder() {
+    void everyShippedMigrationIsAppliedInOrder() throws Exception {
+        List<String> shipped;
+        try (var files = java.nio.file.Files.list(java.nio.file.Path.of("src/main/resources/db/migration"))) {
+            shipped = files.map(f -> f.getFileName().toString())
+                    .filter(n -> n.matches("V\\d+__.+\\.sql"))
+                    .map(n -> n.substring(1, n.indexOf("__")))
+                    .sorted(java.util.Comparator.comparingInt(Integer::parseInt))
+                    .toList();
+        }
+        assertThat(shipped).isNotEmpty();
         assertThat(jdbc.queryForList("select version from flyway_schema_history where success order by installed_rank", String.class))
-                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8", "9");
+                .containsExactlyElementsOf(shipped);
     }
 
     @Nested

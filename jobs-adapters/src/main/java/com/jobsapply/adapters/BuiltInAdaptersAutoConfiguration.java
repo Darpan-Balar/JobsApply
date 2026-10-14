@@ -8,6 +8,11 @@ import com.jobsapply.adapters.source.ashby.AshbyJobBoardAdapter;
 import com.jobsapply.adapters.source.greenhouse.GreenhouseJobBoardAdapter;
 import com.jobsapply.adapters.source.lever.LeverPostingsAdapter;
 import com.jobsapply.adapters.matching.EligibilityRules;
+import com.jobsapply.adapters.preparation.FactBasedCoverNoteGenerator;
+import com.jobsapply.adapters.preparation.FactBasedResumeGenerator;
+import com.jobsapply.adapters.preparation.RuleBasedAnswerDrafter;
+import com.jobsapply.adapters.render.HtmlResumeRenderer;
+import com.jobsapply.adapters.render.PdfResumeRenderer;
 import com.jobsapply.adapters.matching.ScoreComponents;
 import com.jobsapply.adapters.matching.WeightedMatchingStrategy;
 import com.jobsapply.spi.matching.EligibilityRule;
@@ -63,6 +68,31 @@ public class BuiltInAdaptersAutoConfiguration {
                         BeanDefinitionBuilder.genericBeanDefinition(ScoreComponent.class, () -> component).getBeanDefinition());
             }
         };
+    }
+
+    @Bean
+    FactBasedResumeGenerator factBasedResumeGenerator() {
+        return new FactBasedResumeGenerator();
+    }
+
+    @Bean
+    FactBasedCoverNoteGenerator factBasedCoverNoteGenerator() {
+        return new FactBasedCoverNoteGenerator();
+    }
+
+    @Bean
+    RuleBasedAnswerDrafter ruleBasedAnswerDrafter() {
+        return new RuleBasedAnswerDrafter();
+    }
+
+    @Bean
+    HtmlResumeRenderer htmlResumeRenderer() {
+        return new HtmlResumeRenderer();
+    }
+
+    @Bean
+    PdfResumeRenderer pdfResumeRenderer() {
+        return new PdfResumeRenderer();
     }
 
     @Bean

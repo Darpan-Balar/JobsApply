@@ -39,11 +39,21 @@
     - `web/MatchController`
     - Rules, components and strategies are plugins in `jobs-adapters/.../matching`.
   - `application`: the `ApplicationStatus` transition table, the `Application` aggregate (`discover`, `transitionTo`) and its history.
+  - `preparation`:
+    - `PreparationService` (prepare, answer, editResume, reject, views, download)
+    - `TraceabilityValidator`, `PackageContent`
+    - `ResumeTemplateService` / `ResumeTemplateSpec`
+    - `internal/ApplicationPackage` and `ApplicationDocument` (immutable, encrypted)
+    - `web/ApplicationController`
+  - `application`: `ApplicationService` (`openOrCreate`, `transition`, `recordPreparation`, views).
+  - `candidate`: also `MasterResumeService` and `web/MasterResumeController`.
+  - `shared/storage/DocumentStore`: encrypted, write-once files under `jobs.storage.directory`.
   - `audit`: `AuditEvent` entity.
   - `configimport`: `ConfigImportService` (directory, single YAML document, CSV content), `EmployerExchangeService` (CSV import; CSV/YAML export), `internal/EmployerCsv`, `web/ConfigController`, `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
 - `jobs-adapters/` (`com.jobsapply.adapters`):
   - `http/` holds `HttpFetcher`, `HostRateLimiter`, `HttpTransport`/`JdkHttpTransport`, `AbstractHttpJobSourceAdapter` and `Json`.
   - `source/{greenhouse,lever,ashby}` hold the adapters.
+  - `matching/` holds the rules, components and strategy; `preparation/` the resume, cover-note and answer plugins; `render/` the HTML and PDF renderers.
   - `BuiltInAdaptersAutoConfiguration` is registered via `META-INF/spring/...AutoConfiguration.imports`.
   - Tests use `FakeTransport` and `src/test/resources/fixtures`. `live/PublicBoardsLiveIT` runs with `-Plive`.
 - Migrations: `jobs-app/src/main/resources/db/migration/V1..V8`.

@@ -1,0 +1,11 @@
+# A resume template selects and orders verified facts; it never writes new text about the candidate.
+schemaVersion: 1
+kind: ResumeTemplate
+key: one-page-technical
+displayName: One-page technical resume
+generator: fact-based-resume          # content plugin (selection + verbatim restatement)
+renderers: [html-resume, pdf-resume]  # output formats
+maxExperiences: 5
+maxAchievementsPerExperience: 3
+maxSkills: 18
+includeEducation: true

@@ -10,14 +10,20 @@ import java.util.Set;
  *
  * @param bindingOwners {@code "sourceKey/externalRef" → employer key}
  */
-public record ValidationContext(CatalogSnapshot catalog, Set<String> sourceKeys, Map<String, String> bindingOwners) {
+public record ValidationContext(
+        CatalogSnapshot catalog, Set<String> sourceKeys, Map<String, String> bindingOwners, Set<String> resumeTemplates) {
 
     public ValidationContext {
         sourceKeys = Set.copyOf(sourceKeys);
         bindingOwners = Map.copyOf(bindingOwners);
+        resumeTemplates = Set.copyOf(resumeTemplates);
+    }
+
+    public ValidationContext(CatalogSnapshot catalog, Set<String> sourceKeys, Map<String, String> bindingOwners) {
+        this(catalog, sourceKeys, bindingOwners, Set.of());
     }
 
     public static ValidationContext empty() {
-        return new ValidationContext(new CatalogSnapshot(Set.of(), Set.of(), Map.of()), Set.of(), Map.of());
+        return new ValidationContext(new CatalogSnapshot(Set.of(), Set.of(), Map.of()), Set.of(), Map.of(), Set.of());
     }
 }

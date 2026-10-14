@@ -7,6 +7,10 @@ import com.jobsapply.spi.common.PluginKind;
 import com.jobsapply.spi.matching.EligibilityRule;
 import com.jobsapply.spi.matching.MatchingStrategy;
 import com.jobsapply.spi.matching.ScoreComponent;
+import com.jobsapply.spi.render.AnswerDrafter;
+import com.jobsapply.spi.render.CoverNoteGenerator;
+import com.jobsapply.spi.render.DocumentRenderer;
+import com.jobsapply.spi.render.ResumeContentGenerator;
 import com.jobsapply.spi.source.JobSourceAdapter;
 import jakarta.validation.Validator;
 import java.util.List;
@@ -41,6 +45,30 @@ class PluginRegistryConfiguration {
     PluginRegistry<MatchingStrategy> matchingStrategies(
             ObjectProvider<MatchingStrategy> strategies, PluginProperties properties, Validator validator) {
         return named(PluginKind.MATCHING_STRATEGY, strategies.orderedStream().toList(), MatchingStrategy::strategyKey, properties, validator);
+    }
+
+    @Bean
+    PluginRegistry<ResumeContentGenerator> resumeContentGenerators(
+            ObjectProvider<ResumeContentGenerator> plugins, PluginProperties properties, Validator validator) {
+        return new PluginRegistry<>(PluginKind.CONTENT_GENERATOR, plugins.orderedStream().toList(), properties.disabled(), validator);
+    }
+
+    @Bean
+    PluginRegistry<CoverNoteGenerator> coverNoteGenerators(
+            ObjectProvider<CoverNoteGenerator> plugins, PluginProperties properties, Validator validator) {
+        return named(PluginKind.CONTENT_GENERATOR, plugins.orderedStream().toList(), CoverNoteGenerator::strategy, properties, validator);
+    }
+
+    @Bean
+    PluginRegistry<DocumentRenderer> documentRenderers(
+            ObjectProvider<DocumentRenderer> plugins, PluginProperties properties, Validator validator) {
+        return new PluginRegistry<>(PluginKind.DOCUMENT_RENDERER, plugins.orderedStream().toList(), properties.disabled(), validator);
+    }
+
+    @Bean
+    PluginRegistry<AnswerDrafter> answerDrafters(
+            ObjectProvider<AnswerDrafter> plugins, PluginProperties properties, Validator validator) {
+        return new PluginRegistry<>(PluginKind.ANSWER_DRAFTER, plugins.orderedStream().toList(), properties.disabled(), validator);
     }
 
     /** Role profiles reference these plugins by name, so the plugin id must equal that name (checked at startup). */

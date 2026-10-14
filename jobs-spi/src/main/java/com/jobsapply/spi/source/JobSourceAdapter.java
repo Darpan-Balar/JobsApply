@@ -1,9 +1,12 @@
 package com.jobsapply.spi.source;
 
+import com.jobsapply.spi.common.Capability;
 import com.jobsapply.spi.common.HealthReport;
 import com.jobsapply.spi.common.Plugin;
 import com.jobsapply.spi.common.PluginResult;
 import com.jobsapply.spi.common.ValidationReport;
+import com.jobsapply.spi.render.ApplicationQuestion;
+import java.util.List;
 
 /**
  * Discovers jobs from one kind of source (e.g. the Greenhouse Job Board API) for any number of employers.
@@ -22,4 +25,9 @@ public interface JobSourceAdapter extends Plugin {
     PluginResult<AvailabilityObservation> checkAvailability(SourceJobRef ref);
 
     HealthReport healthCheck(SourceBinding binding);
+
+    /** The job's application-form questions, for sources declaring {@code APPLICATION_QUESTIONS}. */
+    default PluginResult<List<ApplicationQuestion>> fetchApplicationQuestions(SourceJobRef ref) {
+        return PluginResult.unsupported(Capability.APPLICATION_QUESTIONS);
+    }
 }

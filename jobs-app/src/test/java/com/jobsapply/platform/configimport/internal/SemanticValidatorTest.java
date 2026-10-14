@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jobsapply.platform.catalog.CatalogSnapshot;
 import com.jobsapply.platform.configimport.ConfigIssue;
 import com.jobsapply.platform.matching.MatchingVocabulary;
+import com.jobsapply.platform.preparation.PreparationVocabulary;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,21 @@ class SemanticValidatorTest {
 
     private static final ValidationContext EMPTY_DATABASE = ValidationContext.empty();
 
-    private final SemanticValidator validator = new SemanticValidator(VOCABULARY, ConfigFixtures.sourceService());
+    private static final PreparationVocabulary PREPARATION = new PreparationVocabulary() {
+        public Set<String> contentGenerators() {
+            return Set.of("fact-based-resume");
+        }
+
+        public Set<String> renderers() {
+            return Set.of("html-resume");
+        }
+
+        public Set<String> coverNoteStrategies() {
+            return Set.of("fact-based");
+        }
+    };
+
+    private final SemanticValidator validator = new SemanticValidator(VOCABULARY, ConfigFixtures.sourceService(), PREPARATION);
 
     private List<ConfigIssue> validate(Map<String, String> overrides) {
         return validate(overrides, EMPTY_DATABASE);
@@ -197,6 +212,17 @@ class SemanticValidatorTest {
         ValidationContext sameOwner = new ValidationContext(new CatalogSnapshot(Set.of(), Set.of(), Map.of()), Set.of(),
                 Map.of("greenhouse-public/exampleco", "example-co"));
         assertThat(validate(Map.of(), sameOwner)).as("re-declaring an employer's own binding").isEmpty();
+    }
+
+    @Test
+    void roleProfilesMustReferenceKnownTemplatesAndStrategies() {
+        String role = ROLE + "documents:\n  resumeTemplate: missing-template\n  coverNote: { strategy: haiku }\n";
+        assertThat(rendered(validate(Map.of("role.yaml", role)))).containsExactlyInAnyOrder(
+                "role.yaml:documents.resumeTemplate: unknown resume template 'missing-template'",
+                "role.yaml:documents.coverNote.strategy: unknown cover-note strategy 'haiku'");
+        String template = "schemaVersion: 1\nkind: ResumeTemplate\nkey: missing-template\ndisplayName: T\nrenderers: [html-resume, docx-resume]\n";
+        assertThat(rendered(validate(Map.of("role.yaml", role.replace("haiku", "fact-based"), "template.yaml", template))))
+                .containsExactly("template.yaml:renderers[1]: renderer 'docx-resume' is not installed");
     }
 
     @Test

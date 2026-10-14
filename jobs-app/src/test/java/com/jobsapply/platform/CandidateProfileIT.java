@@ -68,7 +68,7 @@ class CandidateProfileIT {
         assertThat(report.outcomes()).singleElement().satisfies(o -> assertThat(o.outcome()).isEqualTo("CREATED"));
         assertThat(report.notices()).singleElement().asString().contains("UNVERIFIED");
         assertThat(detail().factsByVerification())
-                .containsEntry(VerificationStatus.UNVERIFIED, 5L)
+                .containsEntry(VerificationStatus.UNVERIFIED, 6L)
                 .containsEntry(VerificationStatus.USER_PREFERENCE, 1L);
 
         UserContext.runAs(user, () -> candidates.verifyFacts(key, Set.of("exp-acme", "sk-java"), false));
@@ -76,13 +76,13 @@ class CandidateProfileIT {
         assertThat(detail().currentVersion().versionNo()).isEqualTo(2);
 
         UserContext.runAs(user, () -> candidates.verifyFacts(key, Set.of(), true));
-        assertThat(detail().factsByVerification()).containsEntry(VerificationStatus.VERIFIED, 5L).doesNotContainKey(VerificationStatus.UNVERIFIED);
+        assertThat(detail().factsByVerification()).containsEntry(VerificationStatus.VERIFIED, 6L).doesNotContainKey(VerificationStatus.UNVERIFIED);
     }
 
     @Test
     void trustedImportKeepsDeclaredStatusesAndReimportIsIdempotent() {
         importAs(CandidateYaml.profile(key), true);
-        assertThat(detail().factsByVerification()).containsEntry(VerificationStatus.VERIFIED, 5L);
+        assertThat(detail().factsByVerification()).containsEntry(VerificationStatus.VERIFIED, 6L);
 
         assertThat(importAs(CandidateYaml.profile(key), true).outcomes().getFirst().outcome()).isEqualTo("UNCHANGED");
         assertThat(importAs(CandidateYaml.profile(key).replace("Senior Backend Engineer", "Staff Engineer"), true)

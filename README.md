@@ -2,13 +2,14 @@
 
 A local-first platform for discovering, matching, preparing and tracking job applications. It's extensible to any role family, employer, job source and user, through configuration and plugins rather than core code changes.
 
-> **Status: Phases 1–4 complete.**
+> **Status: Phases 1–5 complete.**
 > - Phase 1 (Foundation): domain model, schema, configuration, multi-user isolation and plugin contracts.
 > - Phase 2 (Employer & source registry): employer registry, plugin registry, YAML/CSV exchange and the REST API.
 > - Phase 3 (Discovery): Greenhouse, Lever and Ashby adapters, plus syncing, normalization, cross-source dedup and availability tracking.
 > - Phase 4 (Candidates & Matching): encrypted, versioned candidate profiles with fact verification, 11 eligibility rules, 7 score components, and explainable, idempotent matches.
+> - Phase 5 (Preparation): tailored resumes (HTML/PDF) and cover notes built only from your verified facts and checked for traceability, plus draft answers that never guess sensitive questions, and immutable, encrypted application packages for your review.
 >
-> **Not implemented yet:** resume and answer generation, browser-assisted applying, the dashboard, login and scheduling. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
+> **Not implemented yet:** approval and submission, browser-assisted applying, the dashboard, login and scheduling. See [the architecture](docs/architecture/README.md) §10 for the phase plan.
 
 ## Stack
 
@@ -66,6 +67,9 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `POST /me/candidate-profiles/import` (YAML), `GET/PUT /me/candidate-profiles/{key}`, `POST /me/candidate-profiles/{key}/verification` | Your encrypted, versioned facts. Imports are UNVERIFIED until you confirm them (see `docs/examples/candidate-profile.example.yaml`) |
 | `GET /role-profiles`, `POST /me/role-profiles/{key}/fork`, `POST /me/role-profiles/import` | Shared templates, and your private copies or your own profiles |
 | `POST /me/matches/run`, `POST /me/matches/evaluate`, `GET /me/matches`, `GET /me/matches/{id}` | Explainable matches (eligibility kept separate from score, with every rule outcome and the evidence used) |
+
+| `POST /me/applications/prepare`, `GET /me/applications[/{id}]`, `PUT /me/applications/{id}/answers/{q}`, `PUT /me/applications/{id}/resume`, `GET /me/applications/{id}/documents/{doc}`, `POST /me/applications/{id}/reject` | Prepare and review application packages (documents, answers, issues). Nothing is submitted. |
+| `POST /me/candidate-profiles/{key}/master-resumes` (raw PDF, DOCX or text), `GET .../master-resumes/{id}/content` | Your master resume, kept exactly as uploaded |
 
 **To match:**
 1. Import your profile and confirm its facts.

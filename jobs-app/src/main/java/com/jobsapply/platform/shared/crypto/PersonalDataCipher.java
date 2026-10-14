@@ -1,9 +1,11 @@
 package com.jobsapply.platform.shared.crypto;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HexFormat;
@@ -84,6 +86,58 @@ public class PersonalDataCipher {
                     new GCMParameterSpec(TAG_BITS, Base64.getDecoder().decode(String.valueOf(envelope.get("iv")))));
             cipher.updateAAD(associatedData.getBytes(StandardCharsets.UTF_8));
             return new String(cipher.doFinal(Base64.getDecoder().decode(String.valueOf(envelope.get("ct")))), StandardCharsets.UTF_8);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Decryption failed: data was altered, moved, or encrypted with another key");
+        }
+    }
+
+    private static final byte[] FILE_MAGIC = {'J', 'A', 'E', '1'};
+
+    /**
+     * Encrypts binary content (files). Layout: {@code "JAE1" | kid length (1 byte) | kid | 12-byte IV | ciphertext+tag}.
+     */
+    public byte[] encryptBytes(byte[] plaintext, String associatedData) {
+        try {
+            byte[] iv = new byte[IV_BYTES];
+            random.nextBytes(iv);
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, keys.get(activeKeyId), new GCMParameterSpec(TAG_BITS, iv));
+            cipher.updateAAD(associatedData.getBytes(StandardCharsets.UTF_8));
+            byte[] ciphertext = cipher.doFinal(plaintext);
+            byte[] kid = activeKeyId.getBytes(StandardCharsets.UTF_8);
+            ByteBuffer out = ByteBuffer.allocate(FILE_MAGIC.length + 1 + kid.length + IV_BYTES + ciphertext.length);
+            out.put(FILE_MAGIC).put((byte) kid.length).put(kid).put(iv).put(ciphertext);
+            return out.array();
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Encryption failed", e);
+        }
+    }
+
+    public byte[] decryptBytes(byte[] stored, String associatedData) {
+        ByteBuffer in = ByteBuffer.wrap(stored);
+        byte[] magic = new byte[FILE_MAGIC.length];
+        if (stored.length < FILE_MAGIC.length + 1 + IV_BYTES) {
+            throw new IllegalStateException("Not an encrypted file");
+        }
+        in.get(magic);
+        if (!Arrays.equals(magic, FILE_MAGIC)) {
+            throw new IllegalStateException("Not an encrypted file");
+        }
+        byte[] kid = new byte[in.get() & 0xFF];
+        in.get(kid);
+        SecretKeySpec key = keys.get(new String(kid, StandardCharsets.UTF_8));
+        if (key == null) {
+            throw new IllegalStateException("Unknown encryption key id: " + new String(kid, StandardCharsets.UTF_8));
+        }
+        byte[] iv = new byte[IV_BYTES];
+        in.get(iv);
+        byte[] ciphertext = new byte[in.remaining()];
+        in.get(ciphertext);
+        try {
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(TAG_BITS, iv));
+            cipher.updateAAD(associatedData.getBytes(StandardCharsets.UTF_8));
+            return cipher.doFinal(ciphertext);
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Decryption failed: data was altered, moved, or encrypted with another key");
         }

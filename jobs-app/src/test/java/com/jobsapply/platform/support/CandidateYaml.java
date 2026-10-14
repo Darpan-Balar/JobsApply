@@ -38,6 +38,12 @@ public final class CandidateYaml {
                     completed: true
                 skills:
                   - { id: sk-java, verification: VERIFIED, skill: java, years: 7 }
+                achievements:
+                  - id: ach-kafka
+                    verification: VERIFIED
+                    text: Built an event pipeline on Kafka processing 2M events per day.
+                    experienceId: exp-beta
+                    skills: [kafka]
                 attributes:
                   - { id: auth-de, verification: VERIFIED, key: work-authorization.de, value: citizen }
                   - { id: pref-city, verification: USER_PREFERENCE, key: preferred-city, value: Berlin }

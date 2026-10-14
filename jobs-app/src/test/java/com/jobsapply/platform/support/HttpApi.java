@@ -38,6 +38,25 @@ public final class HttpApi {
                 .POST(HttpRequest.BodyPublishers.ofString(body)));
     }
 
+    public Response postBytes(String path, String contentType, byte[] body) {
+        return send(HttpRequest.newBuilder(URI.create(base + path)).header("Content-Type", contentType)
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body)));
+    }
+
+    /** GET returning raw bytes (downloads). */
+    public byte[] getBytes(String path) {
+        try {
+            HttpResponse<byte[]> response = http.send(HttpRequest.newBuilder(URI.create(base + path)).GET().build(),
+                    HttpResponse.BodyHandlers.ofByteArray());
+            return response.body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
+    }
+
     public Response postJson(String path, Object body) {
         return post(path, "application/json", MAPPER.writeValueAsString(body));
     }

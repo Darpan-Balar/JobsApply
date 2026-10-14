@@ -13,6 +13,8 @@ import com.jobsapply.platform.configimport.model.JobSourceConfig;
 import com.jobsapply.platform.configimport.model.SkillSetConfig;
 import com.jobsapply.platform.configimport.model.SkillSetConfig.SkillConfig;
 import com.jobsapply.platform.matching.MatchingVocabulary;
+import com.jobsapply.platform.preparation.PreparationVocabulary;
+import com.jobsapply.platform.preparation.ResumeTemplateSpec;
 import com.jobsapply.platform.source.JobSourceSpec;
 import com.jobsapply.platform.source.SourceCheck;
 import com.jobsapply.platform.source.SourceService;
@@ -49,6 +51,7 @@ public class SemanticValidator {
 
     private final MatchingVocabulary vocabulary;
     private final SourceService sourceService;
+    private final PreparationVocabulary preparation;
 
     public ValidationResult validate(LoadedConfig config, ValidationContext database) {
         List<ConfigIssue> issues = new ArrayList<>();
@@ -58,7 +61,9 @@ public class SemanticValidator {
         SkillIndex skills = validateSkills(config, database.catalog(), issues);
         Set<String> sources = new HashSet<>(database.sourceKeys());
         sources.addAll(validateSources(config, issues, notices));
-        validateRoleProfiles(config, families, skills, issues);
+        Set<String> templates = new HashSet<>(database.resumeTemplates());
+        templates.addAll(validateTemplates(config, issues));
+        validateRoleProfiles(config, families, skills, templates, issues);
         validateEmployers(config, sources, database.bindingOwners(), issues);
         return new ValidationResult(issues, notices);
     }
@@ -137,7 +142,25 @@ public class SemanticValidator {
         return new JobSourceSpec(source.key(), source.adapter(), source.displayName(), source.enabled(), source.settings());
     }
 
-    private void validateRoleProfiles(LoadedConfig config, Set<String> families, SkillIndex skills, List<ConfigIssue> issues) {
+    private Set<String> validateTemplates(LoadedConfig config, List<ConfigIssue> issues) {
+        Map<String, String> seen = new HashMap<>();
+        for (ConfigDocument doc : config.ofKind(ConfigKind.RESUME_TEMPLATE)) {
+            ResumeTemplateSpec template = doc.contentAs(ResumeTemplateSpec.class);
+            checkUnique(seen, template.key(), doc.file(), "key", "resume template", issues);
+            if (!preparation.contentGenerators().contains(template.generator())) {
+                issues.add(new ConfigIssue(doc.file(), "generator", "content generator '" + template.generator() + "' is not installed"));
+            }
+            for (int i = 0; i < template.renderers().size(); i++) {
+                if (!preparation.renderers().contains(template.renderers().get(i))) {
+                    issues.add(new ConfigIssue(doc.file(), "renderers[" + i + "]", "renderer '" + template.renderers().get(i) + "' is not installed"));
+                }
+            }
+        }
+        return seen.keySet();
+    }
+
+    private void validateRoleProfiles(LoadedConfig config, Set<String> families, SkillIndex skills, Set<String> templates,
+            List<ConfigIssue> issues) {
         Map<String, String> seen = new HashMap<>();
         for (ConfigDocument doc : config.ofKind(ConfigKind.ROLE_PROFILE)) {
             String file = doc.file();
@@ -182,6 +205,18 @@ public class SemanticValidator {
             }
 
             validateScoring(role, file, issues);
+            if (role.documents() != null) {
+                String template = role.documents().resumeTemplate();
+                if (template != null && !templates.contains(template)) {
+                    issues.add(new ConfigIssue(file, "documents.resumeTemplate", "unknown resume template '" + template + "'"));
+                }
+                if (role.documents().coverNote() != null) {
+                    String strategy = role.documents().coverNote().strategy();
+                    if (!"none".equals(strategy) && !preparation.coverNoteStrategies().contains(strategy)) {
+                        issues.add(new ConfigIssue(file, "documents.coverNote.strategy", "unknown cover-note strategy '" + strategy + "'"));
+                    }
+                }
+            }
             validateScreening(role.screeningQuestions(), file, issues);
         }
     }
