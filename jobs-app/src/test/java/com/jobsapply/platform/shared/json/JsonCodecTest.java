@@ -33,4 +33,14 @@ class JsonCodecTest {
         Sample sample = new Sample("x", "y", Map.of("k", 1), null);
         assertThat(codec.read(codec.write(sample), Sample.class)).isEqualTo(sample);
     }
+
+    @Test
+    void canonicalizeMakesPostgresFormattedJsonbComparable() {
+        // jsonb output: whitespace after separators and PostgreSQL's own key order (shorter keys first).
+        String fromJsonb = "{\"rateLimit\": {\"per\": \"PT1S\", \"permits\": 5}, \"maxRetries\": 3}";
+        String ours = codec.write(Map.of("maxRetries", 3, "rateLimit", Map.of("permits", 5, "per", "PT1S")));
+
+        assertThat(fromJsonb).isNotEqualTo(ours);
+        assertThat(codec.canonicalize(fromJsonb)).isEqualTo(ours);
+    }
 }

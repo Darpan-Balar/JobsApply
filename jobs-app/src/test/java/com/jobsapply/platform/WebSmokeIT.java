@@ -2,21 +2,16 @@ package com.jobsapply.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.jobsapply.platform.support.TestcontainersConfiguration;
+import com.jobsapply.platform.support.ApiTest;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
 /** The application starts on a real port, reports healthy, and serves its OpenAPI document. */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
-@ActiveProfiles("test")
+@ApiTest
 class WebSmokeIT {
 
     @Value("${local.server.port}")

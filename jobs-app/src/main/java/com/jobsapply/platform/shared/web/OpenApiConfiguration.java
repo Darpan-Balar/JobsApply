@@ -1,0 +1,18 @@
+package com.jobsapply.platform.shared.web;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration(proxyBeanMethods = false)
+class OpenApiConfiguration {
+
+    @Bean
+    OpenAPI jobsPlatformOpenApi() {
+        return new OpenAPI().info(new Info()
+                .title("Jobs Platform API")
+                .version("v1")
+                .description("Local-first job discovery and application platform. Errors use RFC 9457 problem details."));
+    }
+}

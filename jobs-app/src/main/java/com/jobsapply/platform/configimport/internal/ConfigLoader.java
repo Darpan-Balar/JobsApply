@@ -6,8 +6,10 @@ import com.jobsapply.platform.configimport.ConfigKind;
 import com.jobsapply.platform.configimport.ConfigUpgrader;
 import jakarta.validation.Path;
 import jakarta.validation.Validator;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,6 +88,25 @@ public class ConfigLoader {
             }
         }
         return new LoadedConfig(documents, issues);
+    }
+
+    /** Loads a single uploaded YAML document. */
+    public LoadedConfig loadText(String file, String yaml) {
+        List<ConfigDocument> documents = new ArrayList<>();
+        List<ConfigIssue> issues = new ArrayList<>();
+        load(file, new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), documents, issues);
+        return new LoadedConfig(documents, issues);
+    }
+
+    /** Structurally validates content built in code (e.g. from CSV) exactly like a parsed document. */
+    public LoadedConfig fromContent(String file, ConfigKind kind, Object content) {
+        List<ConfigIssue> issues = validator.validate(content).stream()
+                .map(v -> new ConfigIssue(file, beanPath(v.getPropertyPath()), v.getMessage()))
+                .sorted(Comparator.comparing(ConfigIssue::path).thenComparing(ConfigIssue::message))
+                .toList();
+        return issues.isEmpty()
+                ? new LoadedConfig(List.of(new ConfigDocument(file, kind, kind.latestSchemaVersion(), content)), List.of())
+                : new LoadedConfig(List.of(), issues);
     }
 
     /** Loads one document; visible for tests. */

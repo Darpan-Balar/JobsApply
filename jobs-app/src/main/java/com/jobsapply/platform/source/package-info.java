@@ -1,6 +1,5 @@
 /**
- * Configured job-source instances (each backed by an adapter plugin) and employer ↔ source bindings. One adapter
- * serves many employers; one employer may have many sources. Phase 1: schema and entities only; the plugin registry
- * arrives in Phase 2.
+ * Configured job-source instances: each names an adapter plugin and holds that plugin's settings (secret references
+ * only). A source whose adapter is not installed must stay disabled. Employer bindings live in the employer module.
  */
 package com.jobsapply.platform.source;

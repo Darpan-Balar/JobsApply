@@ -33,15 +33,19 @@ class SemanticValidatorTest {
         }
     };
 
-    private static final CatalogSnapshot EMPTY_DATABASE = new CatalogSnapshot(Set.of(), Set.of(), Map.of());
+    private static final ValidationContext EMPTY_DATABASE = ValidationContext.empty();
 
-    private final SemanticValidator validator = new SemanticValidator(VOCABULARY);
+    private final SemanticValidator validator = new SemanticValidator(VOCABULARY, ConfigFixtures.sourceService());
 
     private List<ConfigIssue> validate(Map<String, String> overrides) {
         return validate(overrides, EMPTY_DATABASE);
     }
 
-    private List<ConfigIssue> validate(Map<String, String> overrides, CatalogSnapshot database) {
+    private List<ConfigIssue> validate(Map<String, String> overrides, ValidationContext database) {
+        return result(overrides, database).issues();
+    }
+
+    private ValidationResult result(Map<String, String> overrides, ValidationContext database) {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("families.yaml", FAMILIES);
         files.put("skills.yaml", SKILLS);
@@ -65,8 +69,11 @@ class SemanticValidatorTest {
 
     @Test
     void referencesMayResolveAgainstTheDatabaseCatalog() {
-        CatalogSnapshot database = new CatalogSnapshot(Set.of("backend"), Set.of("java", "sql", "kubernetes"), Map.of());
+        ValidationContext database = new ValidationContext(
+                new CatalogSnapshot(Set.of("backend"), Set.of("java", "sql", "kubernetes"), Map.of()), Set.of("workday"), Map.of());
         assertThat(validate(Map.of("families.yaml", FAMILIES.replace("key: backend", "key: other-family")), database)).isEmpty();
+        String employers = EMPLOYERS.replace("source: greenhouse-public", "source: workday");
+        assertThat(validate(Map.of("employers.yaml", employers), database)).as("source known only to the database").isEmpty();
     }
 
     @Test
@@ -131,8 +138,10 @@ class SemanticValidatorTest {
 
     @Test
     void literalSecretsInSourceSettingsAreRejectedButReferencesAllowed() {
-        String literal = SOURCE + "  apiKey: abc123\n";
-        String reference = SOURCE + "  apiKey: env:GREENHOUSE_KEY\n";
+        // A disabled source with an adapter that is not installed isolates the secret rule from settings binding.
+        String base = SOURCE.replace("adapter: test-job-board", "adapter: some-future-adapter") + "enabled: false\n";
+        String literal = base.replace("  requestTimeout: PT10S\n", "  requestTimeout: PT10S\n  apiKey: abc123\n");
+        String reference = base.replace("  requestTimeout: PT10S\n", "  requestTimeout: PT10S\n  apiKey: env:GREENHOUSE_KEY\n");
         assertThat(rendered(validate(Map.of("source.yaml", literal))))
                 .containsExactly("source.yaml:settings.apiKey: looks like a secret; configuration may only hold a reference such as env:VARIABLE_NAME");
         assertThat(validate(Map.of("source.yaml", reference))).isEmpty();
@@ -150,6 +159,44 @@ class SemanticValidatorTest {
         assertThat(rendered(validate(Map.of("employers.yaml", employers)))).containsExactlyInAnyOrder(
                 "employers.yaml:employers[1].sources[0].externalRef: 'exampleco' on greenhouse-public is already bound to employer 'example-co'",
                 "employers.yaml:employers[1].sources[1].source: unknown job source 'workday'");
+    }
+
+    @Test
+    void enabledSourceNeedsAnInstalledAdapter() {
+        String source = SOURCE.replace("adapter: test-job-board", "adapter: greenhouse-job-board");
+        assertThat(validate(Map.of("source.yaml", source))).singleElement().satisfies(issue -> {
+            assertThat(issue.path()).isEqualTo("adapter");
+            assertThat(issue.message()).startsWith("adapter 'greenhouse-job-board' is not installed; installed: test-job-board");
+        });
+    }
+
+    @Test
+    void disabledSourceMayNameAnAdapterThatIsNotInstalledYet() {
+        String source = SOURCE.replace("adapter: test-job-board", "adapter: greenhouse-job-board") + "enabled: false\n";
+        ValidationResult result = result(Map.of("source.yaml", source), EMPTY_DATABASE);
+        assertThat(result.issues()).isEmpty();
+        assertThat(result.notices()).containsExactly("source 'greenhouse-public' stays disabled: adapter 'greenhouse-job-board' is not installed");
+    }
+
+    @Test
+    void sourceSettingsAreValidatedAgainstTheAdaptersSettingsRecord() {
+        assertThat(rendered(validate(Map.of("source.yaml", SOURCE + "  maxRetries: 99\n"))))
+                .containsExactly("source.yaml:settings.maxRetries: must be less than or equal to 10");
+        assertThat(validate(Map.of("source.yaml", SOURCE + "  maxRetrys: 3\n")))
+                .singleElement().satisfies(issue -> assertThat(issue.path()).isEqualTo("settings.maxRetrys"));
+        assertThat(rendered(validate(Map.of("source.yaml", SOURCE.replace("  requestTimeout: PT10S\n", "  {}\n").replace("settings:\n  {}", "settings: {}")))))
+                .containsExactly("source.yaml:settings.requestTimeout: must not be null");
+    }
+
+    @Test
+    void bindingAlreadyOwnedByAnotherEmployerInTheDatabaseIsRejected() {
+        ValidationContext database = new ValidationContext(new CatalogSnapshot(Set.of(), Set.of(), Map.of()), Set.of(),
+                Map.of("greenhouse-public/exampleco", "someone-else"));
+        assertThat(rendered(validate(Map.of(), database))).containsExactly(
+                "employers.yaml:employers[0].sources[0].externalRef: 'exampleco' on greenhouse-public is already bound to employer 'someone-else'");
+        ValidationContext sameOwner = new ValidationContext(new CatalogSnapshot(Set.of(), Set.of(), Map.of()), Set.of(),
+                Map.of("greenhouse-public/exampleco", "example-co"));
+        assertThat(validate(Map.of(), sameOwner)).as("re-declaring an employer's own binding").isEmpty();
     }
 
     @Test

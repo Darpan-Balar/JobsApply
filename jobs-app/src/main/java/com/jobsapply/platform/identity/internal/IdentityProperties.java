@@ -7,12 +7,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * {@code jobs.identity.*}. Until authentication exists (Phase 8) the platform acts as {@code local-user}, which is
- * created on startup if missing.
+ * {@code jobs.identity.*}.
+ *
+ * @param mode {@code LOCAL}: every API request acts as {@code local-user} (single-user, localhost-only deployment).
+ *     Authenticated multi-user login replaces this in Phase 8.
  */
 @Validated
 @ConfigurationProperties("jobs.identity")
-public record IdentityProperties(@NotNull @Valid LocalUser localUser) {
+public record IdentityProperties(Mode mode, @NotNull @Valid LocalUser localUser) {
+
+    public enum Mode {
+        LOCAL
+    }
+
+    public IdentityProperties {
+        mode = mode == null ? Mode.LOCAL : mode;
+    }
 
     public record LocalUser(@NotBlank String username, @NotBlank String displayName) {}
 }

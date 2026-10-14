@@ -1,6 +1,13 @@
 package com.jobsapply.platform.configimport.internal;
 
 import com.jobsapply.platform.configimport.ConfigDocument;
+import com.jobsapply.platform.plugin.PluginRegistry;
+import com.jobsapply.platform.plugin.PluginSettingsBinder;
+import com.jobsapply.platform.shared.json.JsonCodec;
+import com.jobsapply.platform.source.SourceService;
+import com.jobsapply.platform.support.TestJobSourceAdapter;
+import com.jobsapply.spi.common.PluginKind;
+import com.jobsapply.spi.source.JobSourceAdapter;
 import com.jobsapply.platform.configimport.ConfigIssue;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -9,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 
 /** In-memory YAML fixtures for loader and validator unit tests (no Spring, no database). */
@@ -66,7 +74,7 @@ final class ConfigFixtures {
             schemaVersion: 1
             kind: JobSource
             key: greenhouse-public
-            adapter: greenhouse-job-board
+            adapter: test-job-board
             displayName: Greenhouse
             settings:
               requestTimeout: PT10S
@@ -84,6 +92,14 @@ final class ConfigFixtures {
             """;
 
     private ConfigFixtures() {}
+
+    /** A real {@link SourceService} whose registry contains only the test adapter (no database needed for checks). */
+    static SourceService sourceService() {
+        PluginRegistry<JobSourceAdapter> registry =
+                new PluginRegistry<>(PluginKind.JOB_SOURCE, List.of(new TestJobSourceAdapter()), Set.of(), VALIDATOR);
+        JsonCodec json = new JsonCodec();
+        return new SourceService(null, registry, new PluginSettingsBinder(json, VALIDATOR), json);
+    }
 
     static ConfigLoader loader() {
         return new ConfigLoader(VALIDATOR, List.of());

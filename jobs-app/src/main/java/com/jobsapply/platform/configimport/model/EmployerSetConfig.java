@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.Map;
 
 /** {@code kind: EmployerSet}. */
 public record EmployerSetConfig(@NotEmpty List<@NotNull @Valid EmployerConfig> employers) {
@@ -29,12 +30,15 @@ public record EmployerSetConfig(@NotEmpty List<@NotNull @Valid EmployerConfig> e
             @Size(max = 200) String headquarters,
             @Min(0) @Max(100) Integer discoveryPriority,
             Boolean enabled,
+            /* Free-form attributes. Absent = keep what is stored; {} clears. */
+            Map<String, Object> metadata,
             List<@NotNull @Valid EmployerSourceConfig> sources) {
         public EmployerConfig {
             tags = Lists.immutable(tags);
             sources = Lists.immutable(sources);
             discoveryPriority = discoveryPriority == null ? 50 : discoveryPriority;
             enabled = enabled == null || enabled;
+            metadata = metadata == null ? null : Lists.immutable(metadata);
         }
     }
 
@@ -43,7 +47,15 @@ public record EmployerSetConfig(@NotEmpty List<@NotNull @Valid EmployerConfig> e
      * @param externalRef the provider's identifier for this employer (board token, site name, ...)
      */
     public record EmployerSourceConfig(
-            @NotBlank @Pattern(regexp = Keys.KEY_REGEX) String source, @NotBlank @Size(max = 200) String externalRef) {}
+            @NotBlank @Pattern(regexp = Keys.KEY_REGEX) String source,
+            @NotBlank @Size(max = 200) String externalRef,
+            Boolean enabled,
+            @Min(0) @Max(100) Integer priority) {
+        public EmployerSourceConfig {
+            enabled = enabled == null || enabled;
+            priority = priority == null ? 50 : priority;
+        }
+    }
 
     public static final String HTTP_URL = "^https?://\\S+$";
 }

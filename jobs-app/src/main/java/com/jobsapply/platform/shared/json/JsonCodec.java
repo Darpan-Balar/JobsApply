@@ -36,6 +36,19 @@ public class JsonCodec {
         return mapper.readValue(json, type);
     }
 
+    /** Converts between compatible shapes, e.g. a settings map to a typed record. Unknown properties fail. */
+    public <T> T convert(Object value, Class<T> type) {
+        return mapper.convertValue(value, type);
+    }
+
+    /**
+     * Re-serializes JSON text in canonical form. Needed when comparing with stored {@code jsonb}: PostgreSQL returns
+     * jsonb re-formatted (whitespace, its own key order), so equal content does not compare equal as text.
+     */
+    public String canonicalize(String jsonText) {
+        return write(mapper.readValue(jsonText, Object.class));
+    }
+
     /** SHA-256 of the canonical JSON form, as 64 lower-case hex characters. */
     public String contentHash(Object value) {
         return sha256Hex(write(value));

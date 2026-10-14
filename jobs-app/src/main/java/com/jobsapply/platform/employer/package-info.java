@@ -1,5 +1,6 @@
 /**
- * Employer registry (shared catalog). An employer is not a job source: it reaches sources through bindings owned by
- * the {@code source} module. Phase 1: schema and entity only; registry API and import arrive in Phase 2.
+ * Employer registry (shared catalog) and employer ↔ job-source bindings, plus each user's private employer
+ * preferences. An employer is not a job source: it reaches any number of sources through bindings, and one source
+ * serves any number of employers.
  */
 package com.jobsapply.platform.employer;

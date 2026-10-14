@@ -34,7 +34,23 @@ class ConfigImportIT {
         ConfigImportReport report = importService.validate(REPO_CONFIG);
 
         assertThat(report.issues()).isEmpty();
-        assertThat(report.notices()).singleElement().asString().contains("Phase 2");
+        assertThat(report.notices()).containsExactlyInAnyOrder(
+                "source 'greenhouse-public' stays disabled: adapter 'greenhouse-job-board' is not installed",
+                "source 'lever-public' stays disabled: adapter 'lever-postings' is not installed",
+                "source 'ashby-public' stays disabled: adapter 'ashby-job-board' is not installed");
+    }
+
+    @Test
+    void sourcesEmployersAndBindingsAreImported() throws IOException {
+        ConfigImportReport report = importService.importDirectory(copyOf(REPO_CONFIG), false);
+
+        assertThat(keys(report, ConfigKind.JOB_SOURCE)).containsExactlyInAnyOrder("greenhouse-public", "lever-public", "ashby-public");
+        assertThat(keys(report, ConfigKind.EMPLOYER_SET)).containsExactlyInAnyOrder("example-fintech", "example-trading");
+        assertThat(jdbc.queryForObject("select count(*) from job_source where key in ('greenhouse-public','lever-public','ashby-public') "
+                + "and not enabled", Integer.class)).isEqualTo(3);
+        assertThat(jdbc.queryForList("select s.key || '/' || b.external_ref from employer_source b join employer e on e.id = b.employer_id "
+                + "join job_source s on s.id = b.job_source_id where e.key = 'example-fintech' order by 1", String.class))
+                .containsExactly("greenhouse-public/examplefintech", "lever-public/examplefintech");
     }
 
     @Test
@@ -47,6 +63,7 @@ class ConfigImportIT {
         assertThat(keys(first, ConfigKind.ROLE_PROFILE)).containsExactlyInAnyOrder("backend-engineer", "quant-developer", "data-engineer");
 
         ConfigImportReport second = importService.importDirectory(config, false);
+        assertThat(second.outcomes()).extracting(ConfigItemOutcome::kind).contains(ConfigKind.JOB_SOURCE, ConfigKind.EMPLOYER_SET);
         assertThat(second.outcomes()).as("re-importing identical files changes nothing")
                 .allSatisfy(o -> assertThat(o.outcome()).startsWith("UNCHANGED"));
 

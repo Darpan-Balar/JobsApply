@@ -42,6 +42,12 @@ Project guide for Claude sessions. The repository is the source of truth. For th
   - Database constraints are tested with plain SQL through `TestData`.
 - **Never commit** secrets or personal data. `.env`, `local/` and `data/` are git-ignored, and config holds only `env:` secret references.
 
+## Gotchas learned
+- **jsonb is returned re-formatted** by PostgreSQL. Never compare stored JSON text with our canonical JSON; use `JsonCodec.canonicalize`.
+- **Hibernate binds array parameters as `varchar[]`.** Array columns queried with array predicates must be `varchar(n)[]`, not `text[]`.
+- **Run `clean` after renaming or removing a migration.** Otherwise `target/classes` keeps the old file and Flyway sees duplicate versions.
+- **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select max(version) from flyway_schema_history`).
+
 ## Environment notes
 - JDK 25 doesn't run annotation processors implicitly, so Lombok is declared in `annotationProcessorPaths`.
 - Homebrew PostgreSQL uses port 5432 and another local app uses 8080. Compose therefore uses 5433, and the app uses 8090.

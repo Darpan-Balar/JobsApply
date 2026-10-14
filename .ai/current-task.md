@@ -4,16 +4,20 @@
 Build an extensible, multi-user, local-first job discovery and application platform: Java 25, Spring Boot 4.1.1, PostgreSQL 18, Maven, Lombok, and later React + TypeScript. Implementation proceeds phase by phase, stopping after each phase for user approval.
 
 ## Current state (2026-10-14)
-- **Phase 1 (Foundation): complete and verified.** Waiting for user approval to start Phase 2.
-- `./mvnw clean install` passes 123 tests: SPI 13, app unit tests 63, integration tests 47.
-- The app ran against Compose PostgreSQL 18 on port 8090. Health was UP, OpenAPI was served, and the config import was idempotent across restarts.
-- Nothing is committed yet. The user approved `git init` only.
+- **Phase 1** is merged and pushed (`master`, commit b21e374, GitHub Darpan-Balar/JobsApply, public repo).
+- **Phase 2** (employer & source registry) is complete on the local branch `phase-2-employer-registry`. It is committed locally only: **not pushed, not merged**, and is waiting for the user's review.
+- `./mvnw clean install`: 178 tests, 0 failures (13 SPI unit tests, 94 app unit tests, 71 integration tests).
+- A local run against Compose PostgreSQL (port 8090) was verified. The local Compose database now has V7 applied.
 
 ## Decisions made with the user
-- Personal data is strictly private per user, with login (planned for Phase 8). Employers, sources and postings form a shared catalog.
-- 13 application states: the requested 9 plus SUBMITTING, NOT_ELIGIBLE, REJECTED_BY_USER and WITHDRAWN.
-- There's a single user today; onboarding another is `UserService.createUser`.
-- The stack is Java 25 + Spring Boot (not Python).
+- Personal data is strictly private per user, with login (Phase 8). Employers, sources and postings form a shared catalog.
+- 13 application states.
+- A single user today; onboarding another is quick (`UserService.createUser`).
+- Work happens on a branch; nothing is merged or pushed without review.
 
-## Next action: Phase 2 (employer & source registry)
-Employer CRUD, REST and OpenAPI; YAML/CSV import and export of employers and sources (they're already validated); `PluginRegistry` with startup validation; `user_employer_preference`; filtering by tag, priority and source type; the Modulith event publication table once events are introduced. Acceptance criteria are in `docs/architecture/README.md` §10.
+## Phase 2 design changes (recorded in the ADR-0003 amendment and architecture §11)
+- Plugin registration is a deny-list (`jobs.plugins.disabled`), and an enabled source needs an installed adapter. The shipped sources are disabled until Phase 3.
+- Bindings moved to the employer module, so the dependency direction is employer → source.
+
+## Next action
+The user reviews Phase 2. Once approved: merge into master and push. Then Phase 3: Greenhouse, Lever and Ashby adapters (re-verify the official API docs first), sync orchestration, normalization, dedup and freshness.

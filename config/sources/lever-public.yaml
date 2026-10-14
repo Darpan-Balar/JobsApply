@@ -3,7 +3,7 @@ kind: JobSource
 key: lever-public
 adapter: lever-postings
 displayName: Lever Postings API (public)
-enabled: true
+enabled: false   # the adapter plugin arrives in Phase 3; a source can only be enabled once its adapter is installed
 settings:
   requestTimeout: PT10S
   maxRetries: 3

@@ -1,4 +1,4 @@
-package com.jobsapply.platform.source.internal;
+package com.jobsapply.platform.employer.internal;
 
 import com.jobsapply.platform.shared.persistence.BaseEntity;
 import jakarta.persistence.Column;
@@ -23,10 +23,11 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EmployerSource extends BaseEntity {
 
-    /** References {@code employer.id} (another module: by id only). */
+    /** References {@code employer.id} (same module). */
     @Column(name = "employer_id", nullable = false, updatable = false)
     private UUID employerId;
 
+    /** References {@code job_source.id} (source module: by id only). */
     @Column(name = "job_source_id", nullable = false, updatable = false)
     private UUID jobSourceId;
 
@@ -58,4 +59,14 @@ public class EmployerSource extends BaseEntity {
 
     @Column(name = "last_error", columnDefinition = "text")
     private String lastError;
+
+    /** @return whether anything changed */
+    public boolean configure(boolean enabled, int priority) {
+        if (this.enabled == enabled && this.priority == priority) {
+            return false;
+        }
+        this.enabled = enabled;
+        this.priority = (short) priority;
+        return true;
+    }
 }

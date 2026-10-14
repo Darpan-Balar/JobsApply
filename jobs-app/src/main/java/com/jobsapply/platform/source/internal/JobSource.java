@@ -4,6 +4,7 @@ import com.jobsapply.platform.shared.persistence.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,4 +44,17 @@ public class JobSource extends BaseEntity {
     @Builder.Default
     @Column(name = "settings_schema_version", nullable = false)
     private int settingsSchemaVersion = 1;
+
+    /** @return whether anything changed */
+    public boolean update(String adapterId, String displayName, boolean enabled, String settingsJson) {
+        if (Objects.equals(this.adapterId, adapterId) && Objects.equals(this.displayName, displayName)
+                && this.enabled == enabled && Objects.equals(this.settingsJson, settingsJson)) {
+            return false;
+        }
+        this.adapterId = adapterId;
+        this.displayName = displayName;
+        this.enabled = enabled;
+        this.settingsJson = settingsJson;
+        return true;
+    }
 }

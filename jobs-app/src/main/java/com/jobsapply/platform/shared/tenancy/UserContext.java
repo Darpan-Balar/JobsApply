@@ -34,4 +34,9 @@ public final class UserContext {
     public static <T> T callAs(UUID userId, Supplier<T> action) {
         return ScopedValue.where(CURRENT_USER, Objects.requireNonNull(userId, "userId")).call(action::get);
     }
+
+    /** Variant for code that throws checked exceptions (e.g. servlet filters). */
+    public static <T, X extends Throwable> T callAsChecked(UUID userId, ScopedValue.CallableOp<T, X> action) throws X {
+        return ScopedValue.where(CURRENT_USER, Objects.requireNonNull(userId, "userId")).call(action);
+    }
 }

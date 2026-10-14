@@ -13,6 +13,9 @@ import com.jobsapply.platform.configimport.model.JobSourceConfig;
 import com.jobsapply.platform.configimport.model.SkillSetConfig;
 import com.jobsapply.platform.configimport.model.SkillSetConfig.SkillConfig;
 import com.jobsapply.platform.matching.MatchingVocabulary;
+import com.jobsapply.platform.source.JobSourceSpec;
+import com.jobsapply.platform.source.SourceCheck;
+import com.jobsapply.platform.source.SourceService;
 import com.jobsapply.spi.profile.RoleProfileDefinition;
 import com.jobsapply.spi.profile.RoleProfileDefinition.ScreeningPolicy;
 import com.jobsapply.spi.profile.RoleProfileDefinition.ScreeningQuestionRule;
@@ -45,16 +48,19 @@ public class SemanticValidator {
             Pattern.compile("(?i).*(password|passwd|secret|token|api[-_]?key|credential|private[-_]?key).*");
 
     private final MatchingVocabulary vocabulary;
+    private final SourceService sourceService;
 
-    public List<ConfigIssue> validate(LoadedConfig config, CatalogSnapshot database) {
+    public ValidationResult validate(LoadedConfig config, ValidationContext database) {
         List<ConfigIssue> issues = new ArrayList<>();
-        Set<String> families = new HashSet<>(database.jobFamilyKeys());
+        List<String> notices = new ArrayList<>();
+        Set<String> families = new HashSet<>(database.catalog().jobFamilyKeys());
         families.addAll(validateFamilies(config, issues));
-        SkillIndex skills = validateSkills(config, database, issues);
-        Set<String> sources = validateSources(config, issues);
+        SkillIndex skills = validateSkills(config, database.catalog(), issues);
+        Set<String> sources = new HashSet<>(database.sourceKeys());
+        sources.addAll(validateSources(config, issues, notices));
         validateRoleProfiles(config, families, skills, issues);
-        validateEmployers(config, sources, issues);
-        return issues;
+        validateEmployers(config, sources, database.bindingOwners(), issues);
+        return new ValidationResult(issues, notices);
     }
 
     private Set<String> validateFamilies(LoadedConfig config, List<ConfigIssue> issues) {
@@ -110,14 +116,25 @@ public class SemanticValidator {
         return new SkillIndex(keys, aliasToSkill);
     }
 
-    private Set<String> validateSources(LoadedConfig config, List<ConfigIssue> issues) {
+    private Set<String> validateSources(LoadedConfig config, List<ConfigIssue> issues, List<String> notices) {
         Map<String, String> seen = new HashMap<>();
         for (ConfigDocument doc : config.ofKind(ConfigKind.JOB_SOURCE)) {
             JobSourceConfig source = doc.contentAs(JobSourceConfig.class);
             checkUnique(seen, source.key(), doc.file(), "key", "job source", issues);
+            int before = issues.size();
             findLiteralSecrets(source.settings(), "settings", doc.file(), issues);
+            if (issues.size() > before) {
+                continue; // never hand literal secrets to a plugin's settings binder
+            }
+            SourceCheck check = sourceService.check(toSpec(source));
+            check.issues().forEach(issue -> issues.add(new ConfigIssue(doc.file(), issue.path(), issue.message())));
+            notices.addAll(check.notices());
         }
         return seen.keySet();
+    }
+
+    static JobSourceSpec toSpec(JobSourceConfig source) {
+        return new JobSourceSpec(source.key(), source.adapter(), source.displayName(), source.enabled(), source.settings());
     }
 
     private void validateRoleProfiles(LoadedConfig config, Set<String> families, SkillIndex skills, List<ConfigIssue> issues) {
@@ -207,7 +224,8 @@ public class SemanticValidator {
         }
     }
 
-    private void validateEmployers(LoadedConfig config, Set<String> sources, List<ConfigIssue> issues) {
+    private void validateEmployers(
+            LoadedConfig config, Set<String> sources, Map<String, String> storedOwners, List<ConfigIssue> issues) {
         Map<String, String> seenKeys = new HashMap<>();
         Map<String, String> seenRefs = new HashMap<>();
         for (ConfigDocument doc : config.ofKind(ConfigKind.EMPLOYER_SET)) {
@@ -223,6 +241,10 @@ public class SemanticValidator {
                     }
                     String ref = binding.source() + "/" + binding.externalRef();
                     String owner = seenRefs.putIfAbsent(ref, employer.key());
+                    String stored = storedOwners.get(ref);
+                    if (owner == null && stored != null && !stored.equals(employer.key())) {
+                        owner = stored;
+                    }
                     if (owner != null) {
                         issues.add(new ConfigIssue(doc.file(), path + ".externalRef",
                                 "'" + binding.externalRef() + "' on " + binding.source() + " is already bound to employer '" + owner + "'"));

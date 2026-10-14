@@ -11,15 +11,24 @@
     - `json/JsonCodec`
     - `error/*` and `web/GlobalExceptionHandler`
     - `model/Actor`, `UpsertOutcome`
-  - `identity`: `UserService` and `AppUser`. `LocalUserBootstrap` creates the configured local user.
+  - `identity`: `UserService` and `AppUser`. `LocalUserBootstrap` creates the configured local user, and `LocalUserContextFilter` binds that user for `/api/*` in LOCAL mode.
   - `catalog`: `CatalogService` (job families, skills and aliases), `CatalogSnapshot`.
-  - `employer`, `source`, `posting`, `discovery`: entities and repositories only (Phase 1).
+  - `plugin`: `PluginRegistry<T>` (fail-fast; deny-list `jobs.plugins.disabled`), `PluginSettingsBinder`. Registries are created in `internal/PluginRegistryConfiguration`.
+  - `source`: `SourceService` (check against the installed adapters, upsert, list, IDs by key or adapter); `web/SourceController` (sources, plugins).
+  - `employer`:
+    - `EmployerService` (CRUD, declarative upsert with bindings, search, export, binding owners)
+    - `EmployerPreferenceService` (per user)
+    - `internal/EmployerSpecifications` (JPA Specification) and `EmployerSearch`
+    - `EmployerSource` (bindings, moved here from `source`)
+    - `UserEmployerPreference`
+    - `web/*Controller`
+  - `posting`, `discovery`: entities and repositories only (Phase 3 adds logic).
   - `roleprofile`: `RoleProfileService` (idempotent versioned import; visibility is "own profiles plus templates").
   - `candidate`: `CandidateProfileService` (immutable snapshot versions) and `CandidateSnapshotValidator`.
   - `matching`: `MatchingVocabulary` (declared names only), `JobMatch` entity.
   - `application`: the `ApplicationStatus` transition table, the `Application` aggregate (`discover`, `transitionTo`) and its history.
   - `audit`: `AuditEvent` entity.
-  - `configimport`: `ConfigImportService` (validate/import/dry run), `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
+  - `configimport`: `ConfigImportService` (directory, single YAML document, CSV content), `EmployerExchangeService` (CSV import; CSV/YAML export), `internal/EmployerCsv`, `web/ConfigController`, `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
 - Migrations: `jobs-app/src/main/resources/db/migration/V1..V6`.
 - Tests:
   - Unit tests are `*Test`. Integration tests are `*IT` (`support/IntegrationTest`, `TestData`, `DbAssertions`).

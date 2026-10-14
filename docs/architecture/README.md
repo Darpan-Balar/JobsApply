@@ -1,6 +1,6 @@
 # Job Discovery & Application Platform — Architecture Proposal
 
-> **Status: ACCEPTED (2026-10-14). Phase 1 (Foundation) is implemented; Phases 2–9 are not.**
+> **Status: ACCEPTED (2026-10-14). Phases 1 (Foundation) and 2 (Employer & source registry) are implemented; Phases 3–9 are not.**
 > Where Phase 1 deviated from the original proposal, this document was updated. See "Phase 1 outcome" in §11.
 
 ## 0. Environment (verified 2026-10-14)
@@ -104,10 +104,13 @@ flowchart LR
   identity --> shared
   catalog --> shared
   employer --> shared
-  source --> employer
+  employer --> source
+  source --> plugin
+  plugin --> shared
   posting --> employer
   posting --> catalog
   discovery --> source
+  discovery --> employer
   discovery --> posting
   roleprofile --> catalog
   roleprofile --> identity
@@ -124,6 +127,7 @@ flowchart LR
   scheduling --> discovery
   scheduling --> matching
   configimport --> employer
+  configimport --> plugin
   configimport --> source
   configimport --> roleprofile
   configimport --> catalog
@@ -656,3 +660,40 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
   - The issue format is `file:path: message`, which is ASCII-safe.
   - Spotless was deferred.
 - The matching vocabulary (rule types, components, strategies) is *declared* so that configuration can be validated. It isn't implemented yet; Phase 4 replaces it with the plugin registry.
+
+### Phase 2 outcome (2026-10-14)
+
+**Delivered**
+- **`plugin` module.** `PluginRegistry<T>` performs fail-fast validation, and `PluginSettingsBinder` binds and validates a plugin's typed settings (ADR-0003 amendment).
+- **Job sources.** `SourceService` checks sources against the installed adapters: an enabled source needs its adapter, a disabled one gets a notice.
+- **Employer registry.**
+  - CRUD with optimistic locking, and archive instead of delete.
+  - Search through a JPA Specification: tag, industry, minimum priority, source, adapter type, enabled, archived, and text with escaped `LIKE`.
+  - Paging and whitelisted sorting.
+  - Bindings that can be disabled but never deleted, and per-user preferences (`user_employer_preference`, private).
+- **Import/export.**
+  - `EmployerSet` and `JobSource` YAML import, as a declarative upsert where undeclared bindings are disabled.
+  - Single-document YAML import over the API.
+  - CSV import with `row N.column` errors.
+  - CSV export with spreadsheet-formula neutralization, and YAML export that re-imports as UNCHANGED.
+  - Every path shares one validation pipeline, is all-or-nothing, and supports dry runs.
+- **REST `/api/v1`.**
+  - Endpoints: `employers`, `employers/{key}/bindings/{source}/{ref}`, `me/employer-preferences`, `sources`, `plugins/job-source-adapters`, `config/validation`, `config/import`, `config/documents` and `exchange/employers`.
+  - RFC 9457 errors with field lists, OpenAPI, and a 5 MB upload limit.
+- **Local identity mode.** A filter binds the configured local user for `/api/*`. This is not authentication, which arrives in Phase 8.
+- **V7 migration.** Adds `user_employer_preference`, and `employer.tags` becomes `varchar(63)[]` (see below).
+
+**Design changes**
+- Employer↔source bindings moved into the employer module, to keep module dependencies acyclic when filtering employers by source.
+- There's a new `plugin` module.
+
+**Problems found and fixed**
+- **jsonb comparison.** PostgreSQL returns `jsonb` re-formatted, so comparing stored settings or metadata with our canonical JSON as text always reported a change. `JsonCodec.canonicalize` now normalizes before comparing, with regression tests.
+- **Tag search type.** `text[] @> varchar[]` has no operator in PostgreSQL. The tags column is now `varchar(63)[]`, so tag filtering runs in SQL on the GIN index.
+
+**Verification**
+- `./mvnw clean install`: 178 tests, 0 failures (13 SPI unit tests, 94 app unit tests, 71 integration tests).
+- A local run against Compose PostgreSQL showed:
+  - re-import reports UNCHANGED for every item
+  - enabling a source without its adapter returns 409
+  - CSV export and import work, including a dry run with row-level errors

@@ -16,6 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, TestPluginsConfiguration.class})
 @ActiveProfiles("test")
 public @interface IntegrationTest {}
