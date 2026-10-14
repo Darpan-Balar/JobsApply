@@ -1,23 +1,18 @@
-# Latest Session: 2026-10-14 (Phase 5)
+# Latest Session: 2026-10-14 (Phase 6)
 
-1. Phase 4 was merged with a fast-forward and pushed. Phase 5 started on `phase-5-preparation`.
-2. **Research:**
-   - Verified Greenhouse's `questions=true` shape live.
-   - Found a burst of about 60 releases of openhtmltopdf starting July 2026, so pinned 1.1.37 with PDFBox 3.0.8 (ADR-0010).
-3. **Built:**
-   - preparation plugins: resume, cover note, answers, HTML and PDF renderers
-   - Greenhouse questions
-   - `TraceabilityValidator`
-   - the encrypted document store and master resume
-   - immutable encrypted packages and `PreparationService` with edits
-   - application service, templates config kind, REST
-   - V10
-4. **Bugs fixed:**
-   - availability "confirmed" from stale state
-   - binary uploads corrupted by text decoding
-   - cover-note sort order
-   - the migration-order test now derives its expectations from the shipped files
-5. **Verified:**
-   - 327 tests green
-   - local V10 with the template imported
-6. **Next:** wait for review.
+1. Phase 5 was merged with a fast-forward and pushed. Phase 6 started on `phase-6-workflow`.
+2. **Built:**
+   - V11 (approvals, attempts, audit subject)
+   - application module: approve, start, outcome, verify, recover, withdraw, plus domain events
+   - new `submission` module: gates, idempotent start, recovery, REST
+   - synchronous `AuditRecorder` and `GET /me/audit`
+   - `CandidateEvents` and `PreparationEvents`
+   - ADR-0011
+3. **Bugs fixed:**
+   - a FAILED application could never get back to review when the package was unchanged
+   - verification accepted CONFIRMED without evidence
+   - `isCredible()` was serialised into the stored evidence JSON, which broke reading it back
+4. **Verified:**
+   - 342 tests green, including races of 4 threads on approve and start
+   - a local run applied V11 and the endpoints answer on :8090
+5. **Next:** wait for review.

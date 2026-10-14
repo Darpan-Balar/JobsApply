@@ -23,7 +23,9 @@ public final class PreparationViews {
 
     public record Result(UUID applicationId, ApplicationStatus status, Outcome outcome, Integer packageVersion, List<PackageIssue> issues) {}
 
-    public record PackageView(UUID id, int versionNo, Instant createdAt, int blockingIssues, int warnings, PackageContent content) {}
+    /** @param contentHash keyed fingerprint of the package's substance; an approval is bound to it */
+    public record PackageView(UUID id, int versionNo, Instant createdAt, int blockingIssues, int warnings, String contentHash,
+            PackageContent content) {}
 
     public record PackageVersion(UUID id, int versionNo, Instant createdAt, int blockingIssues, int warnings) {}
 

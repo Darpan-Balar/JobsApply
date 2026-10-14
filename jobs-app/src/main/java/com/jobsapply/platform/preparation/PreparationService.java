@@ -67,6 +67,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -111,6 +112,7 @@ public class PreparationService {
     private final PersonalDataCipher cipher;
     private final JsonCodec json;
     private final TransactionTemplate transactions;
+    private final ApplicationEventPublisher events;
     private final Clock clock;
 
     // --- prepare ---------------------------------------------------------------------------------------------------
@@ -349,7 +351,10 @@ public class PreparationService {
         if (app.currentPackageId() != null) {
             ApplicationPackage current = transactions.execute(s -> packages.findById(app.currentPackageId()).orElseThrow());
             if (current.getContentHash().equals(fingerprint)) {
-                return new Result(app.id(), app.status(), Outcome.UNCHANGED, current.getVersionNo(), content.issues());
+                // After a definite failure the same package goes back to review; it then needs a fresh approval.
+                ApplicationStatus status = app.status() != ApplicationStatus.FAILED ? app.status()
+                        : transactions.execute(s -> advance(app.id(), current.getBlockingIssues() == 0));
+                return new Result(app.id(), status, Outcome.UNCHANGED, current.getVersionNo(), content.issues());
             }
         }
 
@@ -374,6 +379,7 @@ public class PreparationService {
                 }, fingerprint, blocking, warnings);
                 packages.save(pkg);
                 packages.flush();
+                events.publishEvent(new PreparationEvents.PackageCreated(app.id(), owner, pkg.getId(), versionNo, blocking, warnings, clock.instant()));
                 documents.saveAll(docs);
                 applications.recordPreparation(app.id(), content.candidate().versionId(), content.role().versionId(),
                         matchId != null ? matchId : content.match().matchId(),
@@ -505,7 +511,8 @@ public class PreparationService {
     }
 
     private PreparationViews.PackageView view(ApplicationPackage p) {
-        return new PreparationViews.PackageView(p.getId(), p.getVersionNo(), p.getCreatedAt(), p.getBlockingIssues(), p.getWarnings(), decrypt(p));
+        return new PreparationViews.PackageView(p.getId(), p.getVersionNo(), p.getCreatedAt(), p.getBlockingIssues(), p.getWarnings(),
+                p.getContentHash(), decrypt(p));
     }
 
     private PackageContent decrypt(ApplicationPackage p) {

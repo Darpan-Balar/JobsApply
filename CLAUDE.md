@@ -61,11 +61,20 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - READY_FOR_REVIEW requires zero BLOCKING issues, including availability *confirmed by a check made now*.
 - Master resumes and packages are immutable. Read uploads as raw bytes (`RequestBodies.readBytes`), never as text.
 
+## Submission rules (ADR-0006, ADR-0011), do not weaken
+- Approve only the current, complete package. A new package version revokes the approval.
+- An approval is used once.
+- `POST /submission` requires an `Idempotency-Key`.
+- SUBMITTED needs credible evidence, whether reported or verified. Only the user resolves SUBMISSION_UNCONFIRMED. Nothing is retried automatically.
+- At startup, SUBMITTING becomes SUBMISSION_UNCONFIRMED (`SubmissionRecovery`, the only cross-user scan).
+- Audit payloads hold ids, statuses and codes only: never evidence text, URLs or user free text.
+
 ## Gotchas learned
 - **`JsonCodec.canonicalize` must keep decimal scale.** It does, by reading decimals as `BigDecimal`. Comparing with values read as `double` breaks idempotency.
 - **jsonb is returned re-formatted** by PostgreSQL. Never compare stored JSON text with our canonical JSON; use `JsonCodec.canonicalize`.
 - **Hibernate binds array parameters as `varchar[]`.** Array columns queried with array predicates must be `varchar(n)[]`, not `text[]`.
 - **Run `clean` after renaming or removing a migration.** Otherwise `target/classes` keeps the old file and Flyway sees duplicate versions.
+- **Jackson serialises `isX()`/`getX()` methods on records as properties**, which breaks reading them back. Name derived methods record-style (`credible()`, `blockingIssues()`).
 - **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
 - **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select version from flyway_schema_history order by installed_rank desc limit 1`). Do NOT use `max(version)`: the column is text, so "9" sorts after "10".
 

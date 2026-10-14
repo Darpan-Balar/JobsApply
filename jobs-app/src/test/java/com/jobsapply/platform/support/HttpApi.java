@@ -61,6 +61,11 @@ public final class HttpApi {
         return post(path, "application/json", MAPPER.writeValueAsString(body));
     }
 
+    public Response postJson(String path, Object body, String headerName, String headerValue) {
+        return send(HttpRequest.newBuilder(URI.create(base + path)).header("Content-Type", "application/json").header(headerName, headerValue)
+                .POST(HttpRequest.BodyPublishers.ofString(MAPPER.writeValueAsString(body))));
+    }
+
     public Response putJson(String path, Object body) {
         return send(HttpRequest.newBuilder(URI.create(base + path)).header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(MAPPER.writeValueAsString(body))));

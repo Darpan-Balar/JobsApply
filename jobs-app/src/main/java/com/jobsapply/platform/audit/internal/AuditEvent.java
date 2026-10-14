@@ -37,6 +37,10 @@ public class AuditEvent extends BaseEntity {
     @Column(name = "actor_user_id")
     private UUID actorUserId;
 
+    /** Whose data the event concerns. */
+    @Column(name = "subject_user_id", updatable = false)
+    private UUID subjectUserId;
+
     @Column(name = "aggregate_type", nullable = false, length = 100, updatable = false)
     private String aggregateType;
 

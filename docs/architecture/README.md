@@ -120,9 +120,10 @@ flowchart LR
   matching --> candidate
   matching --> roleprofile
   preparation --> matching
-  application --> preparation
-  application --> posting
-  automation --> application
+  preparation --> application
+  submission --> preparation
+  submission --> application
+  automation --> submission
   tracking --> application
   scheduling --> discovery
   scheduling --> matching
@@ -132,7 +133,8 @@ flowchart LR
   configimport --> roleprofile
   configimport --> catalog
   audit -. listens to events .-> application
-  audit -. listens to events .-> discovery
+  audit -. listens to events .-> preparation
+  audit -. listens to events .-> candidate
   SPI[(jobs-spi)]
   source --> SPI
   matching --> SPI
@@ -804,3 +806,49 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - An unconfirmed availability blocks READY_FOR_REVIEW.
 - Packages are immutable and encrypted at rest, and private to their owner.
 - A local run applied V10 and imported the resume template.
+
+### Phase 6 outcome (2026-10-14)
+
+**Delivered (see ADR-0011, which implements ADR-0006)**
+- **New `submission` module:**
+  - `SubmissionService`: approval gates, approve, revoke (back to review), start, report outcome, verify, withdraw
+  - `SubmissionRecovery` (at startup, SUBMITTING → SUBMISSION_UNCONFIRMED)
+  - REST under `/me/applications/{id}`: `approval[/blockers]`, `approvals`, `submission` (with an `Idempotency-Key` header), `submission/{attempt}/outcome`, `verification`, `attempts`, `withdrawal`
+- **Application module:**
+  - `SubmissionApproval` (single use, bound to the package id and hash)
+  - `ApplicationAttempt` (idempotency key, channel, outcome, evidence encrypted with row-bound AAD, verification)
+  - `ApplicationService` approval and submission operations. The generic `transition` can't reach APPROVED, SUBMITTING, SUBMITTED or UNCONFIRMED.
+  - Domain events in `ApplicationEvents`
+- **Audit:**
+  - A synchronous `AuditRecorder` in the same transaction, recording application, package and candidate-version events
+  - `audit_event.subject_user_id`
+  - `GET /me/audit`, private to the caller. Records hold no evidence, URLs or free-text reasons.
+- **V11:**
+  - `submission_approval`, with a partial unique index allowing one active approval and a check that the approver is the owner
+  - `application_attempt`, with three uniqueness rules: one attempt per approval, idempotency keys unique per user, and one in-progress attempt per application
+  - the audit subject column
+- **Module direction:** submission → application, preparation. Audit listens to application, preparation and candidate. The application module still has no outward dependencies.
+
+**Problems found and fixed**
+- **Retry after failure:** after a FAILED attempt, re-preparing an unchanged package returned UNCHANGED and left the application FAILED for good. It now goes back to READY_FOR_REVIEW, and a fresh approval is still required.
+- **Verification evidence:** verification accepted `CONFIRMED` without evidence. Reported and verified outcomes now share one evidence rule.
+- **Stored evidence:** `SubmissionEvidence.isCredible()` was serialised as a JSON property, which broke reading stored evidence back. It was renamed `credible()`, following the record-style convention.
+
+**Verification**
+- `./mvnw clean install`: 342 tests, 0 failures. This adds `SubmissionIT` (14 tests) and `SubmissionApiIT`.
+- Gates tested: an unanswered required question blocks approval, and a stale package id is refused.
+- A package change revokes the approval.
+- An approval is single use.
+- Idempotent replays return the same attempt, and a key can't be reused for another application.
+- Evidence rules hold, and evidence is encrypted at rest.
+- FAILED → re-preparation → fresh approval works.
+- Crash recovery leads to UNCONFIRMED, after which only verification is possible.
+- There is at most one live application per vacancy across candidate profiles; withdrawing frees it.
+- Parallel races, 4 threads each:
+  - approvals: exactly 1 approval
+  - starts with different keys: exactly 1 attempt
+  - starts reusing one key: 1 attempt
+- The audit trail is free of personal data and private to its subject.
+- Another user gets 404 everywhere.
+- Over HTTP, a missing or invalid `Idempotency-Key` returns 400.
+- A local run applied V11, and the app is healthy on :8090.

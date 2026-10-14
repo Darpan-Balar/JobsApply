@@ -2,6 +2,7 @@
 
 - Status: Accepted (2026-10-14)
 - Date: 2026-10-14
+- Implemented by: ADR-0011 (approval gates, idempotency, evidence, recovery, audit)
 
 ## Context
 Submissions are consequential external actions that can't be undone. Batches must never auto-submit. Uncertain outcomes must never be retried blindly.

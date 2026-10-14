@@ -8,3 +8,7 @@ The authoritative records are the ADRs in `docs/adr/`. This is an index only.
 - 0005: candidate profiles as immutable jsonb snapshots with stable fact IDs
 - 0006: 13-state application machine, single-use approvals, no automatic retries
 - 0007: entity, Lombok and JSON conventions
+- 0008: discovery, availability only from authoritative evidence, dedup
+- 0009: matching via CandidateFacts, UNKNOWN when facts are missing, encrypted snapshots
+- 0010: preparation (traceable fact-backed content, immutable encrypted packages)
+- 0011: approval and submission workflow (approval gates over the reviewed package, idempotency keys, evidence rules, crash recovery, synchronous audit; Modulith outbox deferred to Phase 9)

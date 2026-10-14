@@ -22,6 +22,11 @@ public abstract class OwnedEntity extends BaseEntity {
     @Column(name = "owner_user_id", nullable = false, updatable = false)
     private UUID ownerUserId;
 
+    /** The owner; before the first insert (when Hibernate assigns it) this is the bound user. */
+    public UUID getOwnerUserIdOrCurrent() {
+        return ownerUserId != null ? ownerUserId : UserContext.requireUserId();
+    }
+
     @PostLoad
     void verifyOwnership() {
         UUID current = UserContext.requireUserId();

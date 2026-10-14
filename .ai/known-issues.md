@@ -39,3 +39,9 @@
 - **Classpath:** Jackson 2 is present via springdoc. Our code must use only Jackson 3 (`tools.jackson.*`).
 - **Docker dependency:** integration tests require a running Docker daemon.
 - **Spotless/formatter** was deferred. palantir-java-format compatibility with JDK 25 hasn't been evaluated.
+- **Submission (ADR-0011):**
+  - Until Phase 7 the outcome is self-reported. CONFIRMED requires evidence text, but the app can't check it.
+  - Audit records are written synchronously in the business transaction, so an audit failure fails the operation. The Modulith outbox is deferred to Phase 9.
+  - Crash recovery and its cross-user scan assume a single instance.
+  - A replay that races the first request with the same `Idempotency-Key` may get 409 instead of the attempt. It never creates a second attempt.
+  - Withdrawal is only possible from SUBMITTED. Before submission, use reject.

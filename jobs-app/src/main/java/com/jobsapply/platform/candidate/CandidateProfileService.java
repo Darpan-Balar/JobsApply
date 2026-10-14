@@ -14,6 +14,7 @@ import com.jobsapply.spi.common.VerificationStatus;
 import com.jobsapply.spi.profile.CandidateFact;
 import com.jobsapply.spi.profile.CandidateSnapshot;
 import jakarta.validation.Valid;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -43,6 +45,8 @@ public class CandidateProfileService {
     private final CandidateSnapshotValidator validator;
     private final PersonalDataCipher cipher;
     private final JsonCodec json;
+    private final ApplicationEventPublisher events;
+    private final Clock clock;
 
     /** A version together with its decrypted snapshot. */
     public record CurrentVersion(UUID profileId, UUID versionId, int versionNo, CandidateSnapshot snapshot) {}
@@ -88,6 +92,8 @@ public class CandidateProfileService {
         CandidateProfileVersion version = versions.save(CandidateProfileVersion.create(profileId, nextVersionNo,
                 SNAPSHOT_SCHEMA_VERSION, id -> cipher.encrypt(plaintext, aad(id, owner)), fingerprint, note));
         profile.makeCurrent(version.getId());
+        events.publishEvent(new CandidateEvents.VersionCreated(profileId, version.getId(), nextVersionNo, owner, note == null ? null
+                : note.startsWith("verified") || note.startsWith("imported") || note.equals("edited") ? note : "custom note", clock.instant()));
         return toRef(version);
     }
 

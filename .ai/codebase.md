@@ -45,10 +45,17 @@
     - `ResumeTemplateService` / `ResumeTemplateSpec`
     - `internal/ApplicationPackage` and `ApplicationDocument` (immutable, encrypted)
     - `web/ApplicationController`
-  - `application`: `ApplicationService` (`openOrCreate`, `transition`, `recordPreparation`, views).
+  - `application`:
+    - `ApplicationService`: `openOrCreate`, `transition` (approval and submission states blocked), `recordPreparation`, `approve`, `revokeApproval`, `startSubmission`, `recordOutcome`, `verify`, `markInterrupted`, `withdraw`, views
+    - `internal/SubmissionApproval` and `ApplicationAttempt` (evidence encrypted)
+    - `ApplicationEvents`, `SubmissionEvidence` (`credible()`)
+  - `submission`:
+    - `SubmissionService`: gates, approve, revoke, start (returns the application link), outcome, verify, withdraw
+    - `internal/SubmissionRecovery`: startup recovery and the only cross-user scan
+    - `web/SubmissionController`
   - `candidate`: also `MasterResumeService` and `web/MasterResumeController`.
   - `shared/storage/DocumentStore`: encrypted, write-once files under `jobs.storage.directory`.
-  - `audit`: `AuditEvent` entity.
+  - `audit`: `AuditEvent` (`subject_user_id`), `internal/AuditRecorder` (synchronous `@EventListener`, ids and codes only), `AuditService.mine`, `web/AuditController` (`GET /me/audit`).
   - `configimport`: `ConfigImportService` (directory, single YAML document, CSV content), `EmployerExchangeService` (CSV import; CSV/YAML export), `internal/EmployerCsv`, `web/ConfigController`, `internal/ConfigLoader` (YAML → envelope → upgraders → record → Bean Validation), `internal/SemanticValidator` (cross-document rules), `internal/ConfigStartupRunner`.
 - `jobs-adapters/` (`com.jobsapply.adapters`):
   - `http/` holds `HttpFetcher`, `HostRateLimiter`, `HttpTransport`/`JdkHttpTransport`, `AbstractHttpJobSourceAdapter` and `Json`.

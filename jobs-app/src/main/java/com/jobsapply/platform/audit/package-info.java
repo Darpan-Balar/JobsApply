@@ -1,5 +1,5 @@
 /**
- * Append-only audit log. Phase 1: schema and entity; the event listener that records domain events arrives in
- * Phase 6. Payloads must be redacted before they are written.
+ * Append-only audit log. Domain events are recorded synchronously inside the transaction that caused them, so a change
+ * and its audit record commit (or roll back) together. Payloads hold ids, statuses, codes and counts only.
  */
 package com.jobsapply.platform.audit;
