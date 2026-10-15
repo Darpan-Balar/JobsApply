@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link, useSearchParams } from "react-router";
 import { api, rawRequest, unwrap, type Schemas } from "../api/client";
 import { Card, Empty, ErrorBanner, Loading, Notice } from "../components/ui";
 import { formatDateTime, humanize } from "../lib/format";
@@ -6,11 +7,17 @@ import { useAction, useResource } from "../lib/useResource";
 
 export function ProfilesPage() {
   const profiles = useResource(() => unwrap(api.GET("/api/v1/me/candidate-profiles")), []);
-  const [selected, setSelected] = useState<string>();
+  const [params] = useSearchParams();
+  const [selected, setSelected] = useState<string | undefined>(params.get("selected") ?? undefined);
   const key = selected ?? profiles.data?.[0]?.key;
   return (
     <>
-      <h1>Candidate profiles</h1>
+      <div className="row-between">
+        <h1>Candidate profiles</h1>
+        <Link className="button-link" to="/profiles/new">
+          New profile from my resume
+        </Link>
+      </div>
       <Notice>
         Your profile holds the facts every resume line and answer is built from. It is encrypted and visible only to you. Imported facts count only
         after you confirm them.
@@ -32,10 +39,13 @@ export function ProfilesPage() {
                 ))}
               </ul>
             ) : (
-              <Empty>No profile yet. Import one below.</Empty>
+              <Empty>No profile yet. Create one from your resume.</Empty>
             )}
           </Card>
-          <ImportProfile onImported={profiles.reload} />
+          <details>
+            <summary>Advanced: import a profile written in YAML</summary>
+            <ImportProfile onImported={profiles.reload} />
+          </details>
         </div>
         <div>{key && <ProfileDetail profileKey={key} />}</div>
       </div>
@@ -115,7 +125,17 @@ function ProfileDetail({ profileKey }: { profileKey: string }) {
   return (
     <>
       <ErrorBanner error={detail.error ?? resumes.error ?? action.error} onDismiss={action.clearError} />
-      <Card title={detail.data?.profile?.displayName ?? profileKey} actions={<span className="muted small-text">version {detail.data?.currentVersion?.versionNo}</span>}>
+      <Card
+        title={detail.data?.profile?.displayName ?? profileKey}
+        actions={
+          <span className="button-row">
+            <span className="muted small-text">version {detail.data?.currentVersion?.versionNo}</span>
+            <Link className="button-link small" to={`/profiles/${encodeURIComponent(profileKey)}/edit`}>
+              Edit
+            </Link>
+          </span>
+        }
+      >
         <dl className="facts">
           <dt>Name</dt>
           <dd>{contact?.fullName ?? "—"}</dd>

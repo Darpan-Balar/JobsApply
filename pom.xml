@@ -22,6 +22,7 @@
         <module>jobs-spi</module>
         <module>jobs-adapters</module>
         <module>jobs-browser</module>
+        <module>jobs-llm-anthropic</module>
         <module>jobs-web</module>
         <module>jobs-app</module>
     </modules>
@@ -42,6 +43,8 @@
         <pdfbox.version>3.0.8</pdfbox.version>
         <!-- Browser assistance (Phase 7). Apache-2.0. Downloads its browser build on first use unless a channel is set. -->
         <playwright.version>1.63.0</playwright.version>
+        <!-- Optional Claude extraction (ADR-0015). MIT. Latest release at least two weeks old on 2026-10-15. -->
+        <anthropic-java.version>2.68.0</anthropic-java.version>
     </properties>
 
     <dependencyManagement>
@@ -67,6 +70,16 @@
                 <groupId>com.jobsapply</groupId>
                 <artifactId>jobs-browser</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.jobsapply</groupId>
+                <artifactId>jobs-llm-anthropic</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.anthropic</groupId>
+                <artifactId>anthropic-java</artifactId>
+                <version>${anthropic-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jobsapply</groupId>

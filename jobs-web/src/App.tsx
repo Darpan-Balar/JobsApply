@@ -11,6 +11,7 @@ import { JobDetailPage } from "./pages/JobDetailPage";
 import { JobsPage } from "./pages/JobsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MatchesPage } from "./pages/MatchesPage";
+import { ProfileEditPage } from "./pages/ProfileEditPage";
 import { ProfilesPage } from "./pages/ProfilesPage";
 import { SetupPage } from "./pages/SetupPage";
 import { TrackingPage } from "./pages/TrackingPage";
@@ -37,6 +38,8 @@ export function App() {
         <Route path="/applications" element={<ApplicationsPage />} />
         <Route path="/applications/:id" element={<ApplicationDetailPage />} />
         <Route path="/profiles" element={<ProfilesPage />} />
+        <Route path="/profiles/new" element={<ProfileEditPage />} />
+        <Route path="/profiles/:key/edit" element={<ProfileEditPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/tracking" element={<TrackingPage />} />
         <Route path="/account" element={<AccountPage />} />

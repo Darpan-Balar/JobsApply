@@ -2193,6 +2193,31 @@
           }
         }
       },
+      "ProfileDraft" : {
+        "properties" : {
+          "extractor" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "sentExternally" : {
+            "type" : "boolean"
+          },
+          "snapshot" : {
+            "$ref" : "#/components/schemas/CandidateSnapshot"
+          },
+          "unknownSkills" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        }
+      },
       "RawLocation" : {
         "properties" : {
           "city" : {
@@ -2264,6 +2289,19 @@
           },
           "heading" : {
             "type" : "string"
+          }
+        }
+      },
+      "ResumeImportServiceExtractorOption" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "sendsTextExternally" : {
+            "type" : "boolean"
           }
         }
       },
@@ -2708,6 +2746,16 @@
             "type" : "string"
           },
           "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SkillControllerSkillView" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
             "type" : "string"
           }
         }
@@ -4875,6 +4923,63 @@
         "tags" : [ "My candidate profiles" ]
       }
     },
+    "/api/v1/me/candidate-profiles/drafts" : {
+      "post" : {
+        "description" : "Nothing is stored. Every fact is unconfirmed; review and save it with PUT /me/candidate-profiles/{key}. An extractor that sends text externally receives it with e-mail, phone, links and your name masked.",
+        "operationId" : "draft",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "resume",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "extractor",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfileDraft"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Read a resume (raw PDF, DOCX or text body) into a draft profile",
+        "tags" : [ "Profile from resume" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/extractors" : {
+      "get" : {
+        "operationId" : "extractors",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ResumeImportServiceExtractorOption"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Profile from resume" ]
+      }
+    },
     "/api/v1/me/candidate-profiles/import" : {
       "post" : {
         "description" : "Facts are marked UNVERIFIED unless trust=true; confirm them via /verification. Max 5 MB.",
@@ -6175,6 +6280,27 @@
         "tags" : [ "Role profiles" ]
       }
     },
+    "/api/v1/skills" : {
+      "get" : {
+        "operationId" : "skills",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SkillControllerSkillView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Skill catalog" ]
+      }
+    },
     "/api/v1/sources" : {
       "get" : {
         "operationId" : "list_2",
@@ -6409,6 +6535,12 @@
   }, {
     "description" : "Append-only record of what happened to your data",
     "name" : "My audit trail"
+  }, {
+    "description" : "The shared skill catalog (for picking skills in a profile)",
+    "name" : "Skill catalog"
+  }, {
+    "description" : "Propose an unconfirmed profile from a resume file (nothing is saved)",
+    "name" : "Profile from resume"
   }, {
     "description" : "Prepare, review and edit application packages (no submission in this phase)",
     "name" : "My applications"

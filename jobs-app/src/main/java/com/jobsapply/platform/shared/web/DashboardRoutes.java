@@ -18,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Controller
 class DashboardRoutes {
 
-    @GetMapping({"/", "/jobs", "/jobs/**", "/applications", "/applications/**", "/matches", "/profiles", "/tracking", "/account", "/admin"})
+    @GetMapping({"/", "/jobs", "/jobs/**", "/applications", "/applications/**", "/matches", "/profiles", "/profiles/**", "/tracking", "/account", "/admin"})
     ModelAndView dashboard(HttpServletResponse response) {
         response.setHeader("Cache-Control", CacheControl.noCache().getHeaderValue());
         return new ModelAndView("forward:/index.html");

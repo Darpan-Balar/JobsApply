@@ -13,6 +13,8 @@ import com.jobsapply.adapters.preparation.FactBasedResumeGenerator;
 import com.jobsapply.adapters.preparation.RuleBasedAnswerDrafter;
 import com.jobsapply.adapters.render.HtmlResumeRenderer;
 import com.jobsapply.adapters.render.PdfResumeRenderer;
+import com.jobsapply.adapters.resume.HeuristicResumeExtractor;
+import com.jobsapply.adapters.resume.LocalDocumentReader;
 import com.jobsapply.adapters.matching.ScoreComponents;
 import com.jobsapply.adapters.matching.WeightedMatchingStrategy;
 import com.jobsapply.spi.matching.EligibilityRule;
@@ -93,6 +95,16 @@ public class BuiltInAdaptersAutoConfiguration {
     @Bean
     PdfResumeRenderer pdfResumeRenderer() {
         return new PdfResumeRenderer();
+    }
+
+    @Bean
+    LocalDocumentReader localDocumentReader() {
+        return new LocalDocumentReader();
+    }
+
+    @Bean
+    HeuristicResumeExtractor heuristicResumeExtractor() {
+        return new HeuristicResumeExtractor();
     }
 
     @Bean

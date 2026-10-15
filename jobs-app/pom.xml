@@ -29,6 +29,12 @@
             <artifactId>jobs-browser</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- Optional Claude extraction; inactive unless ANTHROPIC_API_KEY is set (ADR-0015). -->
+        <dependency>
+            <groupId>com.jobsapply</groupId>
+            <artifactId>jobs-llm-anthropic</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <!-- The dashboard's built files (static/), served on the same origin. -->
         <dependency>
             <groupId>com.jobsapply</groupId>

@@ -66,6 +66,7 @@ const STATUS_TONE: Record<string, string> = {
   CONFIRMED: "success",
   IN_PROGRESS: "warning",
   UNCONFIRMED: "warning",
+  UNVERIFIED: "warning",
 };
 
 export function Badge({ value }: { value?: string }) {

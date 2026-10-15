@@ -6,7 +6,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.jobsapply.platform.identity.UserRole;
 import com.jobsapply.platform.support.ApiTest;
 import com.jobsapply.platform.support.HttpApi;
+import com.jobsapply.platform.support.SampleResumes;
 import com.jobsapply.platform.support.TestAccounts;
+import com.jobsapply.platform.configimport.ConfigImportService;
+import com.microsoft.playwright.options.FilePayload;
+import tools.jackson.databind.JsonNode;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
@@ -37,6 +41,7 @@ class DashboardE2EIT {
     int port;
 
     @Autowired TestAccounts accounts;
+    @Autowired ConfigImportService config;
 
     @BeforeAll
     static void launch() {
@@ -116,6 +121,31 @@ class DashboardE2EIT {
 
         assertThat(errors).as("no console errors (e.g. Content-Security-Policy violations)")
                 .noneMatch(e -> e.contains("Content Security Policy") || e.contains("Refused"));
+    }
+
+    @Test
+    void aProfileIsCreatedFromAResumeInTheBrowser() {
+        config.importDirectory(java.nio.file.Path.of("..", "config"), false);
+        String user = account();
+        String key = uniqueKey("cv");
+        Page page = newPage(new ArrayList<>());
+        signIn(page, user);
+        page.navigate(url("/profiles/new"));
+        page.getByLabel("Resume file").setInputFiles(new FilePayload("cv.txt", "text/plain",
+                SampleResumes.CLASSIC.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Read my resume")).click();
+        page.getByText("Everything below is unconfirmed", new Page.GetByTextOptions().setExact(false)).waitFor();
+        assertThat(page.getByLabel("Job title").first().inputValue()).isEqualTo("Senior Backend Engineer");
+
+        page.getByLabel("Short key").fill(key);
+        page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Save profile")).click();
+        page.waitForURL("**/profiles?selected=" + key);
+
+        HttpApi api = HttpApi.signedIn(port, user, TestAccounts.PASSWORD);
+        JsonNode detail = api.get("/api/v1/me/candidate-profiles/" + key).json();
+        assertThat(detail.get("snapshot").get("experiences").size()).isEqualTo(2);
+        assertThat(detail.get("factsByVerification").get("UNVERIFIED").asInt()).as("not confirmed by the import").isPositive();
+        assertThat(api.get("/api/v1/me/candidate-profiles/" + key + "/master-resumes").json().get(0).get("fileName").asString()).isEqualTo("cv.txt");
     }
 
     @Test

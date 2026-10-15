@@ -46,6 +46,13 @@ Once it's running, open the dashboard at **http://127.0.0.1:8090**.
 
 The first time, it asks you to create your account. That screen is available only on this machine and only once. The account becomes the administrator and keeps everything already stored. Administrators add further people under **Admin**.
 
+Then go to **Profiles → New profile from my resume**:
+1. Upload your PDF (or .docx or .txt).
+2. Check and complete what was read. Add what a resume doesn't say, such as work authorization or notice period.
+3. Save.
+
+Nothing is used until you've reviewed it. Reading happens on your machine. If you set `ANTHROPIC_API_KEY` in `.env`, you can choose to have Claude read it instead, for better results. The text is then sent to Anthropic with your name, e-mail, phone and links masked, and only after you tick a consent box (ADR-0015).
+
 Other endpoints:
 - `http://127.0.0.1:8090/actuator/health`
 - `http://127.0.0.1:8090/v3/api-docs`
@@ -83,6 +90,7 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `GET /auth/session`, `POST /auth/setup` (first account, this machine only), `POST /auth/login` (form), `POST /auth/logout`, `POST /me/password` | Sign-in and your password |
 | `GET/POST /admin/users`, `POST /admin/users/{id}/password`, `POST /admin/users/{id}/disable` | Accounts (ADMIN) |
 | `GET/POST /me/contacts`, `GET/PUT/DELETE /me/contacts/{id}`, `GET /me/interviews`, `POST /me/applications/{id}/interviews`, `PUT/DELETE /me/interviews/{id}`, `POST /me/interviews/{id}/status`, `GET/POST /me/follow-ups`, `PUT/DELETE /me/follow-ups/{id}`, `POST /me/follow-ups/{id}/done` and `/reopen`, `GET /me/tracking/summary` | Tracking after submission (encrypted, private) |
+| `POST /me/candidate-profiles/drafts?fileName=&extractor=` (raw PDF, DOCX or text), `GET /me/candidate-profiles/extractors`, `GET /skills` | Read a resume into an unconfirmed draft profile (nothing stored); save it with `PUT /me/candidate-profiles/{key}` |
 | `GET /me/audit?aggregateId=` | Your audit trail (ids and statuses only) |
 | `POST /me/candidate-profiles/{key}/master-resumes` (raw PDF, DOCX or text), `GET .../master-resumes/{id}/content` | Your master resume, kept exactly as uploaded |
 

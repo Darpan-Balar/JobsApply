@@ -15,7 +15,7 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 
 ## Architecture rules (see docs/adr)
 - **Modular monolith.** Each feature module lives under `com.jobsapply.platform.<module>`. The module's base package is its public API, and `internal/` is private. Modules reference each other **by ID only**. `ModularityTest` enforces this, so don't weaken it.
-- **`jobs-spi`** must stay free of Spring, JPA, Hibernate and Jackson (`SpiDependencyRulesTest`). `jobs-adapters` and `jobs-browser` (Playwright) compile against the SPI only, and `jobs-app` depends on them at runtime scope.
+- **`jobs-spi`** must stay free of Spring, JPA, Hibernate and Jackson (`SpiDependencyRulesTest`). `jobs-adapters`, `jobs-browser` (Playwright) and `jobs-llm-anthropic` (optional Claude) compile against the SPI only, and `jobs-app` depends on them at runtime scope.
 - **Multi-user (ADR-0002):**
   - Personal aggregates extend `OwnedEntity`, whose `@TenantId` sets the owner automatically.
   - Bind `UserContext.runAs(userId, …)` **before** opening a transaction.
@@ -64,6 +64,12 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - READY_FOR_REVIEW requires zero BLOCKING issues, including availability *confirmed by a check made now*.
 - Master resumes and packages are immutable. Read uploads as raw bytes (`RequestBodies.readBytes`), never as text.
 
+## Profile-from-resume rules (ADR-0015), do not weaken
+- Extractors report only what the resume states (`null` otherwise). Never fill a missing month, city or level with a guess.
+- Drafts are never stored. Every drafted fact is UNVERIFIED, and only the user's edits or explicit "everything is true" confirm facts.
+- The local extraction always runs and supplies contact details. An extractor with `sendsTextExternally()` runs only when chosen per upload (with consent in the UI) and receives `TextMasking`-masked text.
+- `jobs-llm-anthropic` registers nothing without `ANTHROPIC_API_KEY`. Use the official SDK (no raw HTTP), model `claude-opus-5-5` unless the user says otherwise, structured outputs, and handle refusals.
+
 ## Accounts and dashboard rules (ADR-0013), do not weaken
 - There is no unauthenticated access to `/api/v1/**` beyond `/auth/**`. Writes need the CSRF header. Catalog writes and `/admin/**` need ADMIN. Never give ADMIN access to other users' personal data.
 - `UserContextFilter` binds the signed-in user. Tests sign in through `HttpApi` (`TestAccounts`), never through a bypass.
@@ -107,6 +113,7 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - **openapi-fetch captures `fetch` at creation**, so the client passes `fetch: (r) => globalThis.fetch(r)` and an absolute base URL. Both are needed for tests and harmless in browsers.
 - **Hikari's `connection-timeout` binds a plain number of milliseconds**, not a duration string like `10s`.
 - **Async event listeners have no `UserContext`.** Anything a listener needs (such as the actor) must be in the event.
+- **jsdom treats a `required` file input as empty even after an upload**, which silently blocks form submit in tests. Guard with a disabled button instead.
 - **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
 - **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select version from flyway_schema_history order by installed_rank desc limit 1`). Do NOT use `max(version)`: the column is text, so "9" sorts after "10".
 

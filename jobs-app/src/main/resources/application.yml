@@ -82,6 +82,11 @@ jobs:
     legacy-username: local   # the pre-login account; first-account setup takes it over (keeps its data)
     max-failed-logins: 5
     lockout: 15m
+  llm:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:}   # optional; set it in .env to offer "Use Claude" when reading a resume
+      model: claude-opus-5-5
+      effort: low
   operations:
     sync:
       enabled: true

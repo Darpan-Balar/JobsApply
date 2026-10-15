@@ -59,6 +59,7 @@
   - `operations`: `internal/ScheduledJobs` (sync, retention, `ClusterLock`), `internal/HealthIndicators`, `internal/DomainMetrics`, `SystemService` and `web/SystemController` (`/api/v1/admin/system`), `OperationsProperties` (`jobs.operations.*`).
   - `export`: `ExportService` and `web/ExportController` (`/api/v1/me/export`).
   - `shared/persistence/ClusterLock` (advisory lock); `shared/config/AsyncSchedulingConfiguration`.
+  - `resumeimport`: `ResumeImportService` (drafts from resume files), `internal/TextMasking`, `web/ResumeImportController`; `catalog/web/SkillController` (`/api/v1/skills`).
   - `submission`:
     - `SubmissionService`: gates, approve, revoke, start (returns the application link), outcome, verify, withdraw
     - `internal/SubmissionRecovery`: startup recovery and the only cross-user scan
@@ -83,3 +84,4 @@
 - `jobs-browser`: `PlaywrightApplicationAdapter` (single browser thread; `actAsHuman` test hook), `BrowserSettings` (`jobs.browser.*`), `inspect-form.js`, `BrowserAssistAutoConfiguration`. Tests: `PlaywrightApplicationAdapterIT` with fixture forms in `src/test/resources/forms`.
 - `jobs-web`: React dashboard. `src/api/client.ts` (openapi-fetch, CSRF, ApiError), `src/api/openapi.json` (contract snapshot; `schema.d.ts` generated), `src/auth/session.tsx`, `src/pages/*` (one per route), `src/components/*` (PackageReview, SubmissionPanel incl. AssistPanel/OutcomeForm, ApplicationTracking, ui), tests `*.test.tsx` (Vitest, `src/test/fetchMock.ts`). Built by frontend-maven-plugin into `target/classes/static`.
 - `scripts/`: `backup-lib.sh` (shared helpers), `backup.sh`, `verify-backup.sh`, `restore.sh`. Tested by `BackupRestoreIT`.
+- `jobs-adapters/resume`: `LocalDocumentReader`, `HeuristicResumeExtractor`. `jobs-llm-anthropic`: `ClaudeResumeExtractor`, `AnthropicAutoConfiguration` (only with an API key). Dashboard: `components/ProfileEditor.tsx`, `pages/ProfileEditPage.tsx`.

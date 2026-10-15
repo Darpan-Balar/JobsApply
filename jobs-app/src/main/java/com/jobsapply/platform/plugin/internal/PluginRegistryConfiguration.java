@@ -3,6 +3,8 @@ package com.jobsapply.platform.plugin.internal;
 import com.jobsapply.platform.plugin.PluginProperties;
 import com.jobsapply.platform.plugin.PluginRegistry;
 import com.jobsapply.spi.application.ApplicationAdapter;
+import com.jobsapply.spi.resume.DocumentReader;
+import com.jobsapply.spi.resume.ResumeExtractor;
 import com.jobsapply.spi.common.Plugin;
 import com.jobsapply.spi.common.PluginKind;
 import com.jobsapply.spi.matching.EligibilityRule;
@@ -76,6 +78,16 @@ class PluginRegistryConfiguration {
     PluginRegistry<ApplicationAdapter> applicationAdapters(
             ObjectProvider<ApplicationAdapter> plugins, PluginProperties properties, Validator validator) {
         return new PluginRegistry<>(PluginKind.APPLICATION_ADAPTER, plugins.orderedStream().toList(), properties.disabled(), validator);
+    }
+
+    @Bean
+    PluginRegistry<DocumentReader> documentReaders(ObjectProvider<DocumentReader> plugins, PluginProperties properties, Validator validator) {
+        return new PluginRegistry<>(PluginKind.DOCUMENT_READER, plugins.orderedStream().toList(), properties.disabled(), validator);
+    }
+
+    @Bean
+    PluginRegistry<ResumeExtractor> resumeExtractors(ObjectProvider<ResumeExtractor> plugins, PluginProperties properties, Validator validator) {
+        return new PluginRegistry<>(PluginKind.RESUME_EXTRACTOR, plugins.orderedStream().toList(), properties.disabled(), validator);
     }
 
     /** Role profiles reference these plugins by name, so the plugin id must equal that name (checked at startup). */

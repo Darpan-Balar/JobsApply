@@ -132,12 +132,16 @@ flowchart LR
   export --> preparation
   export --> tracking
   export --> audit
+  resumeimport --> catalog
+  resumeimport --> plugin
   tracking --> application
   operations --> discovery
   export --> candidate
   export --> preparation
   export --> tracking
   export --> audit
+  resumeimport --> catalog
+  resumeimport --> plugin
   scheduling --> discovery
   scheduling --> matching
   configimport --> employer
@@ -1002,3 +1006,32 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - `SystemApiIT`: admin-only system view, metrics and health details; the backlog shows as WARNING with HTTP 200.
 - Existing audit assertions now wait for the asynchronous write.
 - Vitest: Admin System card.
+
+### Phase 10 outcome (2026-10-15): profile from a resume
+
+**Delivered (see ADR-0015)**
+- **SPI:** `DocumentReader`, `ResumeExtractor`, `ResumeExtraction`, and the plugin kinds DOCUMENT_READER and RESUME_EXTRACTOR.
+- **`jobs-adapters`:** `LocalDocumentReader` (PDF, DOCX, text) and `HeuristicResumeExtractor`.
+- **New module `jobs-llm-anthropic`:** `ClaudeResumeExtractor` (Anthropic Java SDK 2.68.0, `claude-opus-5-5`, effort low, JSON-schema structured output, refusal fallback). Registered only with `ANTHROPIC_API_KEY`.
+- **New app module `resumeimport`:** `ResumeImportService`, which handles:
+  - file type detection from content
+  - the local reading that always runs
+  - masked text for external extractors
+  - mapping to the catalog, degree levels, fact ids and UNVERIFIED status
+- **REST:** `/me/candidate-profiles/drafts`, `/me/candidate-profiles/extractors`, `/skills`.
+- **Dashboard:**
+  - `ProfileEditor` (contact, positions with achievements and skills, education, skills, other facts; edited or added facts are confirmed, untouched imported facts are not)
+  - `/profiles/new` (resume upload with an extractor choice and per-upload consent for Claude; saves the file as the master resume)
+  - `/profiles/:key/edit`
+  - YAML import moved under "Advanced"
+
+**Verification**
+- `./mvnw clean install`: 417 Java test cases plus 25 Vitest tests, 0 failures.
+- `HeuristicResumeExtractorTest` covers two layouts: contact details, positions with title, employer, location and dates, wrapped highlights, education with degree, field and completion, skills, and missing months left empty with notes.
+- `LocalDocumentReaderTest` reads a real PDF (rendered by our own renderer), DOCX and text, and gives clear failures.
+- `ClaudeResumeExtractorTest` runs against a local stand-in API. It checks the request (model, effort, schema, fallback, key header), parsing, a refusal, a 429 treated as transient, and a 401 without echoing the text.
+- `ResumeImportApiIT`: an unconfirmed draft mapped onto the catalog, a real PDF, nothing stored until saved, bad files refused, sign-in required.
+- `ClaudeResumeImportIT`: what reaches the stand-in API has the name, e-mail, phone and link masked; the structure comes from Claude and the contact details from the local reading.
+- `DashboardE2EIT` (real Chromium): upload, read, review, save, and the master resume stored.
+- Vitest: editor confirmation semantics, required fields, catalog skill picker, consent before using Claude, the draft shown before anything is saved.
+- A local run without an API key: the app is UP, the Claude extractor is not registered, and the new-profile page loads.
