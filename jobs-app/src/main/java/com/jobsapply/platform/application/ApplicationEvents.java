@@ -5,8 +5,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Domain events of the application aggregate, published synchronously inside the changing transaction (the audit log
- * is written atomically with the change). They carry ids, statuses and codes only — never personal data.
+ * Domain events of the application aggregate. They are stored in the event publication registry in the changing
+ * transaction and delivered to listeners after commit (ADR-0014), so they must be self-contained (including who acted)
+ * and serializable. They carry ids, statuses and codes only — never personal data.
  */
 public final class ApplicationEvents {
 
@@ -18,7 +19,9 @@ public final class ApplicationEvents {
 
     public record ApprovalGranted(UUID applicationId, UUID ownerId, UUID approvalId, UUID packageId, Instant at) {}
 
-    public record ApprovalRevoked(UUID applicationId, UUID ownerId, UUID approvalId, String reasonCode, Instant at) {}
+    /** @param actorUserId who caused the revocation, or {@code null} for the system */
+    public record ApprovalRevoked(UUID applicationId, UUID ownerId, UUID approvalId, String reasonCode, ActorType actorType, UUID actorUserId,
+            Instant at) {}
 
     public record AttemptStarted(UUID applicationId, UUID ownerId, UUID attemptId, UUID approvalId, SubmissionChannel channel, Instant at) {}
 

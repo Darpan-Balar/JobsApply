@@ -379,7 +379,8 @@ public class PreparationService {
                 }, fingerprint, blocking, warnings);
                 packages.save(pkg);
                 packages.flush();
-                events.publishEvent(new PreparationEvents.PackageCreated(app.id(), owner, pkg.getId(), versionNo, blocking, warnings, clock.instant()));
+                events.publishEvent(new PreparationEvents.PackageCreated(app.id(), owner, UserContext.currentUserId().orElse(null), pkg.getId(),
+                        versionNo, blocking, warnings, clock.instant()));
                 documents.saveAll(docs);
                 applications.recordPreparation(app.id(), content.candidate().versionId(), content.role().versionId(),
                         matchId != null ? matchId : content.match().matchId(),

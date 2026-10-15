@@ -2,6 +2,7 @@ package com.jobsapply.platform;
 
 import static com.jobsapply.platform.support.ScriptedJobSourceAdapter.completePage;
 import static com.jobsapply.platform.support.TestData.uniqueKey;
+import static com.jobsapply.platform.support.Eventually.eventually;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.jobsapply.platform.configimport.ConfigImportService;
@@ -72,8 +73,8 @@ class SubmissionApiIT {
         assertThat(api.get(base).json().get("application").get("status").asString()).isEqualTo("SUBMITTED");
         assertThat(api.get(base + "/attempts").json().size()).isEqualTo(1);
 
-        assertThat(api.get("/api/v1/me/audit?aggregateId=" + id).json().findValuesAsString("eventType"))
-                .contains("approval-granted", "submission-started", "submission-finished");
+        eventually(() -> assertThat(api.get("/api/v1/me/audit?aggregateId=" + id).json().findValuesAsString("eventType"))
+                .contains("approval-granted", "submission-started", "submission-finished"));
         assertThat(api.postJson(base + "/withdrawal", Map.of()).json().get("status").asString()).isEqualTo("WITHDRAWN");
     }
 }

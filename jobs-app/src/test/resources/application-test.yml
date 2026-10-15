@@ -15,3 +15,8 @@ jobs:
     directory: target/test-data   # test files are removed by mvn clean
   browser:
     headless: true
+  operations:                # tests run the jobs explicitly
+    sync:
+      enabled: false
+    retention:
+      enabled: false

@@ -286,7 +286,7 @@ public class ApplicationService {
             approvals.findActive(application.getId()).ifPresent(a -> {
                 a.revoke(now, "left APPROVED: " + target);
                 events.publishEvent(new ApplicationEvents.ApprovalRevoked(application.getId(), application.getOwnerUserId(), a.getId(),
-                        "LEFT_APPROVED_" + target, now));
+                        "LEFT_APPROVED_" + target, actor.type(), actor.userId(), now));
             });
         }
         publishStatus(application, from, target, actor, reason);

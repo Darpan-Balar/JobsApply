@@ -20,6 +20,14 @@ public interface SyncRunRepository extends JpaRepository<SyncRun, UUID> {
             """)
     int abortRunning(Instant now);
 
+    /** Retention: finished runs (their errors go with them, by cascade). Running ones are never deleted. */
+    @Modifying
+    @Query("""
+            delete from SyncRun r where r.finishedAt < :before
+                   and r.status <> com.jobsapply.platform.discovery.SyncRunStatus.RUNNING
+            """)
+    int deleteFinishedBefore(Instant before);
+
     List<SyncRun> findByOrderByStartedAtDesc(Pageable pageable);
 
     List<SyncRun> findByJobSourceIdOrderByStartedAtDesc(UUID jobSourceId, Pageable pageable);

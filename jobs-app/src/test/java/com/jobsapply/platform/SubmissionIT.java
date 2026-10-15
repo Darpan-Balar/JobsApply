@@ -1,5 +1,6 @@
 package com.jobsapply.platform;
 
+import static com.jobsapply.platform.support.Eventually.eventually;
 import static com.jobsapply.platform.support.ScriptedJobSourceAdapter.completePage;
 import static com.jobsapply.platform.support.TestData.uniqueKey;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -340,9 +341,8 @@ class SubmissionIT {
         AttemptView attempt = startApproved(applicationId);
         as(() -> submissions.reportOutcome(applicationId, attempt.id(), AttemptOutcome.CONFIRMED, EVIDENCE));
 
-        List<AuditService.AuditView> trail = as(() -> audit.mine(applicationId, 100));
-        assertThat(trail).extracting(AuditService.AuditView::eventType)
-                .contains("approval-granted", "submission-started", "submission-finished", "status-changed", "package-created");
+        eventually(() -> assertThat(as(() -> audit.mine(applicationId, 100))).extracting(AuditService.AuditView::eventType)
+                .contains("approval-granted", "submission-started", "submission-finished", "status-changed", "package-created"));
         List<String> payloads = jdbc.queryForList("select payload::text from audit_event where subject_user_id = ?", String.class, user);
         assertThat(payloads).isNotEmpty().allSatisfy(p -> assertThat(p).doesNotContain("Jane", "REF-4711", "jobs.example"));
 

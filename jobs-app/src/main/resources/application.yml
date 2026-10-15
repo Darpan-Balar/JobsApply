@@ -8,6 +8,9 @@ spring:
     url: ${JOBS_DB_URL:jdbc:postgresql://localhost:5433/jobs}
     username: ${JOBS_DB_USER:jobs}
     password: ${JOBS_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000   # ms (Hikari binds a plain number)
   jpa:
     open-in-view: false
     hibernate:
@@ -19,10 +22,20 @@ spring:
   threads:
     virtual:
       enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s   # let running requests and event deliveries finish on shutdown
+  modulith:
+    events:
+      # Event publication registry (ADR-0014): Flyway owns the table (V14); unfinished deliveries are retried on restart.
+      jdbc:
+        schema-initialization:
+          enabled: false
+      republish-outstanding-events-on-restart: true
 
 server:
   address: 127.0.0.1              # local-first: not reachable from the network by default
   port: ${JOBS_PORT:8090}         # override with JOBS_PORT
+  shutdown: graceful
   servlet:
     session:
       timeout: 4h                 # idle timeout of a signed-in session
@@ -40,6 +53,13 @@ management:
     health:
       probes:
         enabled: true
+      show-details: when-authorized   # administrators only (ADR-0014)
+      show-components: when-authorized
+      roles: ADMIN
+      status:
+        order: DOWN, OUT_OF_SERVICE, WARNING, UNKNOWN, UP
+        http-mapping:
+          WARNING: 200
 
 logging:
   structured:
@@ -62,6 +82,15 @@ jobs:
     legacy-username: local   # the pre-login account; first-account setup takes it over (keeps its data)
     max-failed-logins: 5
     lockout: 15m
+  operations:
+    sync:
+      enabled: true
+      cron: "0 0 6,12,18 * * *"      # every active employer binding, three times a day
+    retention:
+      enabled: true
+      cron: "0 30 3 * * *"
+      sync-runs: 90d
+      event-publications: 7d
   config:
     directory: config
     import-on-startup: false

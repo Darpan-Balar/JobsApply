@@ -8,6 +8,7 @@ import com.jobsapply.platform.employer.EmployerService;
 import com.jobsapply.platform.employer.SyncTarget;
 import com.jobsapply.platform.shared.error.NotFoundException;
 import com.jobsapply.platform.source.SourceService;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,6 +26,12 @@ public class SyncRunQueryService {
     private final SyncErrorRepository errors;
     private final EmployerService employers;
     private final SourceService sources;
+
+    /** Retention: deletes sync runs (and their errors) that finished before {@code before}. */
+    @Transactional
+    public int purgeFinishedBefore(Instant before) {
+        return runs.deleteFinishedBefore(before);
+    }
 
     /** Most recent first, optionally for one source and/or one employer. */
     @Transactional(readOnly = true)

@@ -8,6 +8,7 @@ public final class PreparationEvents {
 
     private PreparationEvents() {}
 
-    public record PackageCreated(UUID applicationId, UUID ownerId, UUID packageId, int versionNo, int blockingIssues, int warnings,
-            Instant at) {}
+    /** @param actorUserId the user whose request created the package, or {@code null} for the system */
+    public record PackageCreated(UUID applicationId, UUID ownerId, UUID actorUserId, UUID packageId, int versionNo, int blockingIssues,
+            int warnings, Instant at) {}
 }
