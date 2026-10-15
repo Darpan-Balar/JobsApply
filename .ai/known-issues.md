@@ -37,6 +37,7 @@
 - **Posting dedup:** `fk_application_listing (job_listing_id, job_posting_id)` will block re-pointing a listing that an application uses to another posting during a dedup merge. This must be designed in Phase 3.
 - **Accounts (ADR-0013):** sessions and lockout counters are in memory (a restart signs everyone out); there's no e-mail password reset (an admin sets a new password); one instance assumed.
 - **Dashboard gaps:** resume claim editing, employer editing and employer preferences are API-only (employers also via YAML/CSV). Local `npm` needs Node ≥ 22.22 (use `jobs-web/node/node`) and npm 11 (npm 10.9 crashes on vitest 5 peers).
+- **Operations (ADR-0014):** the audit log is eventually consistent (asynchronous). Locks and sessions assume one database and one app instance. There's no Prometheus scrape endpoint (read `/actuator/metrics` as admin). Backup scripts assume the Compose container (`docker exec`). The export lists document checksums; the bytes are downloaded separately.
 - **Tenant context timing:** `UserContext` must be bound before a transaction starts. A transaction opened without it sees nothing and can't insert owned rows (fails closed).
 - **Classpath:** Jackson 2 is present via springdoc. Our code must use only Jackson 3 (`tools.jackson.*`).
 - **Docker dependency:** integration tests require a running Docker daemon.

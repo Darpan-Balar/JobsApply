@@ -127,7 +127,17 @@ flowchart LR
   assist --> preparation
   assist --> plugin
   tracking --> application
+  operations --> discovery
+  export --> candidate
+  export --> preparation
+  export --> tracking
+  export --> audit
   tracking --> application
+  operations --> discovery
+  export --> candidate
+  export --> preparation
+  export --> tracking
+  export --> audit
   scheduling --> discovery
   scheduling --> matching
   configimport --> employer
@@ -951,3 +961,44 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - `OpenApiContractIT`.
 - Vitest: API client CSRF and expiry handling, sign-in/setup, role navigation, approval blocked by blockers, approving the exact version, the same idempotency key reused on retry, evidence rules, self-identification never asked.
 - A local run applied V12 and V13. Setup is pending for the owner, and the legacy `local` user still has no password.
+
+### Phase 9 outcome (2026-10-15)
+
+**Delivered (see ADR-0014)**
+- **Audit outbox (V14):**
+  - Spring Modulith event publication registry (JDBC)
+  - `AuditRecorder` as an asynchronous, retried, idempotent `@ApplicationModuleListener`
+  - events made self-contained (`ApprovalRevoked`, `PackageCreated` carry their actor)
+- **`operations` module:**
+  - `ScheduledJobs` (sync three times a day, retention daily), both behind `ClusterLock` advisory locks
+  - `SystemService` and `/api/v1/admin/system` (view, sync now, retention now)
+  - health indicators (encryption, document store, delivery backlog as WARNING)
+  - domain counters
+- **`export` module:** `GET /api/v1/me/export` (all of the user's data, owner-scoped, `no-store`).
+- **`scripts/backup.sh|verify-backup.sh|restore.sh`:** verified backups, and non-destructive restore into a new database and directory.
+- **Dashboard:**
+  - Account → Download my data
+  - Admin → System card (health, schedules, backlog, run-now); the admin sync goes through the locked scheduled path
+- **Hardening:**
+  - graceful shutdown
+  - Hikari limits
+  - health details and metrics for ADMIN only
+
+**Problems found and fixed**
+- **Duplicate YAML key:** a duplicated `spring.datasource` block (the YAML failed to load).
+- **Hikari timeout:** `connection-timeout` needs plain milliseconds.
+
+**Verification**
+- `OutboxIT`:
+  - stored with the change and completed after delivery
+  - a forced audit failure keeps the event, and resubmission records it
+  - a re-delivered event is recorded once
+- `OperationsIT`:
+  - a held lock makes the scheduled sync skip
+  - scheduled runs are recorded as SCHEDULED
+  - retention deletes only old finished runs and delivered events
+- `BackupRestoreIT`: the real scripts against PostgreSQL. A backup restores with identical counts and documents, damage is detected, and an existing database is never overwritten.
+- `ExportApiIT`: own data complete, another user's export contains none of it, 401 when signed out.
+- `SystemApiIT`: admin-only system view, metrics and health details; the backlog shows as WARNING with HTTP 200.
+- Existing audit assertions now wait for the asynchronous write.
+- Vitest: Admin System card.

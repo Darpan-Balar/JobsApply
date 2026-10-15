@@ -41,6 +41,18 @@ class SystemApiIT {
     }
 
     @Test
+    void metricsAreForAdministratorsAndCountSignIns() {
+        HttpApi admin = new HttpApi(port);
+        JsonNode signins = admin.get("/actuator/metrics/jobs.auth.signins?tag=result:success").json();
+        assertThat(signins.get("measurements").get(0).get("value").asDouble()).isPositive();
+
+        String username = uniqueKey("m");
+        accounts.account(username, UserRole.USER);
+        assertThat(HttpApi.signedIn(port, username, TestAccounts.PASSWORD).get("/actuator/metrics").status()).isEqualTo(403);
+        assertThat(HttpApi.anonymous(port).get("/actuator/metrics").status()).isEqualTo(401);
+    }
+
+    @Test
     void healthDetailsAreForAdministratorsAndAnUndeliveredBacklogIsAWarning() {
         JsonNode anonymous = HttpApi.anonymous(port).get("/actuator/health").json();
         assertThat(anonymous.has("components")).isFalse();

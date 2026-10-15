@@ -14,3 +14,4 @@ The authoritative records are the ADRs in `docs/adr/`. This is an index only.
 - 0011: approval and submission workflow (approval gates over the reviewed package, idempotency keys, evidence rules, crash recovery, synchronous audit; Modulith outbox deferred to Phase 9)
 - 0012: browser-assisted filling (separate jobs-browser module, platform-planned HIGH-only fills from the approved package, pauses on login/MFA/challenges, human submits, confirmation plus form gone = evidence)
 - 0013: accounts (session sign-in, SPA CSRF, BCrypt, USER/ADMIN, loopback one-time setup claiming the legacy user), tracking (encrypted contacts/interviews/follow-ups), dashboard (React/Vite in jobs-web, OpenAPI-contract types)
+- 0014: operations (audit via Modulith outbox, advisory-locked schedules, retention, verified backups/non-destructive restore, per-user export, admin-only health details and metrics)

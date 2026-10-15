@@ -9,6 +9,7 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - Unit tests only, no Docker: `./mvnw test`
 - Integration tests only: `./mvnw -pl jobs-app verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false`
 - Run the app (port 8090): `docker compose up -d --wait && ./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.profiles=local`
+- Backups: `scripts/backup.sh`, `scripts/verify-backup.sh <dir>`, `scripts/restore.sh <dir> <new-db> <new-dir>` (database container must be running)
 - Validate config: `./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.arguments="--jobs.config.validate-only=true"`
 - Live tests (real public job-board APIs, opt-in): `./mvnw -pl jobs-adapters verify -Plive`. For the full pipeline, add `-pl jobs-app ... -Plive -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false`. Never part of the default build.
 
@@ -71,13 +72,20 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - The dashboard never uses `dangerouslySetInnerHTML`, inline scripts or external origins (CSP `script-src 'self'`).
 - The OpenAPI snapshot `jobs-web/src/api/openapi.json` must match the server (`OpenApiContractIT`). Nested DTO schema names include their enclosing type.
 
+## Operations rules (ADR-0014), do not weaken
+- Audit entries are recorded by `@ApplicationModuleListener` via the event publication registry (asynchronous after commit, retried). Events must be self-contained (actor included), serializable, and free of personal data. `AuditRecorder` must stay idempotent. Tests assert audit with `Eventually.eventually`.
+- Scheduled jobs run through `ClusterLock.runExclusively` (advisory lock). Retention never deletes personal data, audit entries, running syncs or undelivered events.
+- Backups: `scripts/backup.sh` must keep verifying by restoring into a scratch database. `restore.sh` must never overwrite an existing database or directory. Backups never contain the encryption key.
+- `/api/v1/me/export` is built only from owner-scoped services.
+- Health details and `/actuator/metrics` are ADMIN-only. Metric tags are codes, never ids or personal data.
+
 ## Submission rules (ADR-0006, ADR-0011), do not weaken
 - Approve only the current, complete package. A new package version revokes the approval.
 - An approval is used once.
 - `POST /submission` requires an `Idempotency-Key`.
 - SUBMITTED needs credible evidence, whether reported or verified. Only the user resolves SUBMISSION_UNCONFIRMED. Nothing is retried automatically.
 - At startup, SUBMITTING becomes SUBMISSION_UNCONFIRMED (`SubmissionRecovery`, the only cross-user scan).
-- Audit payloads hold ids, statuses and codes only: never evidence text, URLs or user free text.
+- Audit payloads hold ids, statuses and codes only: never evidence text, URLs or user free text. Audit is written asynchronously through the outbox (ADR-0014).
 
 ## Browser assistance rules (ADR-0012), do not weaken
 - The SPI has no submit operation. The human presses Submit, and the adapter only observes.
@@ -97,6 +105,8 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - **After changing the root POM**, install it (a full `./mvnw install`) before running `-pl` builds, which resolve sibling modules and the parent from `~/.m2`.
 - **npm 10.9 crashes** ("reading 'edgesOut'") resolving vitest 5's peers. The build pins npm 11.20.0; locally use `npx npm@11.20.0 install`.
 - **openapi-fetch captures `fetch` at creation**, so the client passes `fetch: (r) => globalThis.fetch(r)` and an absolute base URL. Both are needed for tests and harmless in browsers.
+- **Hikari's `connection-timeout` binds a plain number of milliseconds**, not a duration string like `10s`.
+- **Async event listeners have no `UserContext`.** Anything a listener needs (such as the actor) must be in the event.
 - **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
 - **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select version from flyway_schema_history order by installed_rank desc limit 1`). Do NOT use `max(version)`: the column is text, so "9" sorts after "10".
 

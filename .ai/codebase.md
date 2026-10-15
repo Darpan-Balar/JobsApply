@@ -56,6 +56,9 @@
   - `identity`: `UserService` (createUser/createAccount, setUpFirstAccount, change/reset password, disable, list), `internal/SecurityConfiguration` (filter chain, roles, CSP), `AccountDetailsService`, `LoginAttempts`, `UserContextFilter`, `CsrfCookieFilter`, `web/AuthController`, `web/AdminUserController`.
   - `tracking`: `TrackingService` (contacts, interviews, follow-ups, summary), `internal/Contact|Interview|FollowUp` (+ encrypted `Details`), `web/TrackingController`.
   - `shared/web/DashboardRoutes` (SPA routes → index.html, asset caching), `shared/web/OpenApiConfiguration` (nested schema names).
+  - `operations`: `internal/ScheduledJobs` (sync, retention, `ClusterLock`), `internal/HealthIndicators`, `internal/DomainMetrics`, `SystemService` and `web/SystemController` (`/api/v1/admin/system`), `OperationsProperties` (`jobs.operations.*`).
+  - `export`: `ExportService` and `web/ExportController` (`/api/v1/me/export`).
+  - `shared/persistence/ClusterLock` (advisory lock); `shared/config/AsyncSchedulingConfiguration`.
   - `submission`:
     - `SubmissionService`: gates, approve, revoke, start (returns the application link), outcome, verify, withdraw
     - `internal/SubmissionRecovery`: startup recovery and the only cross-user scan
@@ -79,3 +82,4 @@
 - `config/`: sample YAML (example role profiles, fictional disabled employers).
 - `jobs-browser`: `PlaywrightApplicationAdapter` (single browser thread; `actAsHuman` test hook), `BrowserSettings` (`jobs.browser.*`), `inspect-form.js`, `BrowserAssistAutoConfiguration`. Tests: `PlaywrightApplicationAdapterIT` with fixture forms in `src/test/resources/forms`.
 - `jobs-web`: React dashboard. `src/api/client.ts` (openapi-fetch, CSRF, ApiError), `src/api/openapi.json` (contract snapshot; `schema.d.ts` generated), `src/auth/session.tsx`, `src/pages/*` (one per route), `src/components/*` (PackageReview, SubmissionPanel incl. AssistPanel/OutcomeForm, ApplicationTracking, ui), tests `*.test.tsx` (Vitest, `src/test/fetchMock.ts`). Built by frontend-maven-plugin into `target/classes/static`.
+- `scripts/`: `backup-lib.sh` (shared helpers), `backup.sh`, `verify-backup.sh`, `restore.sh`. Tested by `BackupRestoreIT`.

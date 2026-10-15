@@ -4,6 +4,7 @@ import com.jobsapply.platform.identity.UserService;
 import com.jobsapply.platform.identity.UserSummary;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.util.Map;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +38,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, LoginAttempts attempts, UserService users, JsonMapper json) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, LoginAttempts attempts, UserService users, JsonMapper json,
+            MeterRegistry meters) {
         http
                 .csrf(csrf -> csrf.spa())
                 .authorizeHttpRequests(auth -> auth
@@ -58,6 +60,7 @@ public class SecurityConfiguration {
                         .loginProcessingUrl("/api/v1/auth/login")
                         .successHandler((request, response, authentication) -> {
                             attempts.succeeded(authentication.getName());
+                            meters.counter("jobs.auth.signins", "result", "success").increment();
                             AccountPrincipal principal = (AccountPrincipal) authentication.getPrincipal();
                             UserSummary user = users.get(principal.userId());
                             writeJson(json, response, HttpStatus.OK, new SessionView(
@@ -65,6 +68,7 @@ public class SecurityConfiguration {
                         })
                         .failureHandler((request, response, exception) -> {
                             String username = request.getParameter("username");
+                            meters.counter("jobs.auth.signins", "result", exception instanceof LockedException ? "locked" : "failure").increment();
                             if (exception instanceof LockedException) {
                                 problem(json, response, HttpStatus.TOO_MANY_REQUESTS, "Too many failed sign-ins",
                                         "This account is temporarily locked; try again later");

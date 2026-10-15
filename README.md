@@ -133,6 +133,30 @@ Add `--jobs.config.directory=/path/to/other/config` to validate a different dire
 ./mvnw -pl jobs-app verify -Plive -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false   # full sync pipeline, twice
 ```
 
+## Operations
+
+**Schedules** (`jobs.operations.*`):
+- Every active employer binding is synchronized at 06:00, 12:00 and 18:00.
+- Retention runs at 03:30. It deletes finished sync runs older than 90 days and delivered internal events older than 7 days, never personal data or the audit log.
+- Only one run happens at a time, even with two instances.
+- Admin → System shows the state and can run either job now.
+
+**Backups.** The database must be running (`docker compose up -d`):
+
+```bash
+scripts/backup.sh                       # → backups/jobs-<timestamp>/ (git-ignored); verified by a test restore while it is made
+scripts/verify-backup.sh backups/jobs-<timestamp>
+scripts/restore.sh backups/jobs-<timestamp> jobs_restored data_restored   # new database + new directory; overwrites nothing
+```
+
+To switch to a restored copy, first stop the app. Then rename the databases (`ALTER DATABASE jobs RENAME TO jobs_old; ALTER DATABASE jobs_restored RENAME TO jobs;`), swap the `data` directories, and start the app again.
+
+**Backups do not contain `JOBS_ENCRYPTION_KEY`.** Without that key, the personal data and documents in a backup can't be read, so keep the key backed up separately.
+
+**Your data.** Account → Download my data (`GET /api/v1/me/export`) gives you everything the platform holds about you as JSON.
+
+**Health and metrics.** `GET /actuator/health` returns the overall status to everyone. Component details (database, encryption key, document store, undelivered events) and `/actuator/metrics` are for administrators only (ADR-0014).
+
 ## Repository layout
 
 ```
