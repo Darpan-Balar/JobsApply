@@ -1,0 +1,6188 @@
+{
+  "components" : {
+    "schemas" : {
+      "AdminUserControllerCreateAccount" : {
+        "properties" : {
+          "displayName" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "email" : {
+            "maxLength" : 320,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          },
+          "role" : {
+            "enum" : [ "USER", "ADMIN" ],
+            "type" : "string"
+          },
+          "username" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "displayName", "password", "username" ]
+      },
+      "AdminUserControllerPasswordReset" : {
+        "properties" : {
+          "newPassword" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "newPassword" ]
+      },
+      "AnswerDraft" : {
+        "properties" : {
+          "answer" : {
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "origin" : {
+            "enum" : [ "FACT", "CONTACT", "USER", "NONE" ],
+            "type" : "string"
+          },
+          "questionId" : {
+            "type" : "string"
+          },
+          "sources" : {
+            "items" : {
+              "$ref" : "#/components/schemas/FactRef"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "enum" : [ "DRAFTED", "NEEDS_USER_INPUT", "NOT_APPLICABLE" ],
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationControllerAnswerBody" : {
+        "properties" : {
+          "answer" : {
+            "maxLength" : 10000,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationControllerPrepare" : {
+        "properties" : {
+          "additionalQuestions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationControllerQuestion"
+            },
+            "type" : "array"
+          },
+          "candidateProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "roleProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "candidateProfile", "postingId", "roleProfile" ]
+      },
+      "ApplicationControllerQuestion" : {
+        "properties" : {
+          "required" : {
+            "type" : "boolean"
+          },
+          "text" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "text" ]
+      },
+      "ApplicationControllerRejectBody" : {
+        "properties" : {
+          "reason" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationControllerResumeBody" : {
+        "properties" : {
+          "sections" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PreparationViewsSectionEdit"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "sections" ]
+      },
+      "ApplicationQuestion" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [ "STANDARD", "SCREENING", "SELF_IDENTIFICATION" ],
+            "type" : "string"
+          },
+          "options" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "required" : {
+            "type" : "boolean"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "TEXT", "TEXTAREA", "SINGLE_SELECT", "MULTI_SELECT", "BOOLEAN", "NUMBER", "DATE", "FILE" ],
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationServiceApprovalView" : {
+        "properties" : {
+          "approvedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "consumedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "packageHash" : {
+            "type" : "string"
+          },
+          "packageId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "revokeReason" : {
+            "type" : "string"
+          },
+          "revokedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationServiceAttemptView" : {
+        "properties" : {
+          "approvalId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "channel" : {
+            "enum" : [ "MANUAL", "BROWSER_ASSISTED" ],
+            "type" : "string"
+          },
+          "evidence" : {
+            "$ref" : "#/components/schemas/SubmissionEvidence"
+          },
+          "finishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "outcome" : {
+            "enum" : [ "IN_PROGRESS", "CONFIRMED", "FAILED", "UNCONFIRMED" ],
+            "type" : "string"
+          },
+          "packageId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "startedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "verifiedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationView" : {
+        "properties" : {
+          "candidateProfileId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "candidateProfileVersionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "currentPackageId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "history" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationViewHistoryEntry"
+            },
+            "type" : "array"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "jobListingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "jobMatchId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "roleProfileVersionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "DISCOVERED", "MATCHED", "NOT_ELIGIBLE", "PREPARED", "READY_FOR_REVIEW", "APPROVED", "SUBMITTING", "SUBMITTED", "SUBMISSION_UNCONFIRMED", "FAILED", "EXPIRED", "REJECTED_BY_USER", "WITHDRAWN" ],
+            "type" : "string"
+          },
+          "statusChangedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "ApplicationViewHistoryEntry" : {
+        "properties" : {
+          "actor" : {
+            "enum" : [ "USER", "SYSTEM" ],
+            "type" : "string"
+          },
+          "at" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "from" : {
+            "enum" : [ "DISCOVERED", "MATCHED", "NOT_ELIGIBLE", "PREPARED", "READY_FOR_REVIEW", "APPROVED", "SUBMITTING", "SUBMITTED", "SUBMISSION_UNCONFIRMED", "FAILED", "EXPIRED", "REJECTED_BY_USER", "WITHDRAWN" ],
+            "type" : "string"
+          },
+          "reason" : {
+            "type" : "string"
+          },
+          "to" : {
+            "enum" : [ "DISCOVERED", "MATCHED", "NOT_ELIGIBLE", "PREPARED", "READY_FOR_REVIEW", "APPROVED", "SUBMITTING", "SUBMITTED", "SUBMISSION_UNCONFIRMED", "FAILED", "EXPIRED", "REJECTED_BY_USER", "WITHDRAWN" ],
+            "type" : "string"
+          }
+        }
+      },
+      "AssistView" : {
+        "properties" : {
+          "applicationId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "attemptId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "blockers" : {
+            "items" : {
+              "enum" : [ "CAPTCHA", "MFA", "LOGIN_REQUIRED", "ACCESS_DENIED", "UNRECOGNIZED_FORM" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "filled" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AssistViewField"
+            },
+            "type" : "array"
+          },
+          "humanSteps" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "instructions" : {
+            "type" : "string"
+          },
+          "leftToYou" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AssistViewField"
+            },
+            "type" : "array"
+          },
+          "outcome" : {
+            "enum" : [ "IN_PROGRESS", "CONFIRMED", "FAILED", "UNCONFIRMED" ],
+            "type" : "string"
+          },
+          "requiredStillEmpty" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "state" : {
+            "enum" : [ "PAUSED_FOR_YOU", "READY_FOR_YOU", "WINDOW_NOT_OPEN", "CONFIRMED", "FAILED", "FINISHED" ],
+            "type" : "string"
+          }
+        }
+      },
+      "AssistViewField" : {
+        "properties" : {
+          "fieldId" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "required" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "AuditServiceAuditView" : {
+        "properties" : {
+          "actorType" : {
+            "enum" : [ "USER", "SYSTEM" ],
+            "type" : "string"
+          },
+          "aggregateId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "aggregateType" : {
+            "type" : "string"
+          },
+          "eventType" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "occurredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "payload" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          }
+        }
+      },
+      "AuthControllerPasswordChange" : {
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string"
+          },
+          "newPassword" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "currentPassword", "newPassword" ]
+      },
+      "AuthControllerSetup" : {
+        "properties" : {
+          "displayName" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "password" : {
+            "type" : "string"
+          },
+          "username" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "displayName", "password", "username" ]
+      },
+      "AvailabilityServiceAvailabilityReport" : {
+        "properties" : {
+          "availability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "checks" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AvailabilityServiceListingCheck"
+            },
+            "type" : "array"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }
+      },
+      "AvailabilityServiceListingCheck" : {
+        "properties" : {
+          "availability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "detail" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "type" : "string"
+          },
+          "method" : {
+            "type" : "string"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          }
+        }
+      },
+      "BindingView" : {
+        "properties" : {
+          "adapterId" : {
+            "type" : "string"
+          },
+          "consecutiveFailures" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "lastError" : {
+            "type" : "string"
+          },
+          "lastFailureAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "lastSuccessAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "priority" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CandidateAchievement" : {
+        "properties" : {
+          "experienceId" : {
+            "type" : "string"
+          },
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+            "type" : "string"
+          },
+          "skills" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "text" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "verification" : {
+            "enum" : [ "VERIFIED", "USER_PREFERENCE", "DERIVED", "UNVERIFIED", "SUPERSEDED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "text", "verification" ]
+      },
+      "CandidateAttribute" : {
+        "properties" : {
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+            "type" : "string"
+          },
+          "key" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9.-]{0,99}$",
+            "type" : "string"
+          },
+          "value" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "verification" : {
+            "enum" : [ "VERIFIED", "USER_PREFERENCE", "DERIVED", "UNVERIFIED", "SUPERSEDED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "key", "value", "verification" ]
+      },
+      "CandidateContact" : {
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "countryCode" : {
+            "pattern" : "^[A-Z]{2}$",
+            "type" : "string"
+          },
+          "email" : {
+            "format" : "email",
+            "type" : "string"
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "links" : {
+            "items" : {
+              "format" : "uri",
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "phone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CandidateEducation" : {
+        "properties" : {
+          "completed" : {
+            "type" : "boolean"
+          },
+          "end" : {
+            "type" : "string"
+          },
+          "field" : {
+            "type" : "string"
+          },
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+            "type" : "string"
+          },
+          "institution" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "level" : {
+            "enum" : [ "HIGH_SCHOOL", "ASSOCIATE", "BACHELOR", "MASTER", "DOCTORATE" ],
+            "type" : "string"
+          },
+          "start" : {
+            "type" : "string"
+          },
+          "verification" : {
+            "enum" : [ "VERIFIED", "USER_PREFERENCE", "DERIVED", "UNVERIFIED", "SUPERSEDED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "institution", "level", "verification" ]
+      },
+      "CandidateExperience" : {
+        "properties" : {
+          "employer" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "end" : {
+            "type" : "string"
+          },
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+            "type" : "string"
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "skills" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "start" : {
+            "type" : "string"
+          },
+          "title" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "verification" : {
+            "enum" : [ "VERIFIED", "USER_PREFERENCE", "DERIVED", "UNVERIFIED", "SUPERSEDED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "employer", "id", "start", "title", "verification" ]
+      },
+      "CandidateProfileControllerPutProfile" : {
+        "properties" : {
+          "displayName" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "snapshot" : {
+            "$ref" : "#/components/schemas/CandidateSnapshot"
+          }
+        },
+        "required" : [ "displayName", "snapshot" ]
+      },
+      "CandidateProfileControllerPutResult" : {
+        "properties" : {
+          "outcome" : {
+            "enum" : [ "CREATED", "NEW_VERSION", "UNCHANGED" ],
+            "type" : "string"
+          },
+          "version" : {
+            "$ref" : "#/components/schemas/CandidateProfileVersionRef"
+          }
+        }
+      },
+      "CandidateProfileControllerVerify" : {
+        "properties" : {
+          "all" : {
+            "type" : "boolean"
+          },
+          "factIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          }
+        }
+      },
+      "CandidateProfileDetail" : {
+        "properties" : {
+          "currentVersion" : {
+            "$ref" : "#/components/schemas/CandidateProfileVersionRef"
+          },
+          "factsByVerification" : {
+            "additionalProperties" : {
+              "format" : "int64",
+              "type" : "integer"
+            },
+            "type" : "object"
+          },
+          "profile" : {
+            "$ref" : "#/components/schemas/CandidateProfileRef"
+          },
+          "snapshot" : {
+            "$ref" : "#/components/schemas/CandidateSnapshot"
+          }
+        }
+      },
+      "CandidateProfileRef" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CandidateProfileVersionRef" : {
+        "properties" : {
+          "candidateProfileId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "contentHash" : {
+            "type" : "string"
+          },
+          "versionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "CandidateSkill" : {
+        "properties" : {
+          "id" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$",
+            "type" : "string"
+          },
+          "proficiency" : {
+            "enum" : [ "BASIC", "WORKING", "PROFICIENT", "EXPERT" ],
+            "type" : "string"
+          },
+          "skill" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          },
+          "verification" : {
+            "enum" : [ "VERIFIED", "USER_PREFERENCE", "DERIVED", "UNVERIFIED", "SUPERSEDED" ],
+            "type" : "string"
+          },
+          "years" : {
+            "minimum" : 0,
+            "type" : "number"
+          }
+        },
+        "required" : [ "id", "skill", "verification" ]
+      },
+      "CandidateSnapshot" : {
+        "properties" : {
+          "achievements" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateAchievement"
+            },
+            "type" : "array"
+          },
+          "attributes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateAttribute"
+            },
+            "type" : "array"
+          },
+          "contact" : {
+            "$ref" : "#/components/schemas/CandidateContact"
+          },
+          "education" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateEducation"
+            },
+            "type" : "array"
+          },
+          "experiences" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateExperience"
+            },
+            "type" : "array"
+          },
+          "skills" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateSkill"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "Claim" : {
+        "properties" : {
+          "sources" : {
+            "items" : {
+              "$ref" : "#/components/schemas/FactRef"
+            },
+            "type" : "array"
+          },
+          "text" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "userApproved" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "text" ]
+      },
+      "Compensation" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "max" : {
+            "type" : "number"
+          },
+          "min" : {
+            "type" : "number"
+          },
+          "period" : {
+            "enum" : [ "HOUR", "DAY", "WEEK", "MONTH", "YEAR" ],
+            "type" : "string"
+          },
+          "rawText" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ComponentScore" : {
+        "properties" : {
+          "component" : {
+            "type" : "string"
+          },
+          "matched" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "missing" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "reasons" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "value" : {
+            "type" : "number"
+          }
+        }
+      },
+      "ConfigImportReport" : {
+        "properties" : {
+          "applied" : {
+            "type" : "boolean"
+          },
+          "dryRun" : {
+            "type" : "boolean"
+          },
+          "issues" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ConfigIssue"
+            },
+            "type" : "array"
+          },
+          "notices" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "outcomes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ConfigItemOutcome"
+            },
+            "type" : "array"
+          },
+          "valid" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "ConfigIssue" : {
+        "properties" : {
+          "file" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "path" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConfigItemOutcome" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [ "JOB_FAMILY_SET", "SKILL_SET", "ROLE_PROFILE", "JOB_SOURCE", "EMPLOYER_SET", "RESUME_TEMPLATE", "CANDIDATE_PROFILE" ],
+            "type" : "string"
+          },
+          "outcome" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EmployerPreferenceView" : {
+        "properties" : {
+          "employerKey" : {
+            "type" : "string"
+          },
+          "employerName" : {
+            "type" : "string"
+          },
+          "mode" : {
+            "enum" : [ "WATCH", "IGNORE" ],
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "EmployerRequestsBindingBody" : {
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EmployerRequestsCreateEmployer" : {
+        "properties" : {
+          "bindings" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EmployerRequestsBindingBody"
+            },
+            "type" : "array"
+          },
+          "careersUrl" : {
+            "type" : "string"
+          },
+          "discoveryPriority" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "headquarters" : {
+            "type" : "string"
+          },
+          "industry" : {
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "metadata" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          },
+          "tags" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "website" : {
+            "type" : "string"
+          }
+        }
+      },
+      "EmployerRequestsPutBinding" : {
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "priority" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "EmployerRequestsPutPreference" : {
+        "properties" : {
+          "mode" : {
+            "enum" : [ "WATCH", "IGNORE" ],
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "mode" ]
+      },
+      "EmployerRequestsUpdateEmployer" : {
+        "properties" : {
+          "careersUrl" : {
+            "type" : "string"
+          },
+          "discoveryPriority" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "headquarters" : {
+            "type" : "string"
+          },
+          "industry" : {
+            "type" : "string"
+          },
+          "metadata" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          },
+          "tags" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "version" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "website" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "EmployerView" : {
+        "properties" : {
+          "archivedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "bindings" : {
+            "items" : {
+              "$ref" : "#/components/schemas/BindingView"
+            },
+            "type" : "array"
+          },
+          "careersUrl" : {
+            "type" : "string"
+          },
+          "discoveryPriority" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "headquarters" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "industry" : {
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "metadata" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          },
+          "normalizedName" : {
+            "type" : "string"
+          },
+          "tags" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "version" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "website" : {
+            "type" : "string"
+          }
+        }
+      },
+      "FactRef" : {
+        "properties" : {
+          "candidateProfileVersionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "factId" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "candidateProfileVersionId", "factId" ]
+      },
+      "JobSnapshot" : {
+        "properties" : {
+          "compensation" : {
+            "$ref" : "#/components/schemas/Compensation"
+          },
+          "descriptionText" : {
+            "type" : "string"
+          },
+          "employerKey" : {
+            "type" : "string"
+          },
+          "employmentType" : {
+            "enum" : [ "FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERNSHIP", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "locations" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RawLocation"
+            },
+            "type" : "array"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "seniority" : {
+            "enum" : [ "INTERN", "ENTRY", "MID", "SENIOR", "STAFF", "PRINCIPAL", "MANAGER", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "skills" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "titleNormalized" : {
+            "type" : "string"
+          },
+          "workplaceType" : {
+            "enum" : [ "REMOTE", "HYBRID", "ONSITE", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }
+      },
+      "JobSourceView" : {
+        "properties" : {
+          "adapterId" : {
+            "type" : "string"
+          },
+          "adapterInstalled" : {
+            "type" : "boolean"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "settings" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          },
+          "version" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        }
+      },
+      "MasterResumeServiceMasterResumeView" : {
+        "properties" : {
+          "fileName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "mediaType" : {
+            "type" : "string"
+          },
+          "sha256" : {
+            "type" : "string"
+          },
+          "sizeBytes" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "uploadedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "MatchControllerEvaluate" : {
+        "properties" : {
+          "candidateProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "roleProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "candidateProfile", "postingId", "roleProfile" ]
+      },
+      "MatchControllerRun" : {
+        "properties" : {
+          "candidateProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "roleProfile" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "candidateProfile", "roleProfile" ]
+      },
+      "MatchResult" : {
+        "properties" : {
+          "componentScores" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ComponentScore"
+            },
+            "type" : "array"
+          },
+          "eligibility" : {
+            "enum" : [ "ELIGIBLE", "NOT_ELIGIBLE", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "matched" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MatchResultRequirement"
+            },
+            "type" : "array"
+          },
+          "missing" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MatchResultRequirement"
+            },
+            "type" : "array"
+          },
+          "reasons" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "ruleOutcomes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RuleOutcome"
+            },
+            "type" : "array"
+          },
+          "score" : {
+            "type" : "number"
+          },
+          "strategyKey" : {
+            "type" : "string"
+          },
+          "strategyVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "uncertain" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MatchResultUncertainFact"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "MatchResultRequirement" : {
+        "properties" : {
+          "detail" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "value" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MatchResultUncertainFact" : {
+        "properties" : {
+          "reason" : {
+            "type" : "string"
+          },
+          "subject" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MatchRunReport" : {
+        "properties" : {
+          "candidateVersion" : {
+            "type" : "string"
+          },
+          "created" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "eligible" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "evaluated" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "excludedByPreference" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "notEligible" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "roleProfile" : {
+            "type" : "string"
+          },
+          "shortlisted" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "unchanged" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "unknown" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "updated" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "MatchView" : {
+        "properties" : {
+          "candidateVersion" : {
+            "type" : "string"
+          },
+          "eligibility" : {
+            "enum" : [ "ELIGIBLE", "NOT_ELIGIBLE", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "employerKey" : {
+            "type" : "string"
+          },
+          "employerName" : {
+            "type" : "string"
+          },
+          "evaluatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "postingAvailability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "postingTitle" : {
+            "type" : "string"
+          },
+          "result" : {
+            "$ref" : "#/components/schemas/MatchResult"
+          },
+          "roleProfileKey" : {
+            "type" : "string"
+          },
+          "roleVersionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "score" : {
+            "type" : "number"
+          },
+          "shortlisted" : {
+            "type" : "boolean"
+          },
+          "strategy" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MatchingServiceEvaluation" : {
+        "properties" : {
+          "match" : {
+            "$ref" : "#/components/schemas/MatchView"
+          },
+          "outcome" : {
+            "enum" : [ "CREATED", "UPDATED", "UNCHANGED" ],
+            "type" : "string"
+          }
+        }
+      },
+      "PackageContent" : {
+        "properties" : {
+          "answers" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PackageContentAnswer"
+            },
+            "type" : "array"
+          },
+          "availability" : {
+            "$ref" : "#/components/schemas/PackageContentAvailabilitySummary"
+          },
+          "candidate" : {
+            "$ref" : "#/components/schemas/PackageContentProfileRef"
+          },
+          "coverNote" : {
+            "$ref" : "#/components/schemas/PackageContentCoverNote"
+          },
+          "destination" : {
+            "$ref" : "#/components/schemas/PackageContentDestination"
+          },
+          "documents" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PackageContentDocumentRef"
+            },
+            "type" : "array"
+          },
+          "employerName" : {
+            "type" : "string"
+          },
+          "generatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "issues" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PackageContentPackageIssue"
+            },
+            "type" : "array"
+          },
+          "job" : {
+            "$ref" : "#/components/schemas/JobSnapshot"
+          },
+          "match" : {
+            "$ref" : "#/components/schemas/PackageContentMatchSummary"
+          },
+          "resume" : {
+            "$ref" : "#/components/schemas/ResumeDocument"
+          },
+          "role" : {
+            "$ref" : "#/components/schemas/PackageContentProfileRef"
+          },
+          "standardFields" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationQuestion"
+            },
+            "type" : "array"
+          },
+          "template" : {
+            "$ref" : "#/components/schemas/ResumeTemplateSpec"
+          }
+        }
+      },
+      "PackageContentAnswer" : {
+        "properties" : {
+          "draft" : {
+            "$ref" : "#/components/schemas/AnswerDraft"
+          },
+          "question" : {
+            "$ref" : "#/components/schemas/ApplicationQuestion"
+          }
+        }
+      },
+      "PackageContentAvailabilitySummary" : {
+        "properties" : {
+          "availability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "checks" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "PackageContentCoverNote" : {
+        "properties" : {
+          "claims" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Claim"
+            },
+            "type" : "array"
+          },
+          "closing" : {
+            "type" : "string"
+          },
+          "greeting" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PackageContentDestination" : {
+        "properties" : {
+          "applicationUrl" : {
+            "type" : "string"
+          },
+          "listingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PackageContentDocumentRef" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "mediaType" : {
+            "type" : "string"
+          },
+          "sha256" : {
+            "type" : "string"
+          },
+          "sizeBytes" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        }
+      },
+      "PackageContentMatchSummary" : {
+        "properties" : {
+          "eligibility" : {
+            "enum" : [ "ELIGIBLE", "NOT_ELIGIBLE", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "matchId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "reasons" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "score" : {
+            "type" : "number"
+          },
+          "uncertain" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "PackageContentPackageIssue" : {
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "severity" : {
+            "enum" : [ "BLOCKING", "WARNING" ],
+            "type" : "string"
+          }
+        }
+      },
+      "PackageContentProfileRef" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "versionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PageResultEmployerView" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EmployerView"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PageResultMatchView" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MatchView"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PageResultPostingViewsSummary" : {
+        "properties" : {
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PostingViewsSummary"
+            },
+            "type" : "array"
+          },
+          "page" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalItems" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PostingViewsDetail" : {
+        "properties" : {
+          "descriptionText" : {
+            "type" : "string"
+          },
+          "listings" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PostingViewsListing"
+            },
+            "type" : "array"
+          },
+          "summary" : {
+            "$ref" : "#/components/schemas/PostingViewsSummary"
+          }
+        }
+      },
+      "PostingViewsListing" : {
+        "properties" : {
+          "applicationUrl" : {
+            "type" : "string"
+          },
+          "availability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "availabilityEvidence" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "type" : "string"
+          },
+          "firstSeenAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lastCheckedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "lastSeenAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "listingUrl" : {
+            "type" : "string"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          },
+          "sourceUpdatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "PostingViewsLocation" : {
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "countryCode" : {
+            "type" : "string"
+          },
+          "rawText" : {
+            "type" : "string"
+          },
+          "region" : {
+            "type" : "string"
+          },
+          "remote" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PostingViewsSalary" : {
+        "properties" : {
+          "currency" : {
+            "type" : "string"
+          },
+          "max" : {
+            "type" : "number"
+          },
+          "min" : {
+            "type" : "number"
+          },
+          "period" : {
+            "enum" : [ "HOUR", "DAY", "WEEK", "MONTH", "YEAR" ],
+            "type" : "string"
+          }
+        }
+      },
+      "PostingViewsSummary" : {
+        "properties" : {
+          "availability" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "employerKey" : {
+            "type" : "string"
+          },
+          "employerName" : {
+            "type" : "string"
+          },
+          "employmentType" : {
+            "enum" : [ "FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERNSHIP", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "firstSeenAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "lastSeenAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "locations" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PostingViewsLocation"
+            },
+            "type" : "array"
+          },
+          "salary" : {
+            "$ref" : "#/components/schemas/PostingViewsSalary"
+          },
+          "seniority" : {
+            "enum" : [ "INTERN", "ENTRY", "MID", "SENIOR", "STAFF", "PRINCIPAL", "MANAGER", "UNKNOWN" ],
+            "type" : "string"
+          },
+          "stale" : {
+            "type" : "boolean"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "workplaceType" : {
+            "enum" : [ "REMOTE", "HYBRID", "ONSITE", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }
+      },
+      "PreparationViewsApplicationDetail" : {
+        "properties" : {
+          "application" : {
+            "$ref" : "#/components/schemas/ApplicationView"
+          },
+          "currentPackage" : {
+            "$ref" : "#/components/schemas/PreparationViewsPackageView"
+          },
+          "posting" : {
+            "$ref" : "#/components/schemas/PostingViewsSummary"
+          }
+        }
+      },
+      "PreparationViewsApplicationSummary" : {
+        "properties" : {
+          "employerName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "packageVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "postingId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "postingTitle" : {
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "DISCOVERED", "MATCHED", "NOT_ELIGIBLE", "PREPARED", "READY_FOR_REVIEW", "APPROVED", "SUBMITTING", "SUBMITTED", "SUBMISSION_UNCONFIRMED", "FAILED", "EXPIRED", "REJECTED_BY_USER", "WITHDRAWN" ],
+            "type" : "string"
+          },
+          "statusChangedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "PreparationViewsClaimEdit" : {
+        "properties" : {
+          "factIds" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "userApproved" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "PreparationViewsPackageVersion" : {
+        "properties" : {
+          "blockingIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "warnings" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PreparationViewsPackageView" : {
+        "properties" : {
+          "blockingIssues" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "content" : {
+            "$ref" : "#/components/schemas/PackageContent"
+          },
+          "contentHash" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "warnings" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "PreparationViewsResult" : {
+        "properties" : {
+          "applicationId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "issues" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PackageContentPackageIssue"
+            },
+            "type" : "array"
+          },
+          "outcome" : {
+            "enum" : [ "CREATED", "NEW_VERSION", "UNCHANGED", "NOT_ELIGIBLE", "EXPIRED" ],
+            "type" : "string"
+          },
+          "packageVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "status" : {
+            "enum" : [ "DISCOVERED", "MATCHED", "NOT_ELIGIBLE", "PREPARED", "READY_FOR_REVIEW", "APPROVED", "SUBMITTING", "SUBMITTED", "SUBMISSION_UNCONFIRMED", "FAILED", "EXPIRED", "REJECTED_BY_USER", "WITHDRAWN" ],
+            "type" : "string"
+          }
+        }
+      },
+      "PreparationViewsSectionEdit" : {
+        "properties" : {
+          "claims" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PreparationViewsClaimEdit"
+            },
+            "type" : "array"
+          },
+          "heading" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RawLocation" : {
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "countryCode" : {
+            "type" : "string"
+          },
+          "region" : {
+            "type" : "string"
+          },
+          "remote" : {
+            "type" : "boolean"
+          },
+          "text" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ResumeDocument" : {
+        "properties" : {
+          "candidateProfileVersionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "header" : {
+            "$ref" : "#/components/schemas/ResumeDocumentHeader"
+          },
+          "sections" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ResumeDocumentSection"
+            },
+            "type" : "array"
+          },
+          "templateKey" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ResumeDocumentHeader" : {
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "links" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ResumeDocumentSection" : {
+        "properties" : {
+          "claims" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Claim"
+            },
+            "type" : "array"
+          },
+          "heading" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ResumeTemplateSpec" : {
+        "properties" : {
+          "displayName" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "generator" : {
+            "pattern" : "^[a-z0-9][a-z0-9.-]{1,99}$",
+            "type" : "string"
+          },
+          "includeEducation" : {
+            "type" : "boolean"
+          },
+          "key" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          },
+          "maxAchievementsPerExperience" : {
+            "format" : "int32",
+            "maximum" : 10,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "maxExperiences" : {
+            "format" : "int32",
+            "maximum" : 20,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "maxSkills" : {
+            "format" : "int32",
+            "maximum" : 60,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "renderers" : {
+            "items" : {
+              "pattern" : "^[a-z0-9][a-z0-9.-]{1,99}$",
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "displayName", "key", "renderers" ]
+      },
+      "RoleProfileDefinition" : {
+        "properties" : {
+          "compensation" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionCompensationPreference"
+          },
+          "displayName" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "documents" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionDocumentPreferences"
+          },
+          "education" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionEducationRequirement"
+          },
+          "eligibility" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RoleProfileDefinitionRuleSpec"
+            },
+            "type" : "array"
+          },
+          "employmentTypes" : {
+            "items" : {
+              "enum" : [ "FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERNSHIP", "UNKNOWN" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "example" : {
+            "type" : "boolean"
+          },
+          "experience" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionExperienceRange"
+          },
+          "jobFamily" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          },
+          "key" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          },
+          "locations" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionLocationPreferences"
+          },
+          "scoring" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionScoringConfig"
+          },
+          "screeningQuestions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RoleProfileDefinitionScreeningQuestionRule"
+            },
+            "type" : "array"
+          },
+          "searchTerms" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "skills" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionSkillRequirements"
+          },
+          "titles" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionTitleRules"
+          }
+        },
+        "required" : [ "displayName", "jobFamily", "key", "scoring", "skills", "titles" ]
+      },
+      "RoleProfileDefinitionCompensationPreference" : {
+        "properties" : {
+          "currency" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Z]{3}$",
+            "type" : "string"
+          },
+          "minAnnual" : {
+            "minimum" : 0,
+            "type" : "number"
+          },
+          "whenMissing" : {
+            "enum" : [ "IGNORE", "TREAT_AS_UNKNOWN" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "currency" ]
+      },
+      "RoleProfileDefinitionCoverNotePreference" : {
+        "properties" : {
+          "strategy" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "strategy" ]
+      },
+      "RoleProfileDefinitionDocumentPreferences" : {
+        "properties" : {
+          "coverNote" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionCoverNotePreference"
+          },
+          "resumeTemplate" : {
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          }
+        }
+      },
+      "RoleProfileDefinitionEducationRequirement" : {
+        "properties" : {
+          "fields" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "minimumLevel" : {
+            "enum" : [ "HIGH_SCHOOL", "ASSOCIATE", "BACHELOR", "MASTER", "DOCTORATE" ],
+            "type" : "string"
+          }
+        }
+      },
+      "RoleProfileDefinitionExperienceRange" : {
+        "properties" : {
+          "maxYears" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "minYears" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        }
+      },
+      "RoleProfileDefinitionLocationPreference" : {
+        "properties" : {
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "minLength" : 1,
+            "pattern" : "^[A-Z]{2}$",
+            "type" : "string"
+          },
+          "region" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "country" ]
+      },
+      "RoleProfileDefinitionLocationPreferences" : {
+        "properties" : {
+          "preferred" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RoleProfileDefinitionLocationPreference"
+            },
+            "type" : "array"
+          },
+          "workplaceTypes" : {
+            "items" : {
+              "enum" : [ "REMOTE", "HYBRID", "ONSITE", "UNKNOWN" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "RoleProfileDefinitionRuleSpec" : {
+        "properties" : {
+          "params" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          },
+          "type" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "type" ]
+      },
+      "RoleProfileDefinitionScoringConfig" : {
+        "properties" : {
+          "strategy" : {
+            "minLength" : 1,
+            "pattern" : "^[a-z0-9][a-z0-9-]{0,62}$",
+            "type" : "string"
+          },
+          "strategyVersion" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "thresholds" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinitionThresholds"
+          },
+          "weights" : {
+            "additionalProperties" : {
+              "type" : "number"
+            },
+            "minProperties" : 1,
+            "type" : "object"
+          }
+        },
+        "required" : [ "strategy", "strategyVersion", "thresholds", "weights" ]
+      },
+      "RoleProfileDefinitionScreeningQuestionRule" : {
+        "properties" : {
+          "fact" : {
+            "type" : "string"
+          },
+          "match" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "policy" : {
+            "enum" : [ "ALWAYS_ASK_USER", "FROM_FACT", "SKIP" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "match", "policy" ]
+      },
+      "RoleProfileDefinitionSkillRequirements" : {
+        "properties" : {
+          "preferred" : {
+            "items" : {
+              "$ref" : "#/components/schemas/RoleProfileDefinitionWeightedSkill"
+            },
+            "type" : "array"
+          },
+          "required" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "requiredAnyOf" : {
+            "items" : {
+              "items" : {
+                "type" : "string"
+              },
+              "minItems" : 1,
+              "type" : "array"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "RoleProfileDefinitionThresholds" : {
+        "properties" : {
+          "minimum" : {
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "number"
+          },
+          "shortlist" : {
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "number"
+          }
+        },
+        "required" : [ "minimum", "shortlist" ]
+      },
+      "RoleProfileDefinitionTitleRules" : {
+        "properties" : {
+          "exclude" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "include" : {
+            "items" : {
+              "minLength" : 1,
+              "type" : "string"
+            },
+            "minItems" : 1,
+            "type" : "array"
+          },
+          "seniority" : {
+            "items" : {
+              "enum" : [ "INTERN", "ENTRY", "MID", "SENIOR", "STAFF", "PRINCIPAL", "MANAGER", "UNKNOWN" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "include" ]
+      },
+      "RoleProfileDefinitionWeightedSkill" : {
+        "properties" : {
+          "skill" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "weight" : {
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [ "skill" ]
+      },
+      "RoleProfileImportResult" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "outcome" : {
+            "enum" : [ "CREATED", "NEW_VERSION", "REACTIVATED", "UNCHANGED" ],
+            "type" : "string"
+          },
+          "version" : {
+            "$ref" : "#/components/schemas/RoleProfileVersionRef"
+          }
+        }
+      },
+      "RoleProfileVersionRef" : {
+        "properties" : {
+          "contentHash" : {
+            "type" : "string"
+          },
+          "roleProfileId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "versionNo" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "RuleOutcome" : {
+        "properties" : {
+          "evidence" : {
+            "items" : {
+              "$ref" : "#/components/schemas/FactRef"
+            },
+            "type" : "array"
+          },
+          "explanation" : {
+            "type" : "string"
+          },
+          "ruleType" : {
+            "type" : "string"
+          },
+          "verdict" : {
+            "enum" : [ "PASS", "FAIL", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }
+      },
+      "SessionView" : {
+        "properties" : {
+          "setupAllowedHere" : {
+            "type" : "boolean"
+          },
+          "setupRequired" : {
+            "type" : "boolean"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/SessionViewMe"
+          }
+        }
+      },
+      "SessionViewMe" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "role" : {
+            "enum" : [ "USER", "ADMIN" ],
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SourceControllerAdapterView" : {
+        "properties" : {
+          "authenticationRequired" : {
+            "type" : "boolean"
+          },
+          "capabilities" : {
+            "items" : {
+              "enum" : [ "LIST_JOBS", "JOB_DETAILS", "AVAILABILITY_CHECK", "INCREMENTAL_SYNC", "COMPENSATION", "APPLICATION_QUESTIONS", "APPLY_VIA_API", "OPEN_DESTINATION", "INSPECT_FIELDS", "FILL_FIELDS", "VALIDATE_FORM", "DETECT_CONFIRMATION" ],
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "documentation" : {
+            "format" : "uri",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "settingsSchemaVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "settingsType" : {
+            "type" : "string"
+          },
+          "termsNotes" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SourceControllerPutSource" : {
+        "properties" : {
+          "adapterId" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "settings" : {
+            "additionalProperties" : {
+              "type" : "object"
+            },
+            "type" : "object"
+          }
+        }
+      },
+      "SourceControllerUpsertResult" : {
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "outcome" : {
+            "enum" : [ "CREATED", "UPDATED", "UNCHANGED" ],
+            "type" : "string"
+          },
+          "source" : {
+            "$ref" : "#/components/schemas/JobSourceView"
+          }
+        }
+      },
+      "SubmissionControllerApprove" : {
+        "properties" : {
+          "packageId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "required" : [ "packageId" ]
+      },
+      "SubmissionControllerOutcome" : {
+        "properties" : {
+          "evidence" : {
+            "$ref" : "#/components/schemas/SubmissionEvidence"
+          },
+          "outcome" : {
+            "enum" : [ "IN_PROGRESS", "CONFIRMED", "FAILED", "UNCONFIRMED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "outcome" ]
+      },
+      "SubmissionControllerVerify" : {
+        "properties" : {
+          "evidence" : {
+            "$ref" : "#/components/schemas/SubmissionEvidence"
+          },
+          "result" : {
+            "enum" : [ "IN_PROGRESS", "CONFIRMED", "FAILED", "UNCONFIRMED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "result" ]
+      },
+      "SubmissionEvidence" : {
+        "properties" : {
+          "artifactRef" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "detail" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [ "CONFIRMATION_PAGE", "CONFIRMATION_EMAIL", "SCREENSHOT", "EMPLOYER_PORTAL", "NONE" ],
+            "type" : "string"
+          },
+          "pageUrl" : {
+            "maxLength" : 2048,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "kind" ]
+      },
+      "SubmissionServiceStartedSubmission" : {
+        "properties" : {
+          "applicationUrl" : {
+            "type" : "string"
+          },
+          "attempt" : {
+            "$ref" : "#/components/schemas/ApplicationServiceAttemptView"
+          },
+          "instructions" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SyncCounts" : {
+        "properties" : {
+          "closed" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "discovered" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "failed" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "inserted" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "unchanged" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "updated" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }
+      },
+      "SyncReport" : {
+        "properties" : {
+          "counts" : {
+            "$ref" : "#/components/schemas/SyncCounts"
+          },
+          "dryRun" : {
+            "type" : "boolean"
+          },
+          "employerKey" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "outcome" : {
+            "enum" : [ "SUCCEEDED", "PARTIAL", "FAILED", "SKIPPED_ALREADY_RUNNING" ],
+            "type" : "string"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          },
+          "syncRunId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }
+      },
+      "SyncRunView" : {
+        "properties" : {
+          "counts" : {
+            "$ref" : "#/components/schemas/SyncCounts"
+          },
+          "dryRun" : {
+            "type" : "boolean"
+          },
+          "employerKey" : {
+            "type" : "string"
+          },
+          "errorSummary" : {
+            "type" : "string"
+          },
+          "errors" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SyncRunViewError"
+            },
+            "type" : "array"
+          },
+          "externalRef" : {
+            "type" : "string"
+          },
+          "finishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "sourceKey" : {
+            "type" : "string"
+          },
+          "startedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "RUNNING", "SUCCEEDED", "PARTIAL", "FAILED", "ABORTED" ],
+            "type" : "string"
+          },
+          "trigger" : {
+            "enum" : [ "MANUAL", "SCHEDULED" ],
+            "type" : "string"
+          }
+        }
+      },
+      "SyncRunViewError" : {
+        "properties" : {
+          "externalRef" : {
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "occurredAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "TrackingControllerStatusChange" : {
+        "properties" : {
+          "status" : {
+            "enum" : [ "SCHEDULED", "COMPLETED", "CANCELLED" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "status" ]
+      },
+      "TrackingViewsContactInput" : {
+        "properties" : {
+          "email" : {
+            "format" : "email",
+            "maxLength" : 320,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "employerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "notes" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "phone" : {
+            "maxLength" : 50,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "profileUrl" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "title" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "TrackingViewsContactView" : {
+        "properties" : {
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "employerId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "phone" : {
+            "type" : "string"
+          },
+          "profileUrl" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }
+      },
+      "TrackingViewsFollowUpInput" : {
+        "properties" : {
+          "applicationId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "contactId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "dueOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "note" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "dueOn", "note" ]
+      },
+      "TrackingViewsFollowUpView" : {
+        "properties" : {
+          "applicationId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "contactId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "done" : {
+            "type" : "boolean"
+          },
+          "doneAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "dueOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "note" : {
+            "type" : "string"
+          },
+          "overdue" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "TrackingViewsInterviewInput" : {
+        "properties" : {
+          "contactIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "maxItems" : 10,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "durationMinutes" : {
+            "format" : "int32",
+            "maximum" : 600,
+            "minimum" : 5,
+            "type" : "integer"
+          },
+          "kind" : {
+            "enum" : [ "PHONE_SCREEN", "TECHNICAL", "BEHAVIORAL", "ONSITE", "FINAL", "OTHER" ],
+            "type" : "string"
+          },
+          "location" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "notes" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "scheduledAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "kind", "scheduledAt" ]
+      },
+      "TrackingViewsInterviewView" : {
+        "properties" : {
+          "applicationId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "contactIds" : {
+            "items" : {
+              "format" : "uuid",
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "durationMinutes" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [ "PHONE_SCREEN", "TECHNICAL", "BEHAVIORAL", "ONSITE", "FINAL", "OTHER" ],
+            "type" : "string"
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "scheduledAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "SCHEDULED", "COMPLETED", "CANCELLED" ],
+            "type" : "string"
+          }
+        }
+      },
+      "TrackingViewsSummary" : {
+        "properties" : {
+          "openFollowUps" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+            },
+            "type" : "array"
+          },
+          "overdueFollowUps" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "upcomingInterviews" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "UserSummary" : {
+        "properties" : {
+          "canSignIn" : {
+            "type" : "boolean"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "role" : {
+            "enum" : [ "USER", "ADMIN" ],
+            "type" : "string"
+          },
+          "status" : {
+            "enum" : [ "ACTIVE", "DISABLED" ],
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "VisibleRoleProfile" : {
+        "properties" : {
+          "activeVersion" : {
+            "$ref" : "#/components/schemas/RoleProfileVersionRef"
+          },
+          "definition" : {
+            "$ref" : "#/components/schemas/RoleProfileDefinition"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "systemTemplate" : {
+            "type" : "boolean"
+          }
+        }
+      }
+    }
+  },
+  "info" : {
+    "description" : "Local-first job discovery and application platform. Errors use RFC 9457 problem details.",
+    "title" : "Jobs Platform API",
+    "version" : "v1"
+  },
+  "openapi" : "3.1.0",
+  "paths" : {
+    "/api/v1/admin/users" : {
+      "get" : {
+        "operationId" : "list_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Accounts (admin)" ]
+      },
+      "post" : {
+        "operationId" : "create_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AdminUserControllerCreateAccount"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSummary"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "Accounts (admin)" ]
+      }
+    },
+    "/api/v1/admin/users/{id}/disable" : {
+      "post" : {
+        "operationId" : "disable",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSummary"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Accounts (admin)" ]
+      }
+    },
+    "/api/v1/admin/users/{id}/password" : {
+      "post" : {
+        "operationId" : "resetPassword",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AdminUserControllerPasswordReset"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "Accounts (admin)" ]
+      }
+    },
+    "/api/v1/auth/session" : {
+      "get" : {
+        "operationId" : "session",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Who is signed in, and whether the one-time setup is needed (also issues the CSRF cookie)",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/auth/setup" : {
+      "post" : {
+        "description" : "Takes over the pre-login single-user account if it exists, so its data is kept. Sign in afterwards.",
+        "operationId" : "setup",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AuthControllerSetup"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSummary"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Create the first account (ADMIN); only from this machine and only once",
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/config/documents" : {
+      "post" : {
+        "description" : "Any kind, e.g. an EmployerSet. Max 5 MB.",
+        "operationId" : "importDocument",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "upload.yaml",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Import one YAML configuration document",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/config/import" : {
+      "post" : {
+        "description" : "All-or-nothing; dryRun reports without writing.",
+        "operationId" : "importDirectory",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Import the configured configuration directory",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/config/validation" : {
+      "get" : {
+        "operationId" : "validate",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Validate the configured configuration directory",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/employers" : {
+      "get" : {
+        "description" : "Filters combine with AND. Archived employers are excluded unless includeArchived=true.",
+        "operationId" : "search",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "tag",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "industry",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "minPriority",
+          "required" : false,
+          "schema" : {
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "source",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "adapter",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "enabled",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "includeArchived",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "default" : "PRIORITY",
+            "enum" : [ "PRIORITY", "NAME", "KEY" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 200,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultEmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Search employers",
+        "tags" : [ "Employers" ]
+      },
+      "post" : {
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EmployerRequestsCreateEmployer"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Employers" ]
+      }
+    },
+    "/api/v1/employers/{key}" : {
+      "get" : {
+        "operationId" : "get_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Employers" ]
+      },
+      "put" : {
+        "description" : "Requires the version last read; returns 409 if it changed meanwhile.",
+        "operationId" : "update",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EmployerRequestsUpdateEmployer"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Replace an employer's details",
+        "tags" : [ "Employers" ]
+      }
+    },
+    "/api/v1/employers/{key}/archive" : {
+      "post" : {
+        "description" : "Soft delete: hidden from search and discovery, history retained.",
+        "operationId" : "archive",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Archive an employer",
+        "tags" : [ "Employers" ]
+      }
+    },
+    "/api/v1/employers/{key}/bindings/{sourceKey}/{externalRef}" : {
+      "delete" : {
+        "description" : "Bindings are never deleted because discovered listings reference them.",
+        "operationId" : "disableBinding",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "sourceKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "externalRef",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "Disable a binding",
+        "tags" : [ "Employers" ]
+      },
+      "put" : {
+        "operationId" : "putBinding",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "sourceKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "externalRef",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EmployerRequestsPutBinding"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BindingView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Create or reconfigure a binding of the employer to a job source",
+        "tags" : [ "Employers" ]
+      }
+    },
+    "/api/v1/employers/{key}/unarchive" : {
+      "post" : {
+        "operationId" : "unarchive",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Employers" ]
+      }
+    },
+    "/api/v1/exchange/employers" : {
+      "get" : {
+        "operationId" : "exportEmployers",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "format",
+          "required" : false,
+          "schema" : {
+            "default" : "CSV",
+            "enum" : [ "CSV", "YAML" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "includeArchived",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Export employers as CSV or as a re-importable YAML EmployerSet",
+        "tags" : [ "Configuration & exchange" ]
+      },
+      "post" : {
+        "description" : "Header: key,displayName,website,careersUrl,industry,tags,headquarters,discoveryPriority,enabled,sources. Max 5 MB.",
+        "operationId" : "importEmployers",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "employers.csv",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Import employers from CSV",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/me/applications" : {
+      "get" : {
+        "operationId" : "list_7",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PreparationViewsApplicationSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/prepare" : {
+      "post" : {
+        "description" : "Rechecks availability, evaluates the match, generates fact-backed documents and answer drafts, and validates that every statement is traceable to your verified facts. Idempotent: unchanged inputs give UNCHANGED.",
+        "operationId" : "prepare",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApplicationControllerPrepare"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreparationViewsResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Prepare an application package",
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}" : {
+      "get" : {
+        "operationId" : "get_6",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreparationViewsApplicationDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/answers/{questionId}" : {
+      "put" : {
+        "description" : "Creates a new package version.",
+        "operationId" : "answer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "questionId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApplicationControllerAnswerBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreparationViewsResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Answer a question yourself (blank clears it)",
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/approval" : {
+      "delete" : {
+        "operationId" : "revoke",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My submissions" ]
+      },
+      "post" : {
+        "description" : "Send the id of the package you reviewed; refused if it is no longer current or not complete.",
+        "operationId" : "approve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmissionControllerApprove"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationServiceApprovalView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Approve the current package for one submission",
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/approval/blockers" : {
+      "get" : {
+        "operationId" : "blockers",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/approvals" : {
+      "get" : {
+        "operationId" : "approvals",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ApplicationServiceApprovalView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/assist" : {
+      "delete" : {
+        "operationId" : "close",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssistView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Close the window (the attempt stays in progress until you report its outcome)",
+        "tags" : [ "Browser assistance" ]
+      },
+      "get" : {
+        "operationId" : "view",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssistView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Browser assistance" ]
+      },
+      "post" : {
+        "description" : "Requires an Idempotency-Key. Fills only values that are certain and come from your approved package; pauses on sign-in, CAPTCHA challenges and one-time codes. Never presses Submit.",
+        "operationId" : "start_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "Idempotency-Key",
+          "required" : true,
+          "schema" : {
+            "pattern" : "[A-Za-z0-9._:-]{8,100}",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssistView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Use the approval and open the form in a browser window",
+        "tags" : [ "Browser assistance" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/assist/confirmation" : {
+      "post" : {
+        "operationId" : "confirm",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "waitSeconds",
+          "required" : false,
+          "schema" : {
+            "default" : 30,
+            "format" : "int32",
+            "maximum" : 600,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssistView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "After you pressed Submit: look for the confirmation and record it as evidence",
+        "tags" : [ "Browser assistance" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/assist/refresh" : {
+      "post" : {
+        "operationId" : "refresh",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AssistView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Continue after you resolved a pause (inspect and fill again; never overwrites what you typed)",
+        "tags" : [ "Browser assistance" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/attempts" : {
+      "get" : {
+        "operationId" : "attempts",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ApplicationServiceAttemptView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/attempts/{attemptId}/screenshot" : {
+      "get" : {
+        "operationId" : "screenshot",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "attemptId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Browser assistance" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/documents/{documentId}" : {
+      "get" : {
+        "operationId" : "document",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "documentId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/interviews" : {
+      "post" : {
+        "operationId" : "schedule",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsInterviewInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/packages" : {
+      "get" : {
+        "operationId" : "versions_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PreparationViewsPackageVersion"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/reject" : {
+      "post" : {
+        "operationId" : "reject",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApplicationControllerRejectBody"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/resume" : {
+      "put" : {
+        "description" : "Each statement must cite your verified facts (factIds) or be your own approved text (userApproved=true). Untraceable statements are rejected. Creates a new package version.",
+        "operationId" : "editResume",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ApplicationControllerResumeBody"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PreparationViewsResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Edit the resume",
+        "tags" : [ "My applications" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/submission" : {
+      "post" : {
+        "description" : "Requires an Idempotency-Key header; replays return the same attempt. You then submit in your browser and report the outcome.",
+        "operationId" : "start",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "Idempotency-Key",
+          "required" : true,
+          "schema" : {
+            "pattern" : "[A-Za-z0-9._:-]{8,100}",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SubmissionServiceStartedSubmission"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Start the submission (uses the approval)",
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/submission/{attemptId}/outcome" : {
+      "post" : {
+        "description" : "CONFIRMED needs evidence; FAILED needs a description; UNCONFIRMED when unsure (blocks any retry until you verify).",
+        "operationId" : "outcome",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "attemptId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmissionControllerOutcome"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationServiceAttemptView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Report how the submission ended",
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/verification" : {
+      "post" : {
+        "description" : "Only you can: CONFIRMED (with evidence) or FAILED.",
+        "operationId" : "verify_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SubmissionControllerVerify"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationServiceAttemptView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Resolve an unconfirmed submission",
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/applications/{id}/withdrawal" : {
+      "post" : {
+        "operationId" : "withdraw",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApplicationView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My submissions" ]
+      }
+    },
+    "/api/v1/me/audit" : {
+      "get" : {
+        "operationId" : "mine",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "aggregateId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 100,
+            "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AuditServiceAuditView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My audit trail" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles" : {
+      "get" : {
+        "operationId" : "list_6",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CandidateProfileRef"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My candidate profiles" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/import" : {
+      "post" : {
+        "description" : "Facts are marked UNVERIFIED unless trust=true; confirm them via /verification. Max 5 MB.",
+        "operationId" : "importCandidate",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "candidate.yaml",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "trust",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Import one of your candidate profiles (YAML, kind CandidateProfile)",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/{key}" : {
+      "get" : {
+        "operationId" : "get_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CandidateProfileDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My candidate profiles" ]
+      },
+      "put" : {
+        "description" : "Facts keep the verification status you send: this is your own statement. Identical content is a no-op.",
+        "operationId" : "put_2",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CandidateProfileControllerPutProfile"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CandidateProfileControllerPutResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Save a new version of a profile (created if missing)",
+        "tags" : [ "My candidate profiles" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/{key}/master-resumes" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/MasterResumeServiceMasterResumeView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My master resume" ]
+      },
+      "post" : {
+        "description" : "Raw body with Content-Type application/pdf, the DOCX type, text/plain or text/markdown. Max 5 MB. It is never modified; generated resumes are separate documents.",
+        "operationId" : "upload",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "resume",
+            "type" : "string"
+          }
+        }, {
+          "in" : "header",
+          "name" : "Content-Type",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MasterResumeServiceMasterResumeView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Upload your master resume",
+        "tags" : [ "My master resume" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/{key}/master-resumes/{id}/content" : {
+      "get" : {
+        "operationId" : "content",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My master resume" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/{key}/verification" : {
+      "post" : {
+        "description" : "Marks the listed (or all) UNVERIFIED facts as VERIFIED in a new version. Only verified facts count in matching and generated documents.",
+        "operationId" : "verify",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CandidateProfileControllerVerify"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CandidateProfileVersionRef"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Confirm facts",
+        "tags" : [ "My candidate profiles" ]
+      }
+    },
+    "/api/v1/me/candidate-profiles/{key}/versions" : {
+      "get" : {
+        "operationId" : "versions",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/CandidateProfileVersionRef"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My candidate profiles" ]
+      }
+    },
+    "/api/v1/me/contacts" : {
+      "get" : {
+        "operationId" : "contacts",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TrackingViewsContactView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "post" : {
+        "operationId" : "createContact",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsContactInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsContactView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/contacts/{id}" : {
+      "delete" : {
+        "operationId" : "deleteContact",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "get" : {
+        "operationId" : "contact",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsContactView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "put" : {
+        "operationId" : "updateContact",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsContactInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsContactView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/employer-preferences" : {
+      "get" : {
+        "operationId" : "list_5",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/EmployerPreferenceView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My employer preferences" ]
+      }
+    },
+    "/api/v1/me/employer-preferences/{employerKey}" : {
+      "delete" : {
+        "operationId" : "remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "employerKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My employer preferences" ]
+      },
+      "put" : {
+        "operationId" : "put_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "employerKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EmployerRequestsPutPreference"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EmployerPreferenceView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My employer preferences" ]
+      }
+    },
+    "/api/v1/me/follow-ups" : {
+      "get" : {
+        "operationId" : "followUps",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "includeDone",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "applicationId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "post" : {
+        "operationId" : "createFollowUp",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsFollowUpInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/follow-ups/{id}" : {
+      "delete" : {
+        "operationId" : "deleteFollowUp",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "put" : {
+        "operationId" : "updateFollowUp",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsFollowUpInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/follow-ups/{id}/done" : {
+      "post" : {
+        "operationId" : "complete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/follow-ups/{id}/reopen" : {
+      "post" : {
+        "operationId" : "reopen",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/interviews" : {
+      "get" : {
+        "operationId" : "interviews",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "applicationId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/interviews/{id}" : {
+      "delete" : {
+        "operationId" : "deleteInterview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      },
+      "put" : {
+        "operationId" : "updateInterview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingViewsInterviewInput"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/interviews/{id}/status" : {
+      "post" : {
+        "operationId" : "markInterview",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TrackingControllerStatusChange"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/me/matches" : {
+      "get" : {
+        "operationId" : "list_4",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "candidateProfile",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "roleProfile",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "eligibility",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "ELIGIBLE", "NOT_ELIGIBLE", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "minScore",
+          "required" : false,
+          "schema" : {
+            "type" : "number"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 200,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultMatchView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Matches for your profiles' current versions, best first",
+        "tags" : [ "My matches" ]
+      }
+    },
+    "/api/v1/me/matches/evaluate" : {
+      "post" : {
+        "operationId" : "evaluate",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MatchControllerEvaluate"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatchingServiceEvaluation"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Evaluate one posting",
+        "tags" : [ "My matches" ]
+      }
+    },
+    "/api/v1/me/matches/run" : {
+      "post" : {
+        "description" : "Employers you IGNORE are skipped. Idempotent: unchanged results are reported as such.",
+        "operationId" : "run",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MatchControllerRun"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatchRunReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Evaluate all open postings",
+        "tags" : [ "My matches" ]
+      }
+    },
+    "/api/v1/me/matches/{id}" : {
+      "get" : {
+        "operationId" : "get_5",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MatchView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My matches" ]
+      }
+    },
+    "/api/v1/me/password" : {
+      "post" : {
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AuthControllerPasswordChange"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "tags" : [ "Authentication" ]
+      }
+    },
+    "/api/v1/me/role-profiles/import" : {
+      "post" : {
+        "description" : "Private to you. Max 5 MB.",
+        "operationId" : "importRoleProfile",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "fileName",
+          "required" : false,
+          "schema" : {
+            "default" : "role-profile.yaml",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigImportReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Import one of your own role profiles (YAML, kind RoleProfile)",
+        "tags" : [ "Configuration & exchange" ]
+      }
+    },
+    "/api/v1/me/role-profiles/{key}/fork" : {
+      "post" : {
+        "operationId" : "fork",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RoleProfileImportResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Copy a template into your own profiles, to tune it",
+        "tags" : [ "Role profiles" ]
+      }
+    },
+    "/api/v1/me/tracking/summary" : {
+      "get" : {
+        "operationId" : "summary",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrackingViewsSummary"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "My tracking" ]
+      }
+    },
+    "/api/v1/plugins/job-source-adapters" : {
+      "get" : {
+        "operationId" : "adapters",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SourceControllerAdapterView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Job sources" ]
+      }
+    },
+    "/api/v1/postings" : {
+      "get" : {
+        "description" : "stale=true: not closed but not seen recently (a flag, never a closure).",
+        "operationId" : "search_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "employer",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "availability",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "OPEN", "CLOSED", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "workplace",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "REMOTE", "HYBRID", "ONSITE", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "employmentType",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERNSHIP", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "seniority",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "INTERN", "ENTRY", "MID", "SENIOR", "STAFF", "PRINCIPAL", "MANAGER", "UNKNOWN" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "country",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "stale",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "in" : "query",
+          "name" : "seenSince",
+          "required" : false,
+          "schema" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "sort",
+          "required" : false,
+          "schema" : {
+            "default" : "LAST_SEEN",
+            "enum" : [ "LAST_SEEN", "FIRST_SEEN", "TITLE" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "format" : "int32",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "maximum" : 200,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResultPostingViewsSummary"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Search postings",
+        "tags" : [ "Postings" ]
+      }
+    },
+    "/api/v1/postings/{id}" : {
+      "get" : {
+        "operationId" : "get_4",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PostingViewsDetail"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Postings" ]
+      }
+    },
+    "/api/v1/postings/{id}/availability-check" : {
+      "post" : {
+        "description" : "Required before preparing an application.",
+        "operationId" : "recheck",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AvailabilityServiceAvailabilityReport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Recheck a posting's availability at its sources",
+        "tags" : [ "Discovery" ]
+      }
+    },
+    "/api/v1/role-profiles" : {
+      "get" : {
+        "description" : "Your own profiles and the shared templates.",
+        "operationId" : "list_3",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/VisibleRoleProfile"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Role profiles visible to you",
+        "tags" : [ "Role profiles" ]
+      }
+    },
+    "/api/v1/role-profiles/{key}" : {
+      "get" : {
+        "description" : "Your own profile with this key if you have one, otherwise the template.",
+        "operationId" : "get_3",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VisibleRoleProfile"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "A role profile",
+        "tags" : [ "Role profiles" ]
+      }
+    },
+    "/api/v1/sources" : {
+      "get" : {
+        "operationId" : "list_2",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/JobSourceView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Job sources" ]
+      }
+    },
+    "/api/v1/sources/{key}" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JobSourceView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Job sources" ]
+      },
+      "put" : {
+        "description" : "An enabled source needs an installed adapter and settings valid for it. Settings may hold secret references (env:NAME) only.",
+        "operationId" : "put",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SourceControllerPutSource"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SourceControllerUpsertResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Create or replace a job source",
+        "tags" : [ "Job sources" ]
+      }
+    },
+    "/api/v1/sync" : {
+      "post" : {
+        "description" : "All active bindings, or narrowed by source and/or employer. Runs synchronously; dryRun reports what would change without changing anything.",
+        "operationId" : "sync",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "source",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "employer",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dryRun",
+          "required" : false,
+          "schema" : {
+            "default" : false,
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SyncReport"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Synchronize now",
+        "tags" : [ "Discovery" ]
+      }
+    },
+    "/api/v1/sync-runs" : {
+      "get" : {
+        "operationId" : "recent",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "source",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "employer",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "default" : 50,
+            "format" : "int32",
+            "maximum" : 500,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/SyncRunView"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Discovery" ]
+      }
+    },
+    "/api/v1/sync-runs/{id}" : {
+      "get" : {
+        "operationId" : "run_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SyncRunView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Discovery" ]
+      }
+    }
+  },
+  "tags" : [ {
+    "description" : "Shared templates plus your own private profiles",
+    "name" : "Role profiles"
+  }, {
+    "description" : "Versioned facts about you; private to you",
+    "name" : "My candidate profiles"
+  }, {
+    "description" : "Session, first-account setup, sign-in, password",
+    "name" : "Authentication"
+  }, {
+    "description" : "Shared employer registry and employer-to-source bindings",
+    "name" : "Employers"
+  }, {
+    "description" : "Fill the approved application in a visible browser window; you press Submit",
+    "name" : "Browser assistance"
+  }, {
+    "description" : "The current user's private watch / ignore list",
+    "name" : "My employer preferences"
+  }, {
+    "description" : "Onboard people, reset passwords, disable accounts",
+    "name" : "Accounts (admin)"
+  }, {
+    "description" : "Configured job-source instances and installed adapter plugins",
+    "name" : "Job sources"
+  }, {
+    "description" : "Append-only record of what happened to your data",
+    "name" : "My audit trail"
+  }, {
+    "description" : "Prepare, review and edit application packages (no submission in this phase)",
+    "name" : "My applications"
+  }, {
+    "description" : "Synchronization with job sources and availability rechecks",
+    "name" : "Discovery"
+  }, {
+    "description" : "Discovered job postings (shared catalog)",
+    "name" : "Postings"
+  }, {
+    "description" : "Explainable matches of postings against your candidate and role profiles",
+    "name" : "My matches"
+  }, {
+    "description" : "Your own resume file, stored exactly as uploaded (encrypted)",
+    "name" : "My master resume"
+  }, {
+    "description" : "Approve one exact package, submit once, record evidence, verify uncertain outcomes",
+    "name" : "My submissions"
+  }, {
+    "description" : "Contacts, interviews and follow-ups (private, encrypted at rest)",
+    "name" : "My tracking"
+  } ]
+}

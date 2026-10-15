@@ -28,6 +28,7 @@ React + TypeScript (dashboard) and Playwright (browser assistance) arrive in lat
 
 - JDK 25
 - Docker Desktop, running. Integration tests and the local database need it.
+- Internet access for the first build: it downloads Node and npm for the dashboard (into `jobs-web/node`) and Playwright's Chromium.
 
 ## Quick start
 
@@ -41,13 +42,21 @@ docker compose up -d --wait       # PostgreSQL 18 on 127.0.0.1:5433
 
 The `local` profile imports `config/` as system templates on startup. Doing so is idempotent: a second start changes nothing.
 
-Once it's running, these endpoints are available:
+Once it's running, open the dashboard at **http://127.0.0.1:8090**.
+
+The first time, it asks you to create your account. That screen is available only on this machine and only once. The account becomes the administrator and keeps everything already stored. Administrators add further people under **Admin**.
+
+Other endpoints:
 - `http://127.0.0.1:8090/actuator/health`
 - `http://127.0.0.1:8090/v3/api-docs`
 
 The port is set by `JOBS_PORT`, and the server binds to localhost only.
 
-### REST API (Phase 2)
+### Dashboard development
+
+`cd jobs-web && npm run dev` serves the dashboard with hot reload and proxies `/api` to a running app on :8090. It needs Node ≥ 22.22; the copy the build downloaded is at `jobs-web/node/node`. After changing the API, run `./mvnw -pl jobs-app verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false -Dit.test=OpenApiContractIT -Dopenapi.update=true` to refresh the contract, then rebuild `jobs-web`.
+
+### REST API
 
 The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.0.0.1:8090/api/v1`. Errors are RFC 9457 problem details.
 
@@ -71,6 +80,9 @@ The OpenAPI document is at `/v3/api-docs`. All endpoints live under `http://127.
 | `GET /me/applications/{id}/approval/blockers`, `POST /me/applications/{id}/approval {packageId}`, `DELETE .../approval`, `GET .../approvals` | Approve the exact package you reviewed, for one submission (refused while anything blocks), or revoke the approval |
 | `POST /me/applications/{id}/submission` (requires an `Idempotency-Key` header), `POST .../submission/{attempt}/outcome`, `POST .../verification`, `GET .../attempts`, `POST .../withdrawal` | Start the submission (you submit in your browser), report the outcome with evidence, resolve an unconfirmed outcome, withdraw |
 | `POST /me/applications/{id}/assist` (requires an `Idempotency-Key`), `GET/DELETE .../assist`, `POST .../assist/refresh`, `POST .../assist/confirmation?waitSeconds=`, `GET .../attempts/{attempt}/screenshot` | Browser assistance: open the approved form in a visible window, fill only what your approved package makes certain, pause on sign-in, challenges and codes, and record the confirmation after **you** press Submit |
+| `GET /auth/session`, `POST /auth/setup` (first account, this machine only), `POST /auth/login` (form), `POST /auth/logout`, `POST /me/password` | Sign-in and your password |
+| `GET/POST /admin/users`, `POST /admin/users/{id}/password`, `POST /admin/users/{id}/disable` | Accounts (ADMIN) |
+| `GET/POST /me/contacts`, `GET/PUT/DELETE /me/contacts/{id}`, `GET /me/interviews`, `POST /me/applications/{id}/interviews`, `PUT/DELETE /me/interviews/{id}`, `POST /me/interviews/{id}/status`, `GET/POST /me/follow-ups`, `PUT/DELETE /me/follow-ups/{id}`, `POST /me/follow-ups/{id}/done` and `/reopen`, `GET /me/tracking/summary` | Tracking after submission (encrypted, private) |
 | `GET /me/audit?aggregateId=` | Your audit trail (ids and statuses only) |
 | `POST /me/candidate-profiles/{key}/master-resumes` (raw PDF, DOCX or text), `GET .../master-resumes/{id}/content` | Your master resume, kept exactly as uploaded |
 
@@ -101,7 +113,7 @@ If the window shows a sign-in, a challenge or a code request, assistance pauses.
 
 **To discover jobs:** add a real employer with a verified board token (for example via `PUT /employers/{key}/bindings/greenhouse-public/{token}`, or YAML/CSV), make sure it is `enabled`, then `POST /sync`. A job is closed only on authoritative evidence: a failed request never closes anything (ADR-0008).
 
-In the current *local identity mode*, every API call acts as the configured local user. The server is reachable only from this machine. Real login arrives with the dashboard (Phase 8).
+Every API call needs a signed-in session (`POST /api/v1/auth/login` with form fields `username` and `password`). Writes also need the `X-XSRF-TOKEN` header, holding the value of the `XSRF-TOKEN` cookie. Only administrators change the shared catalog (employers, sources, configuration, synchronization). Personal data is visible only to its owner, administrators included (ADR-0013).
 
 ### Validate configuration (CLI)
 
@@ -136,7 +148,7 @@ compose.yaml     Local PostgreSQL
 
 - **Add a role family or profile.** Add a YAML file to `config/role-profiles/` (and a family to `config/job-families/` if needed), then validate. No code changes. See `config/README.md`.
 - **Add skills or synonyms.** Edit `config/skills/`.
-- **Add a user.** Call `UserService.createUser(...)`. Each user's candidate profiles, matches and applications are private to them, and the database rejects mixed-owner rows. Login arrives with the dashboard (Phase 8).
+- **Add a user.** In the dashboard go to Admin → Accounts (or `POST /api/v1/admin/users`). Each user's candidate profiles, matches, applications and tracking are private to them, and the database rejects mixed-owner rows.
 - **Add a job source, renderer or browser adapter.** Implement the matching interface from `jobs-spi`. Plugin registration arrives in Phase 2.
 
 ## Safety principles

@@ -3,7 +3,9 @@
 Project guide for Claude sessions. The repository is the source of truth. For the current state, read `.ai/current-task.md` first.
 
 ## Commands
-- Full build and all tests (Docker must be running; the first run downloads Playwright's Chromium): `./mvnw clean install`
+- Full build and all tests (Docker must be running; the first run downloads Node/npm for jobs-web and Playwright's Chromium): `./mvnw clean install`
+- Dashboard only: `./mvnw -pl jobs-web install` (Vitest runs in `test`). Dev server: `cd jobs-web && npm run dev` (Node ≥ 22.22; `jobs-web/node/node` works)
+- Refresh the API contract after an intended API change: `./mvnw -pl jobs-app verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false -Dit.test=OpenApiContractIT -Dopenapi.update=true`
 - Unit tests only, no Docker: `./mvnw test`
 - Integration tests only: `./mvnw -pl jobs-app verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false`
 - Run the app (port 8090): `docker compose up -d --wait && ./mvnw -pl jobs-app spring-boot:run -Dspring-boot.run.profiles=local`
@@ -61,6 +63,14 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - READY_FOR_REVIEW requires zero BLOCKING issues, including availability *confirmed by a check made now*.
 - Master resumes and packages are immutable. Read uploads as raw bytes (`RequestBodies.readBytes`), never as text.
 
+## Accounts and dashboard rules (ADR-0013), do not weaken
+- There is no unauthenticated access to `/api/v1/**` beyond `/auth/**`. Writes need the CSRF header. Catalog writes and `/admin/**` need ADMIN. Never give ADMIN access to other users' personal data.
+- `UserContextFilter` binds the signed-in user. Tests sign in through `HttpApi` (`TestAccounts`), never through a bypass.
+- First-account setup is loopback-only and one-time, and takes over the legacy `local` user (keeping its data).
+- Tracking details (names, contact data, notes) are stored only in encrypted envelopes.
+- The dashboard never uses `dangerouslySetInnerHTML`, inline scripts or external origins (CSP `script-src 'self'`).
+- The OpenAPI snapshot `jobs-web/src/api/openapi.json` must match the server (`OpenApiContractIT`). Nested DTO schema names include their enclosing type.
+
 ## Submission rules (ADR-0006, ADR-0011), do not weaken
 - Approve only the current, complete package. A new package version revokes the approval.
 - An approval is used once.
@@ -85,6 +95,8 @@ Project guide for Claude sessions. The repository is the source of truth. For th
 - **Jackson serialises `isX()`/`getX()` methods on records as properties**, which breaks reading them back. Name derived methods record-style (`credible()`, `blockingIssues()`).
 - **Maven scope override:** declaring a dependency directly with `test` scope *replaces* its transitive runtime scope, and the app then fails at runtime even though the tests pass. Don't redeclare Playwright in `jobs-app`.
 - **After changing the root POM**, install it (a full `./mvnw install`) before running `-pl` builds, which resolve sibling modules and the parent from `~/.m2`.
+- **npm 10.9 crashes** ("reading 'edgesOut'") resolving vitest 5's peers. The build pins npm 11.20.0; locally use `npx npm@11.20.0 install`.
+- **openapi-fetch captures `fetch` at creation**, so the client passes `fetch: (r) => globalThis.fetch(r)` and an absolute base URL. Both are needed for tests and harmless in browsers.
 - **API docs vs reality.** The ATS docs are incomplete. Verify parsers against a live response (`-Plive`) whenever the provider changes behaviour.
 - **Migrations that have been pushed or merged are immutable.** Before editing an unmerged one, check that it hasn't been applied to the local Compose database (`select version from flyway_schema_history order by installed_rank desc limit 1`). Do NOT use `max(version)`: the column is text, so "9" sorts after "10".
 

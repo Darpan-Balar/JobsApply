@@ -127,6 +127,7 @@ flowchart LR
   assist --> preparation
   assist --> plugin
   tracking --> application
+  tracking --> application
   scheduling --> discovery
   scheduling --> matching
   configimport --> employer
@@ -163,7 +164,7 @@ flowchart LR
 4. Background jobs such as matching must set the user context explicitly through `UserContext.runAs(userId, ...)`, and a missing context fails fast.
 5. Native SQL bypasses `@TenantId`, so it's banned in owned modules unless reviewed (ArchUnit/Modulith rule).
 
-**Authentication:** the current user is held in `UserContext`, a Java 25 `ScopedValue` that web requests and background jobs bind. Until login exists, the configured local user (`jobs.identity.local-user`) is created at startup, and further users are added with `UserService.createUser`. Real login (Spring Security, local accounts with BCrypt, OIDC-ready) arrives with the dashboard (proposed: Phase 8). Because ownership was in the schema from the start, adding a second person needs **no** schema rework.
+**Authentication:** the current user is held in `UserContext`, a Java 25 `ScopedValue` that web requests and background jobs bind. Since Phase 8 (ADR-0013), web requests bind it from a Spring Security session: local accounts with BCrypt, ADMIN/USER roles, and one-time first-account setup that takes over the pre-login `local` user. Because ownership was in the schema from the start, adding a second person needed **no** schema rework.
 
 ---
 
@@ -902,3 +903,51 @@ Each phase ends the same way: `./mvnw verify` (and `npm test` once a dashboard e
 - Reporting the outcome manually closes the window.
 - Other users get 404.
 - A local run started cleanly, the assist endpoints are in OpenAPI, and requests without a key are rejected with 400.
+
+### Phase 8 outcome (2026-10-15)
+
+**Delivered (see ADR-0013)**
+- **Accounts (V12):**
+  - Spring Security 7.1 session sign-in with SPA CSRF, BCrypt passwords, per-username lockout, session fixation protection, CSP and referrer headers
+  - USER and ADMIN roles (ADMIN for catalog writes and `/admin/**`)
+  - `UserContextFilter` replaces the LOCAL identity mode
+  - loopback-only, one-time first-account setup that takes over the legacy `local` user
+  - REST: `/auth/session|setup|login|logout`, `/me/password`, `/admin/users`
+- **Tracking (V13):**
+  - new `tracking` module: contacts, interviews (submitted applications only) and follow-ups
+  - names, contact data and notes encrypted
+  - dashboard summary
+- **Dashboard (`jobs-web`):**
+  - React 19 / TypeScript 5.9 / Vite 8, built by Maven (pinned Node v22.23.3 and npm 11.20.0) into the jar and served by `jobs-app` (`DashboardRoutes`)
+  - pages: Overview, Jobs (search and detail with prepare), Matches, Applications (package review, answers, approve, manual or assisted submission, outcome, verification, withdraw, reject, attempts, history, interviews, follow-ups), Tracking, Profiles (YAML import, fact confirmation, master resume), Account, Admin (accounts, configuration import, sync)
+  - types generated from the OpenAPI snapshot
+- **Contract:**
+  - `OpenApiContractIT`
+  - unambiguous schema names for nested DTOs (fixes silent collisions of `Summary`, `Outcome` and `Verify`)
+
+**Problems found and fixed**
+- **Schema name collisions:** the published OpenAPI document had colliding schema names. Different types overwrote each other, so the contract was wrong for some endpoints.
+- **CSRF token in the API document:** the CSRF parameter appeared in the OpenAPI document as a request schema.
+- **Migration column type:** `interview.duration_minutes` was `smallint` against an `Integer` field. Hibernate validation caught it before the migration was applied anywhere.
+- **Default login page:** Spring's generated `/login` page is disabled; the dashboard is the sign-in page.
+- **Field label accessibility:** form hints were part of the field's accessible name. They now sit outside the label.
+
+**Verification**
+- `./mvnw clean install`: 388 Java test cases plus 18 Vitest tests, 0 failures.
+- `SecurityApiIT` (10 tests):
+  - sign-in required, with one generic error
+  - lockout, even with the right password
+  - CSRF on sign-in and on writes
+  - roles enforced
+  - an administrator gets 404 on another user's profile
+  - sign-out ends the session
+  - password change
+  - disabling an account ends its open session
+  - setup refused once an account exists
+  - security headers
+- `IdentityIT`: password rules, BCrypt at rest, and a one-time setup that keeps the legacy user's id.
+- `TrackingIT` (5 tests): encryption at rest, isolation, submitted-only interviews, overdue detection, a follow-up surviving its deleted contact.
+- `DashboardE2EIT` (real Chromium): sign-in through the UI, deep links, one user's contacts invisible to another, a contact added in the UI is stored, sign-out, no CSP violations.
+- `OpenApiContractIT`.
+- Vitest: API client CSRF and expiry handling, sign-in/setup, role navigation, approval blocked by blockers, approving the exact version, the same idempotency key reused on retry, evidence rules, self-identification never asked.
+- A local run applied V12 and V13. Setup is pending for the owner, and the legacy `local` user still has no password.

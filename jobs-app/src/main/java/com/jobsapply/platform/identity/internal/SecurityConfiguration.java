@@ -53,6 +53,8 @@ public class SecurityConfiguration {
                         // the dashboard's files and routes; the dashboard itself asks for sign-in
                         .anyRequest().permitAll())
                 .formLogin(form -> form
+                        // the dashboard is the sign-in page (this also disables Spring's generated /login page)
+                        .loginPage("/")
                         .loginProcessingUrl("/api/v1/auth/login")
                         .successHandler((request, response, authentication) -> {
                             attempts.succeeded(authentication.getName());

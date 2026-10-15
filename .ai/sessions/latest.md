@@ -1,17 +1,23 @@
-# Latest Session: 2026-10-14 (Phase 7)
+# Latest Session: 2026-10-15 (Phase 8)
 
-1. Phase 6 was merged with a fast-forward and pushed. Phase 7 started on `phase-7-browser-assist`.
+1. Phase 7 was merged and pushed. The user backed up `JOBS_ENCRYPTION_KEY`. Phase 8 started on `phase-8-dashboard`.
 2. **Built:**
-   - new Maven module `jobs-browser` (Playwright 1.63.0 adapter)
-   - SPI: open/close, platform-owned session, attachments
-   - app module `assist`: planner, sessions, service, REST, window closer
-   - `SubmissionEvidence.artifactRef`, centralised idempotency-key check
-   - ADR-0012
+   - accounts and security (V12)
+   - tracking module (V13)
+   - `jobs-web` React dashboard, built by Maven with pinned Node 22.23.3 and npm 11.20.0
+   - OpenAPI contract test and generated types
+   - Playwright end-to-end test
+   - ADR-0013
 3. **Bugs fixed:**
-   - the first-launch Chromium download blocked the browser thread past its timeouts, so launching now has its own budget
-   - a test-scope Playwright declaration removed it from the runtime classpath (caught by a local run)
+   - OpenAPI schema name collisions (wrong contract)
+   - CsrfToken appearing in the API document
+   - a smallint/Integer column mismatch
+   - Spring's default `/login` page
+   - form hints inside accessible names
+   - openapi-fetch fetch capture and relative URLs in tests
+   - the npm 10.9 crash
 4. **Verified:**
-   - 367 tests green, including real headless Chromium against fixture forms
-   - a local run is healthy and the assist endpoints are live
-   - no headed window was opened on the user's machine
+   - 388 Java + 18 Vitest tests green
+   - a local run applied V13
+   - setup is pending and must be done by the owner
 5. **Next:** wait for review.

@@ -29,6 +29,12 @@
             <artifactId>jobs-browser</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- The dashboard's built files (static/), served on the same origin. -->
+        <dependency>
+            <groupId>com.jobsapply</groupId>
+            <artifactId>jobs-web</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

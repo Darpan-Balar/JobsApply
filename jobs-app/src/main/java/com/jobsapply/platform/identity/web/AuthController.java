@@ -8,6 +8,7 @@ import com.jobsapply.platform.identity.internal.SessionView;
 import com.jobsapply.platform.shared.error.DomainRuleViolationException;
 import com.jobsapply.platform.shared.tenancy.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -51,7 +52,8 @@ class AuthController {
 
     @Operation(summary = "Who is signed in, and whether the one-time setup is needed (also issues the CSRF cookie)")
     @GetMapping("/api/v1/auth/session")
-    SessionView session(Authentication authentication, CsrfToken csrf, HttpServletRequest request) {
+    SessionView session(@Parameter(hidden = true) Authentication authentication, @Parameter(hidden = true) CsrfToken csrf,
+            HttpServletRequest request) {
         csrf.getToken();
         boolean setupRequired = users.setupRequired();
         if (authentication != null && authentication.getPrincipal() instanceof AccountPrincipal principal) {
