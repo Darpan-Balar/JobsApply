@@ -23,6 +23,13 @@ spring:
 server:
   address: 127.0.0.1              # local-first: not reachable from the network by default
   port: ${JOBS_PORT:8090}         # override with JOBS_PORT
+  servlet:
+    session:
+      timeout: 4h                 # idle timeout of a signed-in session
+      cookie:
+        name: JOBS_SESSION
+        http-only: true
+        same-site: strict
 
 management:
   endpoints:
@@ -52,9 +59,9 @@ jobs:
   storage:
     directory: data          # encrypted personal files; git-ignored
   identity:
-    local-user:
-      username: local
-      display-name: Local User
+    legacy-username: local   # the pre-login account; first-account setup takes it over (keeps its data)
+    max-failed-logins: 5
+    lockout: 15m
   config:
     directory: config
     import-on-startup: false

@@ -1,28 +1,26 @@
 package com.jobsapply.platform.identity.internal;
 
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
+import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * {@code jobs.identity.*}.
  *
- * @param mode {@code LOCAL}: every API request acts as {@code local-user} (single-user, localhost-only deployment).
- *     Authenticated multi-user login replaces this in Phase 8.
+ * @param legacyUsername the pre-login single-user account; the first-account setup takes it over so its data is kept
+ * @param maxFailedLogins failed sign-ins per username before it is locked for {@code lockout}
  */
 @Validated
 @ConfigurationProperties("jobs.identity")
-public record IdentityProperties(Mode mode, @NotNull @Valid LocalUser localUser) {
-
-    public enum Mode {
-        LOCAL
-    }
+public record IdentityProperties(@NotBlank String legacyUsername, @Min(3) @Max(20) int maxFailedLogins, Duration lockout) {
 
     public IdentityProperties {
-        mode = mode == null ? Mode.LOCAL : mode;
+        legacyUsername = legacyUsername == null || legacyUsername.isBlank() ? "local" : legacyUsername;
+        maxFailedLogins = maxFailedLogins == 0 ? 5 : maxFailedLogins;
+        lockout = Objects.requireNonNullElse(lockout, Duration.ofMinutes(15));
     }
-
-    public record LocalUser(@NotBlank String username, @NotBlank String displayName) {}
 }
