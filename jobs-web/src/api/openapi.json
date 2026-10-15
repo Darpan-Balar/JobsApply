@@ -1148,6 +1148,134 @@
           }
         }
       },
+      "ExportServiceAccount" : {
+        "properties" : {
+          "displayName" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ExportServiceApplication" : {
+        "properties" : {
+          "approvals" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationServiceApprovalView"
+            },
+            "type" : "array"
+          },
+          "attempts" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ApplicationServiceAttemptView"
+            },
+            "type" : "array"
+          },
+          "detail" : {
+            "$ref" : "#/components/schemas/PreparationViewsApplicationDetail"
+          },
+          "packageVersions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PreparationViewsPackageVersion"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "ExportServiceExport" : {
+        "properties" : {
+          "account" : {
+            "$ref" : "#/components/schemas/ExportServiceAccount"
+          },
+          "applications" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ExportServiceApplication"
+            },
+            "type" : "array"
+          },
+          "audit" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AuditServiceAuditView"
+            },
+            "type" : "array"
+          },
+          "candidateProfiles" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ExportServiceProfile"
+            },
+            "type" : "array"
+          },
+          "employerPreferences" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EmployerPreferenceView"
+            },
+            "type" : "array"
+          },
+          "exportedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "formatVersion" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "tracking" : {
+            "$ref" : "#/components/schemas/ExportServiceTracking"
+          }
+        }
+      },
+      "ExportServiceProfile" : {
+        "properties" : {
+          "detail" : {
+            "$ref" : "#/components/schemas/CandidateProfileDetail"
+          },
+          "masterResumes" : {
+            "items" : {
+              "$ref" : "#/components/schemas/MasterResumeServiceMasterResumeView"
+            },
+            "type" : "array"
+          },
+          "versions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CandidateProfileVersionRef"
+            },
+            "type" : "array"
+          }
+        }
+      },
+      "ExportServiceTracking" : {
+        "properties" : {
+          "contacts" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrackingViewsContactView"
+            },
+            "type" : "array"
+          },
+          "followUps" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrackingViewsFollowUpView"
+            },
+            "type" : "array"
+          },
+          "interviews" : {
+            "items" : {
+              "$ref" : "#/components/schemas/TrackingViewsInterviewView"
+            },
+            "type" : "array"
+          }
+        }
+      },
       "FactRef" : {
         "properties" : {
           "candidateProfileVersionId" : {
@@ -2848,6 +2976,46 @@
           }
         }
       },
+      "SystemServiceJobResult" : {
+        "properties" : {
+          "ran" : {
+            "type" : "boolean"
+          },
+          "summary" : {
+            "type" : "object"
+          }
+        }
+      },
+      "SystemServiceSystemView" : {
+        "properties" : {
+          "lastScheduledSync" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "pendingEvents" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "retentionEnabled" : {
+            "type" : "boolean"
+          },
+          "retentionSchedule" : {
+            "type" : "string"
+          },
+          "scheduledSyncEnabled" : {
+            "type" : "boolean"
+          },
+          "schemaVersion" : {
+            "type" : "string"
+          },
+          "syncRunRetention" : {
+            "type" : "string"
+          },
+          "syncSchedule" : {
+            "type" : "string"
+          }
+        }
+      },
       "TrackingControllerStatusChange" : {
         "properties" : {
           "status" : {
@@ -3146,6 +3314,62 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/api/v1/admin/system" : {
+      "get" : {
+        "operationId" : "view_1",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SystemServiceSystemView"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "System (admin)" ]
+      }
+    },
+    "/api/v1/admin/system/retention" : {
+      "post" : {
+        "operationId" : "retentionNow",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SystemServiceJobResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Apply the retention rules now",
+        "tags" : [ "System (admin)" ]
+      }
+    },
+    "/api/v1/admin/system/sync" : {
+      "post" : {
+        "operationId" : "syncNow",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SystemServiceJobResult"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Run the scheduled synchronization now (skipped if one is already running)",
+        "tags" : [ "System (admin)" ]
+      }
+    },
     "/api/v1/admin/users" : {
       "get" : {
         "operationId" : "list_1",
@@ -5131,6 +5355,25 @@
         "tags" : [ "My employer preferences" ]
       }
     },
+    "/api/v1/me/export" : {
+      "get" : {
+        "operationId" : "export",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportServiceExport"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Download all your data (profiles, applications, documents list, tracking, preferences, audit)",
+        "tags" : [ "My data export" ]
+      }
+    },
     "/api/v1/me/follow-ups" : {
       "get" : {
         "operationId" : "followUps",
@@ -6146,6 +6389,9 @@
     "description" : "Session, first-account setup, sign-in, password",
     "name" : "Authentication"
   }, {
+    "description" : "Everything personal the platform holds about you, as JSON",
+    "name" : "My data export"
+  }, {
     "description" : "Shared employer registry and employer-to-source bindings",
     "name" : "Employers"
   }, {
@@ -6169,6 +6415,9 @@
   }, {
     "description" : "Synchronization with job sources and availability rechecks",
     "name" : "Discovery"
+  }, {
+    "description" : "Schedules, retention and delivery backlog",
+    "name" : "System (admin)"
   }, {
     "description" : "Discovered job postings (shared catalog)",
     "name" : "Postings"

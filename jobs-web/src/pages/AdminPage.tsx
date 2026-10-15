@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { api, unwrap, type Schemas } from "../api/client";
+import { api, rawRequest, unwrap, type Schemas } from "../api/client";
 import { useSession } from "../auth/session";
 import { Badge, Card, ErrorBanner, Field, Loading, Notice } from "../components/ui";
 import { formatDateTime, humanize } from "../lib/format";
@@ -14,6 +14,7 @@ export function AdminPage() {
       <div className="columns">
         <Accounts />
         <div>
+          <SystemCard />
           <Catalog />
           <SyncRuns />
         </div>
@@ -168,13 +169,76 @@ function Catalog() {
           disabled={action.busy}
           onClick={() =>
             void action.run(async () => {
-              const reports = await unwrap(api.POST("/api/v1/sync", { params: { query: {} } }));
-              const failed = reports.filter((r) => r.outcome !== "SUCCEEDED").length;
-              setMessage(`Synchronized ${reports.length} board(s)${failed ? `, ${failed} with problems (see the runs below)` : ""}.`);
+              const result = await unwrap(api.POST("/api/v1/admin/system/sync"));
+              setMessage(result.ran ? "Synchronization finished; see the runs below." : "A synchronization is already running.");
             })
           }
         >
           {action.busy ? "Working…" : "Synchronize all employers now"}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
+interface Health {
+  status: string;
+  components?: Record<string, { status: string; details?: Record<string, unknown> }>;
+}
+
+function SystemCard() {
+  const system = useResource(() => unwrap(api.GET("/api/v1/admin/system")), []);
+  const health = useResource(async () => (await (await rawRequest("/actuator/health")).json()) as Health, []);
+  const action = useAction();
+  const [message, setMessage] = useState<string>();
+  const s = system.data;
+  return (
+    <Card
+      title="System"
+      actions={
+        <button className="secondary small" onClick={() => (system.reload(), health.reload())}>
+          Refresh
+        </button>
+      }
+    >
+      <ErrorBanner error={system.error ?? health.error ?? action.error} onDismiss={action.clearError} />
+      {message && <Notice tone="success">{message}</Notice>}
+      {health.data && (
+        <p>
+          Health: <Badge value={health.data.status === "UP" ? "COMPLETED" : health.data.status} />{" "}
+          {Object.entries(health.data.components ?? {})
+            .filter(([, c]) => c.status !== "UP")
+            .map(([name, c]) => `${name}: ${c.status}`)
+            .join(", ")}
+        </p>
+      )}
+      {s && (
+        <dl className="facts">
+          <dt>Database schema</dt>
+          <dd>version {s.schemaVersion}</dd>
+          <dt>Scheduled sync</dt>
+          <dd>
+            {s.scheduledSyncEnabled ? `on (${s.syncSchedule})` : "off"} · last {formatDateTime(s.lastScheduledSync)}
+          </dd>
+          <dt>Retention</dt>
+          <dd>{s.retentionEnabled ? `on (${s.retentionSchedule}), sync runs kept ${s.syncRunRetention}` : "off"}</dd>
+          <dt>Undelivered events</dt>
+          <dd className={s.pendingEvents ? "warning-text" : undefined}>{s.pendingEvents ?? 0}</dd>
+        </dl>
+      )}
+      <div className="button-row">
+        <button
+          className="secondary small"
+          disabled={action.busy}
+          onClick={() =>
+            void action.run(async () => {
+              const result = await unwrap(api.POST("/api/v1/admin/system/retention"));
+              setMessage(result.ran ? "Retention applied." : "Retention is already running.");
+              system.reload();
+            })
+          }
+        >
+          Apply retention now
         </button>
       </div>
     </Card>

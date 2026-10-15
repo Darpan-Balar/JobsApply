@@ -531,3 +531,13 @@ details summary {
   margin: 0.5rem 0;
   font-weight: 600;
 }
+
+a.button-link {
+  display: inline-block;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.9rem;
+  text-decoration: none;
+}

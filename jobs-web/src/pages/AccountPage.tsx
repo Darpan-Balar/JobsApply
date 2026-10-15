@@ -38,6 +38,12 @@ export function AccountPage() {
           <dd>{user?.role === "ADMIN" ? "Administrator" : "User"}</dd>
         </dl>
       </Card>
+      <Card title="Your data">
+        <p>Download everything the platform holds about you (profiles, applications, tracking, preferences, audit trail) as one JSON file.</p>
+        <a className="button-link" href="/api/v1/me/export" download>
+          Download my data
+        </a>
+      </Card>
       <Card title="Change password">
         <form onSubmit={submit} className="form-grid">
           <ErrorBanner error={action.error} />

@@ -27,3 +27,6 @@ dist/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# backups (scripts/backup.sh); they contain personal data (encrypted) — keep them private
+backups/
