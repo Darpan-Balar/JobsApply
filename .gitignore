@@ -30,3 +30,6 @@ dist/
 
 # backups (scripts/backup.sh); they contain personal data (encrypted) — keep them private
 backups/
+
+# local-only helper script (not part of the project)
+/start-local.sh
